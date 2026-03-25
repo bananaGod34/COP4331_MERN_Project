@@ -8,20 +8,23 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    steps: 
+
+    steps:
+      # Pull your workflow repo (GitHub checkout)
       - name: Pull from main
         uses: actions/checkout@v4
 
-        # set up ssh by logging in through ssh
+      # Set up SSH
       - name: Set up SSH
         run: |
           mkdir -p ~/.ssh
           echo "${{ secrets.SSH_KEY }}" > ~/.ssh/id_ed25519
           chmod 600 ~/.ssh/id_ed25519
           ssh-keyscan -H ${{ secrets.SSH_HOST }} >> ~/.ssh/known_hosts
-          
-      # ssh back in, change directory, pull from main
+
+      # Update droplet repository
       - name: Git pull on server
         run: |
           ssh -i ~/.ssh/id_ed25519 -o IdentitiesOnly=yes root@${{ secrets.SSH_HOST }} \
-          "cd /root/website/COP4331_MERN_Project && git fetch --all && git reset --hard origin/main && npm run build"
+          "cd /root/COP4331_MERN_Project && git fetch --all && git reset --hard origin/main && \
+           if [ -f package.json ]; then npm install && npm run build; else echo 'No build, skipping'; fi"
