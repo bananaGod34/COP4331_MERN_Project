@@ -24,4 +24,4 @@ jobs:
       - name: Git pull on server
         run: |
           ssh -i ~/.ssh/id_ed25519 -o IdentitiesOnly=yes root@${{ secrets.SSH_HOST }} \
-          "cd /root/website && git fetch --all && git reset --hard origin/main && npm run build"
+          "cd /root/website/COP4331_MERN_Project && git fetch --all && git reset --hard origin/main && npm run build"
