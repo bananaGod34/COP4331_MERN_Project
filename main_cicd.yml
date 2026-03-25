@@ -1,0 +1,27 @@
+name: "Update website from main"
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps: 
+      - name: Pull from main
+        uses: actions/checkout@v4
+
+        # set up ssh by logging in through ssh
+      - name: Set up SSH
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.SSH_KEY }}" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+          ssh-keyscan -H ${{ secrets.SSH_HOST }} >> ~/.ssh/known_hosts
+          
+      # ssh back in, change directory, pull from main
+      - name: Git pull on server
+        run: |
+          ssh -i ~/.ssh/id_ed25519 -o IdentitiesOnly=yes root@${{ secrets.SSH_HOST }} \
+          "cd /root/website && git fetch --all && git reset --hard origin/main && npm run build"
