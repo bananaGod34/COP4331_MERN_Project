@@ -26,5 +26,5 @@ jobs:
       - name: Git pull on server
         run: |
           ssh -i ~/.ssh/id_ed25519 -o IdentitiesOnly=yes root@${{ secrets.SSH_HOST }} \
-          "cd /root/COP4331_MERN_Project && git fetch --all && git reset --hard origin/main && \
+          "cd /root/website/COP4331_MERN_Project && git fetch --all && git reset --hard origin/main && \
            if [ -f package.json ]; then npm install && npm run build; else echo 'No build, skipping'; fi"
