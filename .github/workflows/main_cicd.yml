@@ -28,7 +28,14 @@ jobs:
       - name: Build frontend
         working-directory: ./frontend
         run: npm run build
-
+        
+      - name: Debug secrets
+        run: |
+          echo "Host is set: ${{ secrets.SERVER_HOST != '' }}"
+          echo "User is set: ${{ secrets.SERVER_USER != '' }}"
+          echo "Password is set: ${{ secrets.SERVER_PASSWORD != '' }}"
+          echo "Port is set: ${{ secrets.SERVER_PORT != '' }}"
+          
       - name: Deploy frontend to server
         uses: appleboy/scp-action@v0.1.5
         with:
