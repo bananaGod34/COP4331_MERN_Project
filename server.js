@@ -1,8 +1,10 @@
 require('dotenv').config();
-const url = process.env.MONGODB_URI;
+const url = process.env.MONGODB_URL;
+const connectDB = require('./db');
 
 const express = require('express');
 const cors = require('cors');
+const { connect } = require('node:http2');
 
 const app = express();
 app.use(cors());
@@ -192,5 +194,40 @@ app.post('/api/searchcards', async (req, res, next) =>
   var ret = {results:_ret, error:''};
   res.status(200).json(ret);
 });
+
+app.post('/api/register', async (req, res) => {
+  const { username, email, password } = req.body;
+
+  try {
+    const db = await connectDB();
+
+    // check if username already exists
+    const existingUser = await db.collection('users').findOne({
+      $or: [{ username: username }, { email: email }]
+    });
+
+    if (existingUser) {
+      return res.status(400).json({ error: 'Username or email already exists' });
+    }
+
+
+    // create new user
+    const newUser = {
+      username: username,
+      password: password,
+      createdAt: new Date(),
+      trips: []
+    }
+
+    const result = await db.collection('users').insertOne(newUser);
+    res.status(200).json({
+      error: '',
+      id: result.insertedId
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Server error' });
+  }
+})
 
 app.listen(5000); // start Node + Express server on port 5000
