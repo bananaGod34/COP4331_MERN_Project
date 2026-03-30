@@ -1,15 +1,3 @@
-html, body, #root {
-  margin: 0;
-  padding: 0;
-  width: 100%;
-  height: 100%;
-  font-family: 'Inter', system-ui, sans-serif;
-}
-
-* {
-  box-sizing: border-box;
-}
-
 :root {
   --bg-panel: #ffffff;
   --bg-sidebar: #f9fafb;
@@ -35,33 +23,6 @@ html, body, #root {
   --border-input: #4b5563;
   --info-bg: #1e3a8a;
   --info-text: #bfdbfe;
-}
-
-.auth-page {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 100vh;
-  background-color: var(--bg-sidebar); 
-  color: var(--text-main);
-  font-family: Inter, system-ui, sans-serif;
-}
-
-.auth-card {
-  background-color: var(--bg-panel);
-  padding: 40px;
-  border-radius: 12px;
-  box-shadow: var(--shadow-float);
-  width: 100%;
-  max-width: 350px;
-  text-align: center;
-  border: 1px solid var(--border-light);
-}
-
-.auth-link {
-  color: var(--accent-blue);
-  text-decoration: none;
-  font-weight: bold;
 }
 
 .map-wrapper { height: 100vh; width: 100%; position: relative; overflow: hidden; color: var(--text-main); }

@@ -2,98 +2,89 @@ import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 
 const Signup = () => {
-  const [username, setUsername] = useState('');
-  const [password, setPassword] = useState('');
+  const [firstName, setFirstName] = useState('');
+  const [lastName, setLastName] = useState('');
+  const [loginName, setLoginName] = useState('');
+  const [loginPassword, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
-  const [errorMsg, setErrorMsg] = useState('');
+  const [message, setMessage] = useState('');
+  
   const navigate = useNavigate();
 
-  const handleSignup = async (e) => {
-    e.preventDefault();
-    setErrorMsg('');
+  const doSignup = async (event: any): Promise<void> => {
+    event.preventDefault();
+    setMessage('');
 
-    if (password !== confirmPassword) {
-      return setErrorMsg("Passwords do not match.");
+    if(loginPassword !== confirmPassword) {
+      return setMessage('Passwords do not match');
     }
 
-    //--------------TEMPORARY LOGIN--------------
-    if (username && password) {
-      console.log("Signup successful! User created.");
-      navigate('/login'); 
-    }
-    
-  };
+    const obj = { firstName, lastName, login: loginName, password: loginPassword };
+    const js = JSON.stringify(obj);
 
-  const styles = {
-    page: {
-        display: 'flex',
-        justifyContent: 'center',
-        alignItems: 'center',
-        height: '100vh',
-        backgroundColor: '#f3f4f6',
-        fontFamily: 'Inter, system-ui, sans-serif'
-    },
-    card: {
-        backgroundColor: 'white',
-        padding: '40px',
-        borderRadius: '12px',
-        boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
-        width: '100%',
-        maxWidth: '350px',
-        textAlign: 'center'
-    },
-    input: {
-        width: '100%',
-        padding: '12px',
-        margin: '10px 0',
-        border: '1px solid #d1d5db',
-        borderRadius: '8px',
-        boxSizing: 'border-box',
-        fontSize: '16px'
-    },
-    button: {
-        width: '100%',
-        padding: '12px',
-        marginTop: '15px',
-        backgroundColor: '#10b981',
-        color: 'white',
-        border: 'none',
-        borderRadius: '8px',
-        fontSize: '16px',
-        fontWeight: '600',
-        cursor: 'pointer'
-    },
-    linkText: {
-        marginTop: '20px',
-        fontSize: '14px',
-        color: '#6b7280'
-    },
-    link: {
-        color: '#3b82f6',
-        textDecoration: 'none',
-        fontWeight: '500'
+    try {
+      //>>>CHECK THE ENDPOINT
+      const response = await fetch('/api/signup', {
+        method: 'POST',
+        body: js,
+        headers: { 'Content-Type': 'application/json' }
+      });
+
+      //>>>ASSUMING THE API RETURNS A SUCCESS STATUS
+      const res = JSON.parse(await response.text());
+
+      if (res.error) {
+        setMessage(res.error);
+      } else {
+        const user = { firstName: firstName, lastName: lastName, id: res.id };
+        localStorage.setItem('user_data', JSON.stringify(user));
+        navigate('/map'); 
+      }
+    } catch (error: any) {
+      setMessage('Could not connect to the server.');
     }
   };
 
   return (
-    <div style={styles.page}>
-      <div style={styles.card}>
-        <h2 style={{ marginTop: '0', color: '#111827' }}>Create Account</h2>
-        <p style={{ color: '#6b7280', marginBottom: '25px', fontSize: '14px' }}>
-            Create Account
+    <div className="auth-page">
+      <div className="auth-card">
+        <h2 style={{ marginTop: '0' }}>Create Account</h2>
+        <p style={{ color: 'var(--text-muted)', marginBottom: '25px', fontSize: '14px' }}>
+          Create an account to start mapping.
         </p>
 
-        {errorMsg && <p style={{ color: '#ef4444', fontSize: '14px' }}>{errorMsg}</p>}
+        {message && <p style={{ color: 'var(--accent-red)', fontSize: '14px' }}>{message}</p>}
 
-        <form onSubmit={handleSignup}>
-          <input style={styles.input} type="text" placeholder="Username" value={username} onChange={(e) => setUsername(e.target.value)} required />
-          <input style={styles.input} type="password" placeholder="Password" value={password} onChange={(e) => setPassword(e.target.value)} required />
-          <input style={styles.input} type="password" placeholder="Confirm Password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} required />
-          <button style={styles.button} type="submit">Sign Up</button>
+        <form onSubmit={doSignup} style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
+          <div style={{ display: 'flex', gap: '10px' }}>
+            <input 
+              className="form-input" type="text" placeholder="First Name" required
+              value={firstName} onChange={(e) => setFirstName(e.target.value)} 
+            />
+            <input 
+              className="form-input" type="text" placeholder="Last Name" required
+              value={lastName} onChange={(e) => setLastName(e.target.value)} 
+            />
+          </div>
+          <input 
+            className="form-input" type="text" placeholder="Username" required
+            value={loginName} onChange={(e) => setLoginName(e.target.value)} 
+          />
+          <input 
+            className="form-input" type="password" placeholder="Password" required
+            value={loginPassword} onChange={(e) => setPassword(e.target.value)} 
+          />
+          <input 
+            className="form-input" type="password" placeholder="Confirm Password" required
+            value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} 
+          />
+          <button className="btn btn-green" type="submit">
+            Create Account
+          </button>
         </form>
 
-        <div style={styles.linkText}>
-          Already have an account? <Link to="/login" style={styles.link}>Log in</Link>
+        <div style={{ marginTop: '20px', fontSize: '14px', color: 'var(--text-muted)' }}>
+          Already have an account? <Link to="/login" className="auth-link">Log in</Link>
         </div>
       </div>
     </div>
