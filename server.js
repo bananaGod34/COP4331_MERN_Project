@@ -1,8 +1,16 @@
+console.log("step 1");
 require('dotenv').config();
+
+console.log("step 2");
 const url = process.env.MONGODB_URL;
+
+console.log("step 3");
 const connectDB = require('./db');
 
+console.log("step 4");
 const express = require('express');
+
+console.log("step 5");
 const cors = require('cors');
 const { connect } = require('node:http2');
 
@@ -230,4 +238,5 @@ app.post('/api/register', async (req, res) => {
   }
 })
 
+console.log("step 6");
 app.listen(5000); // start Node + Express server on port 5000
