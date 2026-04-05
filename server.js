@@ -2,7 +2,7 @@ console.log("step 1");
 require('dotenv').config();
 
 console.log("step 2");
-const url = process.env.MONGODB_URL;
+const url = process.env.MONGODB_URI;
 console.log('MONGODB_URI:', process.env.MONGODB_URI);
 if (!url) {
   console.error("MONGODB_URI is not defined in environment!");
