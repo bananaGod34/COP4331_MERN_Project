@@ -37,32 +37,33 @@ app.use((req, res, next) =>
   next();
 });
 
-app.post('/api/login', async (req, res, next) => 
-{
-  // incoming: login, password
-  // outgoing: id, firstName, lastName, error
-
-  var error = '';
-
+app.post('/api/login', async (req, res) => {
   const { login, password } = req.body;
 
-  var id = -1;
-  var fn = '';
-  var ln = '';
-
-  if( login.toLowerCase() == 'rickl' && password == 'COP4331' )
-  {
-    id = 1;
-    fn = 'Rick';
-    ln = 'Leinecker';
-  }
-  else
-  {
-    error = 'Invalid user name/password';
+  if (!login || !password) {
+    return res.status(400).json({ id: -1, firstName: '', lastName: '', error: 'All fields are required' });
   }
 
-  var ret = { id:id, firstName:fn, lastName:ln, error:error};
-  res.status(200).json(ret);
+  try {
+    const db = await connectDB();
+
+    const user = await db.collection('users').findOne({ login: login, password: password });
+
+    if (!user) {
+      return res.status(200).json({ id: -1, firstName: '', lastName: '', error: 'Invalid username or password' });
+    }
+
+    res.status(200).json({
+      id: user._id,
+      firstName: user.firstName,
+      lastName: user.lastName,
+      error: ''
+    });
+
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ id: -1, firstName: '', lastName: '', error: 'Server error' });
+  }
 });
 
 app.post('/api/signup', async (req, res) => {
