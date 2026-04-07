@@ -64,6 +64,9 @@ const TravelMap = () => {
   const [pinsUnlocked, setPinsUnlocked] = useState(false); 
   const [cameraTarget, setCameraTarget] = useState<{lat: number, lng: number, triggerId: number} | null>(null);
   const [originalPinCoords, setOriginalPinCoords] = useState<{lat: number, lng: number} | null>(null);
+
+  // STATE: Dark Mode
+  const [darkMode, setDarkMode] = useState(false);
   
   // STATE: Form
   const [formName, setFormName] = useState('');
@@ -75,8 +78,14 @@ const TravelMap = () => {
   const markerRefs = useRef<{ [key: number]: any }>({});
   const isPopupOpen = useRef(false);
 
-  // --- HANDLERS ---
+  // --- EFFECTS ---
+  // toggle dark mode
+  useEffect(() => {
+    document.body.classList.toggle('dark-mode', darkMode);
+    return () => document.body.classList.remove('dark-mode'); // cleanup on unmount
+  }, [darkMode]);
 
+  // --- HANDLERS ---
   const handleMapClick = (latlng: any) => {
     if (editingPinId) return;
 
@@ -206,6 +215,22 @@ const TravelMap = () => {
         <p style={{ fontSize: '12px', color: '#6b7280', margin: '5px 0 0 0' }}>
           (Click anywhere on the map to add a new stop)
         </p>
+        {/* Dark Mode Toggle */}
+        <button
+          onClick={() => setDarkMode(d => !d)}
+          className="btn"
+          style={{
+            background: 'none',
+            border: '1px solid var(--border-light)',
+            color: 'var(--text-main)',
+            padding: '6px 10px',
+            fontSize: '14px',
+            fontWeight: 'normal',
+            width: '100%',
+          }}
+        >
+          {darkMode ? '☀️' : '🌙'}
+        </button>
       </div>
 
       {/* Right Sidebar */}
