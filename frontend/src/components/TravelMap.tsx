@@ -301,8 +301,14 @@ const TravelMap = () => {
       {/* Map */}
       <MapContainer center={mapCenter as any} zoom={6} zoomControl={false} style={{ height: '100%', width: '100%' }}>
         <ZoomControl position="bottomleft" />
-        <TileLayer url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png" />
-        
+        <TileLayer
+          key={darkMode ? "dark" : "light"}
+          url={
+            darkMode
+              ? "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
+              : "https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png"
+          }
+        />
         <MapClickHandler onMapClick={handleMapClick} isPopupOpen={isPopupOpen} />
         <MapCameraController target={cameraTarget} />
 
