@@ -46,23 +46,7 @@ const MapCameraController = ({ target }: any) => {
 // --- MAIN COMPONENT ---
 
 const TravelMap = () => {
-  const [trips, setTrips] = useState([
-    { 
-      id: 'trip-1', 
-      name: "Japan 2024", 
-      pins: [
-        { id: 1, name: "Tokyo Capsule Hotel", lat: 35.6762, lng: 139.6503, blurb: "Started the trip here.", photoUrl: "" },
-        { id: 2, name: "Osaka", lat: 34.6937, lng: 135.5023, blurb: "Took the bullet train down.", photoUrl: "" }
-      ] 
-    },
-    { 
-      id: 'trip-2', 
-      name: "Chicago Trip", 
-      pins: [
-        { id: 3, name: "Downtown Chicago", lat: 41.8781, lng: -87.6298, blurb: "Exploring the city.", photoUrl: "" }
-      ] 
-    }
-  ]);
+  const [trips, setTrips] = useState([]);
 
   //NAVIGATION
   const navigate = useNavigate();
