@@ -46,7 +46,13 @@ const MapCameraController = ({ target }: any) => {
 // --- MAIN COMPONENT ---
 
 const TravelMap = () => {
-  const [trips, setTrips] = useState([]);
+  const [trips, setTrips] = useState([
+    { 
+      id: 'trip-1', 
+      name: "New Trip", 
+      pins: [] 
+    }
+  ]);
 
   //NAVIGATION
   const navigate = useNavigate();
@@ -55,6 +61,12 @@ const TravelMap = () => {
   const [activeTripId, setActiveTripId] = useState('trip-1');
 
   // STATE: UI & Interaction
+  const [tripModal, setTripModal] = useState<{isOpen: boolean, mode: 'create' | 'rename', inputValue: string}>({ 
+    isOpen: false, 
+    mode: 'create', 
+    inputValue: '' 
+  });
+
   const activeTrip = trips.find(t => t.id === activeTripId) || trips[0];
   const tripPins = activeTrip ? activeTrip.pins : [];
 
@@ -128,7 +140,7 @@ const TravelMap = () => {
   };
 
   const handleMapClick = (latlng: any) => {
-    if (editingPinId) return;
+    if (editingPinId || uiHidden) return;
     setDraftPin({ lat: latlng.lat, lng: latlng.lng });
     setEditingPinId(null);
     setFormName('');
@@ -255,12 +267,12 @@ const TravelMap = () => {
   };
 
   const handleCreateNewTrip = () => {
-    const tripName = window.prompt("What is the name of your new trip?");
-    if (tripName && tripName.trim() !== "") {
-      const newTrip = { id: `trip-${Date.now()}`, name: tripName, pins: [] };
-      setTrips([...trips, newTrip]);
-      setActiveTripId(newTrip.id);
-    }
+    setTripModal({ isOpen: true, mode: 'create', inputValue: '' });
+  };
+
+  const handleRenameTrip = () => {
+    if (!activeTrip) return;
+    setTripModal({ isOpen: true, mode: 'rename', inputValue: activeTrip.name });
   };
 
   const handleDeleteTrip = () => {
@@ -270,12 +282,29 @@ const TravelMap = () => {
         setTrips(remainingTrips);
         setActiveTripId(remainingTrips[0].id);
       } else {
-        // If they delete their last trip, give them a fresh blank one
         const freshTrip = { id: `trip-${Date.now()}`, name: "New Trip", pins: [] };
         setTrips([freshTrip]);
         setActiveTripId(freshTrip.id);
       }
     }
+  };
+
+  const submitTripModal = (e: React.FormEvent) => {
+    e.preventDefault();
+    const name = tripModal.inputValue.trim();
+    if (!name) return;
+
+    if (tripModal.mode === 'create') {
+      const newTrip = { id: `trip-${Date.now()}`, name, pins: [] };
+      setTrips([...trips, newTrip]);
+      setActiveTripId(newTrip.id);
+      setVisibleTripIds(prev => [...prev, newTrip.id]);
+      setIsSidebarOpen(true); 
+    } else if (tripModal.mode === 'rename') {
+      setTrips(trips.map(t => t.id === activeTripId ? { ...t, name } : t));
+    }
+    
+    setTripModal({ ...tripModal, isOpen: false });
   };
 
   const toggleVisibility = (id: string) => {
@@ -321,6 +350,38 @@ const TravelMap = () => {
 
   return (
     <div className="map-wrapper">
+      {/* Add Trip Modal */}
+      {tripModal.isOpen && (
+        <div style={{
+          position: 'absolute', top: 0, left: 0, width: '100%', height: '100%',
+          backgroundColor: 'rgba(0,0,0,0.5)', zIndex: 9999,
+          display: 'flex', justifyContent: 'center', alignItems: 'center'
+        }}>
+          <div style={{
+            backgroundColor: 'var(--bg-panel)', padding: '25px', borderRadius: '8px',
+            width: '100%', maxWidth: '350px', boxShadow: 'var(--shadow-float)', color: 'var(--text-main)'
+          }}>
+            <h3 style={{ marginTop: 0, marginBottom: '15px' }}>
+              {tripModal.mode === 'create' ? 'Create New Trip' : 'Rename Trip'}
+            </h3>
+            
+            <form onSubmit={submitTripModal} style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
+              <input
+                autoFocus
+                className="form-input"
+                type="text"
+                placeholder="e.g., Disney World 2025"
+                value={tripModal.inputValue}
+                onChange={(e) => setTripModal({...tripModal, inputValue: e.target.value})}
+              />
+              <div style={{ display: 'flex', gap: '10px' }}>
+                <button type="submit" className="btn btn-blue">Save</button>
+                <button type="button" className="btn btn-red" onClick={() => setTripModal({...tripModal, isOpen: false})}>Cancel</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
 
       {/* Zen Mode */}
       {uiHidden && (
@@ -340,6 +401,7 @@ const TravelMap = () => {
             
             <div style={{ display: 'flex', gap: '5px', marginBottom: '15px' }}>
               <button onClick={handleCreateNewTrip} className="btn btn-blue" style={{ padding: '8px', flex: 1 }}>+ New Trip</button>
+              <button onClick={handleRenameTrip} className="mini-btn mini-btn-default" style={{ padding: '8px', flex: 0.3, fontSize: '16px' }}>✏️</button>
               <button onClick={handleDeleteTrip} className="btn btn-red" style={{ padding: '8px', flex: 0.3 }}>🗑️</button>
             </div>
             
@@ -513,14 +575,14 @@ const TravelMap = () => {
                   <Marker 
                     key={`${pin.id}-${offset}-${pinsUnlocked || pin.id === editingPinId}`} 
                     position={[pin.lat, pin.lng + offset]} 
-                    draggable={(pinsUnlocked && trip.id === activeTripId) || pin.id === editingPinId} 
+                    draggable={!uiHidden && ((pinsUnlocked && trip.id === activeTripId) || pin.id === editingPinId)}
                     eventHandlers={{ 
                       dragend: (e) => {
                         const position = e.target.getLatLng();
                         const trueLng = position.lng - offset;
                         updateActiveTripPins(tripPins.map(p => p.id === pin.id ? { ...p, lat: position.lat, lng: trueLng } : p));
                       },
-                      dblclick: () => startEditing(pin) 
+                      dblclick: () => { if (!uiHidden) startEditing(pin); }
                     }}
                     ref={(r) => { markerRefs.current[`${pin.id}-${offset}`] = r; }}
                     opacity={trip.id === activeTripId ? 1.0 : 0.6}
