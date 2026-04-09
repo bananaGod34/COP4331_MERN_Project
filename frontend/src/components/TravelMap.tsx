@@ -428,7 +428,9 @@ const TravelMap = () => {
               <button onClick={() => setDarkMode(d => !d)} className="mini-btn mini-btn-default" style={{ flex: 1 }}>{darkMode ? '☀️' : '🌙'}</button>
               <button onClick={() => setUiHidden(true)} className="mini-btn mini-btn-default" style={{ flex: 1 }}>👁️</button>
             </div>
-            
+            <button className="btn" style={{ background: 'none', border: '1px solid var(--accent-blue)', color: 'var(--accent-blue)', padding: '6px 10px', fontSize: '14px', width: '100%', marginTop: '10px', fontWeight: 'bold' }}>
+              Save
+            </button>
             <button onClick={handleLogout} className="btn" style={{ background: 'none', border: '1px solid var(--accent-red)', color: 'var(--accent-red)', padding: '6px 10px', fontSize: '14px', width: '100%', marginTop: '10px', fontWeight: 'bold' }}>
               Sign Out
             </button>
