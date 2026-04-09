@@ -83,6 +83,10 @@ const TravelMap = () => {
   // STATE: Dark Mode
   const [darkMode, setDarkMode] = useState(false);
 
+  // STATE: Saving
+  const [isDirty, setIsDirty] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+
   // STATE: Form
   const [formName, setFormName] = useState('');
   const [formBlurb, setFormBlurb] = useState('');
@@ -96,6 +100,33 @@ const TravelMap = () => {
   const mapRef = useRef<any>(null);
 
   const WORLD_OFFSETS = [-1080, -720, -360, 0, 360, 720, 1080];
+
+  // UseEffect to Load In User Data
+  useEffect(() => {
+    const loadTripsFromServer = async () => {
+      try {
+        const user = JSON.parse(localStorage.getItem('user_data') || '{}');
+        if (!user?.id) return;
+
+        const response = await fetch(`/api/users/${user.id}/trips`);
+        const data = await response.json();
+        if (!response.ok || data.error) {
+          throw new Error(data.error || 'Failed to load trips');
+        }
+
+        if (Array.isArray(data.trips) && data.trips.length > 0) {
+          setTrips(data.trips);
+          setActiveTripId(data.trips[0].id);
+          setVisibleTripIds(data.trips.map((trip: any) => trip.id));
+          setIsDirty(false);
+        }
+      } catch (err) {
+        console.error('Trip load failed:', err);
+      }
+    };
+
+    loadTripsFromServer();
+  }, []);
 
   // --- EFFECTS ---
   // toggle dark mode
@@ -128,6 +159,26 @@ const TravelMap = () => {
   // --- HANDLERS ---
   const updateActiveTripPins = (newPins: any[]) => {
     setTrips(trips.map(trip => trip.id === activeTripId ? { ...trip, pins: newPins } : trip));
+    setIsDirty(true);
+  };
+
+  const handleSaveTrips = async () => {
+    try {
+      setIsSaving(true);
+      const user = JSON.parse(localStorage.getItem('user_data') || '{}');
+      const response = await fetch(`/api/users/${user.id}/trips`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ trips }),
+      });
+      const data = await response.json();
+      if (!response.ok || data.error) throw new Error(data.error || 'Save failed');
+      setIsDirty(false);
+    } catch (err: any) {
+      alert(err?.message || 'Could not save trips');
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -286,6 +337,7 @@ const TravelMap = () => {
         setTrips([freshTrip]);
         setActiveTripId(freshTrip.id);
       }
+      setIsDirty(true);
     }
   };
 
@@ -300,8 +352,10 @@ const TravelMap = () => {
       setActiveTripId(newTrip.id);
       setVisibleTripIds(prev => [...prev, newTrip.id]);
       setIsSidebarOpen(true); 
+      setIsDirty(true);
     } else if (tripModal.mode === 'rename') {
       setTrips(trips.map(t => t.id === activeTripId ? { ...t, name } : t));
+      setIsDirty(true);
     }
     
     setTripModal({ ...tripModal, isOpen: false });
@@ -428,8 +482,8 @@ const TravelMap = () => {
               <button onClick={() => setDarkMode(d => !d)} className="mini-btn mini-btn-default" style={{ flex: 1 }}>{darkMode ? '☀️' : '🌙'}</button>
               <button onClick={() => setUiHidden(true)} className="mini-btn mini-btn-default" style={{ flex: 1 }}>👁️</button>
             </div>
-            <button className="btn" style={{ background: 'none', border: '1px solid var(--accent-blue)', color: 'var(--accent-blue)', padding: '6px 10px', fontSize: '14px', width: '100%', marginTop: '10px', fontWeight: 'bold' }}>
-              Save
+            <button disabled={!isDirty || isSaving} onClick={handleSaveTrips} className="btn" style={{ background: 'none', border: '1px solid var(--accent-blue)', color: 'var(--accent-blue)', padding: '6px 10px', fontSize: '14px', width: '100%', marginTop: '10px', fontWeight: 'bold', opacity: (!isDirty || isSaving) ? 0.6 : 1, cursor: (!isDirty || isSaving) ? 'not-allowed' : 'pointer' }}>
+              {isSaving ? 'Saving...' : (isDirty ? 'Save Changes' : 'Saved')}
             </button>
             <button onClick={handleLogout} className="btn" style={{ background: 'none', border: '1px solid var(--accent-red)', color: 'var(--accent-red)', padding: '6px 10px', fontSize: '14px', width: '100%', marginTop: '10px', fontWeight: 'bold' }}>
               Sign Out

@@ -104,5 +104,37 @@ app.post('/api/signup', async (req, res) => {
   }
 });
 
+// API Route for User Data
+const { ObjectId } = require('mongodb');
+
+app.get('/api/users/:userId/trips', async (req, res) => {
+  try {
+    const db = await connectDB();
+    const user = await db.collection('users').findOne(
+      { _id: new ObjectId(req.params.userId) },
+      { projection: { trips: 1 } }
+    );
+    res.json({ error: '', trips: user?.trips || [] });
+  } catch (err) {
+    res.status(500).json({ error: 'Server error', trips: [] });
+  }
+});
+
+app.put('/api/users/:userId/trips', async (req, res) => {
+  try {
+    const { trips } = req.body;
+    if (!Array.isArray(trips)) return res.status(400).json({ error: 'trips must be array' });
+
+    const db = await connectDB();
+    await db.collection('users').updateOne(
+      { _id: new ObjectId(req.params.userId) },
+      { $set: { trips, updatedAt: new Date() } }
+    );
+    res.json({ error: '' });
+  } catch (err) {
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
 console.log("step 6");
 app.listen(5000); // start Node + Express server on port 5000
