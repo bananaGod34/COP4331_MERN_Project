@@ -136,48 +136,5 @@ app.put('/api/users/:userId/trips', async (req, res) => {
   }
 });
 
-app.post('/api/getTrips', async (req, res) => {
-  try {
-    const { userId } = req.body;
-    if (!userId) {
-      return res.status(400).json({ error: 'userId is required', trips: [] });
-    }
-
-    const db = await connectDB();
-    const user = await db.collection('users').findOne(
-      { _id: new ObjectId(userId) },
-      { projection: { trips: 1 } }
-    );
-
-    res.status(200).json({ error: '', trips: user?.trips || [] });
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: 'Server error', trips: [] });
-  }
-});
-
-app.post('/api/saveTrips', async (req, res) => {
-  try {
-    const { userId, trips } = req.body;
-    if (!userId) {
-      return res.status(400).json({ error: 'userId is required' });
-    }
-    if (!Array.isArray(trips)) {
-      return res.status(400).json({ error: 'trips must be array' });
-    }
-
-    const db = await connectDB();
-    await db.collection('users').updateOne(
-      { _id: new ObjectId(userId) },
-      { $set: { trips, updatedAt: new Date() } }
-    );
-
-    res.status(200).json({ error: '' });
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: 'Server error' });
-  }
-});
-
 console.log("step 6");
 app.listen(5000); // start Node + Express server on port 5000
