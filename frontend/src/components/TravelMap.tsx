@@ -108,7 +108,11 @@ const TravelMap = () => {
         const user = JSON.parse(localStorage.getItem('user_data') || '{}');
         if (!user?.id) return;
 
-        const response = await fetch(`/api/users/${user.id}/trips`);
+        const response = await fetch('/api/getTrips', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ userId: user.id }),
+        });
         const data = await response.json();
         if (!response.ok || data.error) {
           throw new Error(data.error || 'Failed to load trips');
@@ -166,10 +170,10 @@ const TravelMap = () => {
     try {
       setIsSaving(true);
       const user = JSON.parse(localStorage.getItem('user_data') || '{}');
-      const response = await fetch(`/api/users/${user.id}/trips`, {
-        method: 'PUT',
+      const response = await fetch('/api/saveTrips', {
+        method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ trips }),
+        body: JSON.stringify({ userId: user.id, trips }),
       });
       const data = await response.json();
       if (!response.ok || data.error) throw new Error(data.error || 'Save failed');
