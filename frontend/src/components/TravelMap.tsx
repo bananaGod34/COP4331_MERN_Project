@@ -108,7 +108,7 @@ const TravelMap = () => {
         const user = JSON.parse(localStorage.getItem('user_data') || '{}');
         if (!user?.id) return;
 
-        const response = await fetch('/api/getTrips', {
+        const response = await fetch('http://landmarkmerncop4331.online/api/getTrips', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ userId: user.id }),
@@ -170,7 +170,7 @@ const TravelMap = () => {
     try {
       setIsSaving(true);
       const user = JSON.parse(localStorage.getItem('user_data') || '{}');
-      const response = await fetch('/api/saveTrips', {
+      const response = await fetch('http://landmarkmerncop4331.online/api/saveTrips', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ userId: user.id, trips }),
