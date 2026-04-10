@@ -29,10 +29,6 @@ const getPinIcon = (color: string = '#3b82f6') => {
       <filter id="pin-shadow" x="-50%" y="-50%" width="200%" height="200%">
         <feDropShadow dx="0" dy="2" stdDeviation="2" flood-color="#000000" flood-opacity="0.35"/>
       </filter>
-      
-      {/* By combining the teardrop (first M) and the circle (second M) into one path 
-        and using fill-rule="evenodd", it punches a transparent hole in the middle! 
-      */}
       <path filter="url(#pin-shadow)"
         d="M14 0 C6.27 0 0 6.27 0 14 C0 24.5 14 38 14 38 C14 38 28 24.5 28 14 C28 6.27 21.73 0 14 0 Z
            M 14 9 A 5 5 0 1 0 14 19 A 5 5 0 1 0 14 9 Z"
@@ -401,6 +397,8 @@ const TravelMap = () => {
   };
 
   const handleSwitchTrip = (newTripId: string, clickedPin?: any) => {
+    if(editingPinId) cancelForm();
+
     setActiveTripId(newTripId);
     setIsSidebarOpen(true); 
     if (!visibleTripIds.includes(newTripId)) setVisibleTripIds(prev => [...prev, newTripId]);
