@@ -47,11 +47,11 @@
 
 .info-box { padding: 10px; background-color: var(--info-bg); color: var(--info-text); border-radius: 6px; font-size: 13px; font-weight: bold; }
 
-/* Invert tiles 
+/* Invert tiles */
 .dark-mode .leaflet-tile-pane {
-  filter: brightness(0.85) invert(1) hue-rotate(180deg);
+  filter: brightness(0.75) invert(1) hue-rotate(180deg);
 }
-*/
+
 
 /* Popups */
 .dark-mode .leaflet-popup-content-wrapper,
