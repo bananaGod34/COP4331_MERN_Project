@@ -841,7 +841,7 @@ const TravelMap = () => {
             const shiftedRoute = routeCoords.map((coord: any) => [coord[0], coord[1] + offset]);
             const lineColor = trip.id === activeTripId ? ((trip as any).lineColor || '#3b82f6') : '#9ca3af';
             return <Polyline
-              key={`route-${trip.id}-${offset}-${trip.id === activeTripId}`}
+              key={`route-${trip.id}-${offset}-${lineColor}`}
               positions={shiftedRoute as any}
               color={lineColor} weight={4}
               dashArray="10, 10" />;
