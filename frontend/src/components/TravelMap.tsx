@@ -614,7 +614,28 @@ const TravelMap = () => {
             */}
             
             <div style={{ display: 'flex', gap: '5px' }}>
-              <button onClick={() => setDarkMode(d => !d)} className="mini-btn mini-btn-default" style={{ flex: 1 }}>{darkMode ? '☀️' : '🌙'}</button>
+              {/* Dark Mode Toggle Switch */}
+              <div
+                style={{ display: 'flex', alignItems: 'center', gap: '6px', flex: 1, padding: '5px 8px', borderRadius: '4px', background: 'var(--border-light)', cursor: 'pointer' }}
+                onClick={() => setDarkMode(d => !d)}
+              >
+                <span style={{ fontSize: '12px', color: 'var(--text-main)', userSelect: 'none' }}>
+                  {darkMode ? '🌙' : '☀️'}
+                </span>
+                <div style={{
+                  width: '32px', height: '18px', borderRadius: '9px',
+                  background: darkMode ? 'var(--accent-blue)' : '#cbd5e1',
+                  position: 'relative', transition: 'background 0.2s', flexShrink: 0,
+                }}>
+                  <div style={{
+                    position: 'absolute', top: '2px',
+                    left: darkMode ? '16px' : '2px',
+                    width: '14px', height: '14px', borderRadius: '50%',
+                    background: 'white', transition: 'left 0.2s',
+                    boxShadow: '0 1px 3px rgba(0,0,0,0.3)',
+                  }} />
+                </div>
+              </div>
               <button onClick={() => setUiHidden(true)} className="mini-btn mini-btn-default" style={{ flex: 1 }}>👁️</button>
             </div>
             <button disabled={!isDirty || isSaving} onClick={handleSaveTrips} className="btn" style={{ background: 'none', border: '1px solid var(--accent-blue)', color: 'var(--accent-blue)', padding: '6px 10px', fontSize: '14px', width: '100%', marginTop: '10px', fontWeight: 'bold', opacity: (!isDirty || isSaving) ? 0.6 : 1, cursor: (!isDirty || isSaving) ? 'not-allowed' : 'pointer' }}>
