@@ -808,10 +808,6 @@ const TravelMap = () => {
                       </div>
                     </div>
                   </div>
-
-                  <p style={{ margin: 0, fontSize: '12px', color: 'var(--text-muted)' }}>
-                    To change a pin's color, double-click it or click Edit in its popup.
-                  </p>
                 </div>
 
                 {tripPins.length === 0 && <p style={{ fontSize: '14px', color: 'var(--text-muted)' }}>Click anywhere on the map to drop your first pin!</p>}
