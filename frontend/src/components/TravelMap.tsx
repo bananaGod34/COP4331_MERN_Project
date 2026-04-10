@@ -67,6 +67,12 @@ const TravelMap = () => {
     inputValue: '' 
   });
 
+  const [gallery, setGallery] = useState<{isOpen: boolean, photos: string[], currentIndex: number}>({
+    isOpen: false,
+    photos: [],
+    currentIndex: 0
+  });
+
   const activeTrip = trips.find(t => t.id === activeTripId) || trips[0];
   const tripPins = activeTrip ? activeTrip.pins : [];
 
@@ -90,7 +96,7 @@ const TravelMap = () => {
   // STATE: Form
   const [formName, setFormName] = useState('');
   const [formBlurb, setFormBlurb] = useState('');
-  const [formPhoto, setFormPhoto] = useState(''); 
+  const [formPhotos, setFormPhotos] = useState<string[]>([]);
 
   // REFS
   const dragItem = useRef<number | null>(null);
@@ -182,12 +188,15 @@ const TravelMap = () => {
   };
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
+    const files = Array.from(e.target.files || []);
+    
+    files.forEach(file => {
       const reader = new FileReader();
-      reader.onloadend = () => setFormPhoto(reader.result as string);
+      reader.onloadend = () => {
+        setFormPhotos(prev => [...prev, reader.result as string]);
+      };
       reader.readAsDataURL(file);
-    }
+    });
   };
 
   const handleMapClick = (latlng: any) => {
@@ -213,10 +222,10 @@ const TravelMap = () => {
     e.preventDefault();
     if (editingPinId) {
       updateActiveTripPins(tripPins.map(pin => 
-        pin.id === editingPinId ? { ...pin, name: formName, blurb: formBlurb, photoUrl: formPhoto } : pin
+        pin.id === editingPinId ? { ...pin, name: formName, blurb: formBlurb, photoUrls: formPhotos } : pin
       ));
     } else if (draftPin) {
-      const newPin = { id: Date.now(), name: formName, lat: draftPin.lat, lng: draftPin.lng, blurb: formBlurb, photoUrl: formPhoto };
+      const newPin = { id: Date.now(), name: formName, lat: draftPin.lat, lng: draftPin.lng, blurb: formBlurb, photoUrls: formPhotos };
       updateActiveTripPins([...tripPins, newPin]);
     }
     
@@ -225,7 +234,7 @@ const TravelMap = () => {
     setOriginalPinCoords(null);
     setFormName('');
     setFormBlurb('');
-    setFormPhoto('');
+    setFormPhotos([]);
   };
 
   const deletePin = (id: number) => {
@@ -259,7 +268,7 @@ const TravelMap = () => {
     setEditingPinId(pin.id);
     setFormName(pin.name);
     setFormBlurb(pin.blurb);
-    setFormPhoto(pin.photoUrl || ''); 
+    setFormPhotos(pin.photoUrls || []); 
     setOriginalPinCoords({ lat: pin.lat, lng: pin.lng });
 
     const closest = getClosestLng(pin.lng);
@@ -275,7 +284,7 @@ const TravelMap = () => {
     setDraftPin(null);
     setEditingPinId(null);
     setOriginalPinCoords(null);
-    setFormPhoto('');
+    setFormPhotos([]);
   };
 
   const handleSort = () => {
@@ -298,10 +307,8 @@ const TravelMap = () => {
     }
   };
 
-  const handleSwitchTrip = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const newTripId = e.target.value;
+  const handleSwitchTrip = (newTripId: string) => {
     setActiveTripId(newTripId);
-    
     setIsSidebarOpen(true); 
     if (!visibleTripIds.includes(newTripId)) setVisibleTripIds(prev => [...prev, newTripId]);
     
@@ -336,6 +343,7 @@ const TravelMap = () => {
         const freshTrip = { id: `trip-${Date.now()}`, name: "New Trip", pins: [] };
         setTrips([freshTrip]);
         setActiveTripId(freshTrip.id);
+        setVisibleTripIds([freshTrip.id]);
       }
       setIsDirty(true);
     }
@@ -402,8 +410,74 @@ const TravelMap = () => {
 
   const visibleTripsData = trips.filter(t => visibleTripIds.includes(t.id));
 
+  const renderPhotoPreview = (photos: string[] | undefined) => {
+    if (!photos || photos.length === 0) return null;
+
+    const count = photos.length;
+
+    // 1, 2, or 3 images is a line
+    if (count <= 3) {
+      return (
+        <div style={{ display: 'flex', gap: '5px', margin: '8px 0', width: '100%' }}>
+          {photos.map((photo, idx) => (
+            <div 
+              key={idx} 
+              onClick={(e) => { e.preventDefault(); e.stopPropagation(); setGallery({ isOpen: true, photos, currentIndex: idx }); }}
+              style={{ width: '120px', height: '90px', cursor: 'pointer', borderRadius: '6px', overflow: 'hidden', flexShrink: 0, border: '1px solid var(--border-light)' }}
+            >
+              <img src={photo} alt={`Thumbnail`} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+            </div>
+          ))}
+        </div>
+      );
+    }
+
+    // 4+ images turns into square
+    const visiblePhotos = photos.slice(0, 4);
+    const extraCount = count - 3; 
+
+    return (
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '5px', margin: '8px 0', width: '100%' }}>
+        {visiblePhotos.map((photo, idx) => {
+          const isLast = idx === 3;
+          const showOverlay = isLast && count > 4;
+
+          return (
+            <div 
+              key={idx} 
+              onClick={(e) => { e.preventDefault(); e.stopPropagation(); setGallery({ isOpen: true, photos, currentIndex: idx }); }}
+              style={{ position: 'relative', width: '100%', aspectRatio: '4/3', cursor: 'pointer', borderRadius: '6px', overflow: 'hidden', border: '1px solid var(--border-light)' }}
+            >
+              <img src={photo} alt={`Thumbnail`} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+              
+              {showOverlay && (
+                <div style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', backgroundColor: 'rgba(0,0,0,0.6)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontWeight: 'bold', fontSize: '20px' }}>
+                  +{extraCount}
+                </div>
+              )}
+            </div>
+          );
+        })}
+      </div>
+    );
+  };
+
   return (
-    <div className="map-wrapper">
+    <div className={`map-wrapper ${uiHidden ? 'zen-mode' : ''}`}>
+      <style>
+        {`
+          .dark-mode .leaflet-popup-content-wrapper,
+          .dark-mode .leaflet-popup-tip {
+            background-color: var(--bg-panel);
+            color: var(--text-main);
+          }
+          
+          .zen-mode .leaflet-popup {
+            display: none !important;
+          }
+        `}
+      </style>
+
       {/* Add Trip Modal */}
       {tripModal.isOpen && (
         <div style={{
@@ -437,6 +511,43 @@ const TravelMap = () => {
         </div>
       )}
 
+      {/* Photo Gallery Modal */}
+      {gallery.isOpen && (
+        <div style={{
+          position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh',
+          backgroundColor: 'rgba(0,0,0,0.92)', zIndex: 10000, 
+          display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center'
+        }}>
+          <button onClick={() => setGallery({ ...gallery, isOpen: false })} style={{ position: 'absolute', top: '20px', right: '30px', background: 'none', border: 'none', color: 'white', fontSize: '40px', cursor: 'pointer', zIndex: 10001 }}>✖</button>
+
+          {gallery.photos.length > 1 && (
+            <button 
+              onClick={(e) => { e.stopPropagation(); setGallery({ ...gallery, currentIndex: (gallery.currentIndex - 1 + gallery.photos.length) % gallery.photos.length }); }}
+              style={{ position: 'absolute', left: '20px', top: '50%', transform: 'translateY(-50%)', background: 'rgba(255,255,255,0.1)', border: 'none', color: 'white', fontSize: '40px', cursor: 'pointer', padding: '15px 25px', borderRadius: '12px', zIndex: 10001 }}
+            >
+              ◀
+            </button>
+          )}
+
+          <div style={{ position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center', width: '80%', height: '80vh' }}>
+            <img src={gallery.photos[gallery.currentIndex]} alt={`Gallery view`} style={{ maxHeight: '100%', maxWidth: '100%', objectFit: 'contain' }} />
+          </div>
+          
+          {gallery.photos.length > 1 && (
+            <button 
+              onClick={(e) => { e.stopPropagation(); setGallery({ ...gallery, currentIndex: (gallery.currentIndex + 1) % gallery.photos.length }); }}
+              style={{ position: 'absolute', right: '20px', top: '50%', transform: 'translateY(-50%)', background: 'rgba(255,255,255,0.1)', border: 'none', color: 'white', fontSize: '40px', cursor: 'pointer', padding: '15px 25px', borderRadius: '12px', zIndex: 10001 }}
+            >
+              ▶
+            </button>
+          )}
+
+          <div style={{ color: 'white', marginTop: '20px', fontSize: '18px', fontWeight: 'bold', letterSpacing: '2px' }}>
+            {gallery.currentIndex + 1} / {gallery.photos.length}
+          </div>
+        </div>
+      )}
+
       {/* Zen Mode */}
       {uiHidden && (
         <button onClick={() => setUiHidden(false)} className="btn btn-blue" style={{ position: 'absolute', top: '20px', left: '20px', zIndex: 1000, boxShadow: 'var(--shadow-float)' }}>
@@ -447,36 +558,60 @@ const TravelMap = () => {
       {!uiHidden && (
         <>
           <div className="floating-panel">
-            <h3 style={{ marginTop: 0, marginBottom: '10px' }}>Your Trips</h3>
-            
-            <select value={activeTripId} onChange={handleSwitchTrip} className="form-input" style={{ marginBottom: '10px', fontWeight: 'bold', cursor: 'pointer' }}>
-              {trips.map(trip => <option key={trip.id} value={trip.id}>{trip.name}</option>)}
-            </select>
-            
-            <div style={{ display: 'flex', gap: '5px', marginBottom: '15px' }}>
-              <button onClick={handleCreateNewTrip} className="btn btn-blue" style={{ padding: '8px', flex: 1 }}>+ New Trip</button>
-              <button onClick={handleRenameTrip} className="mini-btn mini-btn-default" style={{ padding: '8px', flex: 0.3, fontSize: '16px' }}>✏️</button>
-              <button onClick={handleDeleteTrip} className="btn btn-red" style={{ padding: '8px', flex: 0.3 }}>🗑️</button>
-            </div>
-            
-            <hr style={{ border: 'none', borderTop: '1px solid var(--border-light)', marginBottom: '15px' }} />
-
-            <strong style={{ fontSize: '14px', display: 'block', marginBottom: '5px' }}>Visible on Map:</strong>
-            <div style={{ maxHeight: '100px', overflowY: 'auto', marginBottom: '15px', fontSize: '14px' }}>
-              {trips.map(trip => (
-                <label key={`vis-${trip.id}`} style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', marginBottom: '4px' }}>
-                  <input type="checkbox" checked={visibleTripIds.includes(trip.id)} onChange={() => toggleVisibility(trip.id)} />
-                  {trip.name}
-                </label>
-              ))}
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '15px', gap: '15px' }}>
+              <h3 style={{ margin: 0 }}>Your Trips</h3>
+              <button onClick={handleCreateNewTrip} className="mini-btn mini-btn-default" style={{ padding: '6px 10px', fontWeight: 'bold', flexShrink: 0 }}>+ New</button>
             </div>
 
+            <div style={{ maxHeight: '200px', overflowY: 'auto', marginBottom: '15px', display: 'flex', flexDirection: 'column', gap: '6px' }}>
+              {trips.map(trip => {
+                const isActive = trip.id === activeTripId;
+                
+                return (
+                  <div 
+                    key={`list-${trip.id}`} 
+                    onClick={() => handleSwitchTrip(trip.id)}
+                    style={{ 
+                      display: 'flex', alignItems: 'center', justifyContent: 'space-between', 
+                      padding: '10px', borderRadius: '8px', cursor: isActive ? 'default' : 'pointer',
+                      backgroundColor: isActive ? 'var(--accent-blue)' : 'transparent',
+                      color: isActive ? 'white' : 'var(--text-main)',
+                      border: isActive ? 'none' : '1px solid var(--border-light)',
+                      transition: 'all 0.2s ease'
+                    }}
+                  >
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flex: 1 }}>
+                      <input 
+                        type="checkbox" 
+                        checked={visibleTripIds.includes(trip.id)} 
+                        onChange={() => toggleVisibility(trip.id)}
+                        onClick={(e) => e.stopPropagation()} 
+                        style={{ cursor: 'pointer', transform: 'scale(1.2)' }}
+                      />
+                      <strong style={{ fontSize: '15px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: isActive ? '120px' : '180px' }}>
+                        {trip.name}
+                      </strong>
+                    </div>
+
+                    {isActive && (
+                      <div style={{ display: 'flex', gap: '5px' }}>
+                        <button onClick={(e) => { e.stopPropagation(); handleRenameTrip(); }} style={{ background: 'rgba(255,255,255,0.2)', border: 'none', color: 'white', cursor: 'pointer', borderRadius: '4px', padding: '4px 6px', fontSize: '12px' }}>✏️</button>
+                        <button onClick={(e) => { e.stopPropagation(); handleDeleteTrip(); }} style={{ background: 'rgba(255,255,255,0.2)', border: 'none', color: 'white', cursor: 'pointer', borderRadius: '4px', padding: '4px 6px', fontSize: '12px' }}>🗑️</button>
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+
             <hr style={{ border: 'none', borderTop: '1px solid var(--border-light)', marginBottom: '15px' }} />
             
+            {/*
             <label style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '14px', cursor: 'pointer', marginBottom: '10px' }}>
               <input type="checkbox" checked={pinsUnlocked} onChange={(e) => setPinsUnlocked(e.target.checked)} />
               Unlock active pins
             </label>
+            */}
             
             <div style={{ display: 'flex', gap: '5px' }}>
               <button onClick={() => setDarkMode(d => !d)} className="mini-btn mini-btn-default" style={{ flex: 1 }}>{darkMode ? '☀️' : '🌙'}</button>
@@ -528,24 +663,31 @@ const TravelMap = () => {
                     <textarea className="form-input" style={{ height: '100px', resize: 'none' }} required value={formBlurb} onChange={(e) => setFormBlurb(e.target.value)} />
                   </div>
 
-                  {/* Photo Upload */}
+                  {/* Multiple Photo Upload */}
                   <div>
-                    <label style={{ fontSize: '14px', fontWeight: 'bold' }}>Photo</label>
-                    {formPhoto ? (
-                      <div style={{ position: 'relative', marginTop: '5px' }}>
-                        <img src={formPhoto} alt="Preview" style={{ width: '100%', height: '150px', objectFit: 'cover', borderRadius: '6px', border: '1px solid var(--border-light)' }} />
-                        <button type="button" onClick={() => setFormPhoto('')} style={{ position: 'absolute', top: '5px', right: '5px', background: 'rgba(239, 68, 68, 0.9)', color: 'white', border: 'none', borderRadius: '4px', padding: '4px 8px', cursor: 'pointer', fontSize: '12px', fontWeight: 'bold' }}>
-                          Remove
-                        </button>
-                      </div>
-                    ) : (
-                      <div style={{ marginTop: '5px', padding: '20px', border: '2px dashed var(--border-input)', borderRadius: '6px', textAlign: 'center' }}>
-                        <label style={{ cursor: 'pointer', color: 'var(--accent-blue)', fontWeight: 'bold', fontSize: '14px' }}>
-                          + Choose an Image
-                          <input type="file" accept="image/*" onChange={handleImageUpload} style={{ display: 'none' }} />
+                    <label style={{ fontSize: '14px', fontWeight: 'bold' }}>Photos</label>
+                    <div style={{ display: 'flex', gap: '10px', overflowX: 'auto', paddingBottom: '10px', marginTop: '5px' }}>
+                      {formPhotos.map((photo, idx) => (
+                        <div key={idx} style={{ position: 'relative', minWidth: '100px' }}>
+                          <img src={photo} alt={`Preview ${idx}`} style={{ width: '100px', height: '100px', objectFit: 'cover', borderRadius: '6px', border: '1px solid var(--border-light)' }} />
+                          <button type="button" onClick={() => setFormPhotos(formPhotos.filter((_, i) => i !== idx))} style={{ position: 'absolute', top: '5px', right: '5px', background: 'rgba(239, 68, 68, 0.9)', color: 'white', border: 'none', borderRadius: '4px', padding: '2px 6px', cursor: 'pointer', fontSize: '10px', fontWeight: 'bold' }}>
+                            X
+                          </button>
+                        </div>
+                      ))}
+                      
+                      <div style={{ minWidth: '100px', height: '100px', border: '2px dashed var(--border-input)', borderRadius: '6px' }}>
+                        <label style={{ 
+                          display: 'flex', alignItems: 'center', justifyContent: 'center', 
+                          width: '100%', height: '100%', cursor: 'pointer', 
+                          color: 'var(--accent-blue)', fontWeight: 'bold', fontSize: '24px' 
+                        }}>
+                          +
+                          <input type="file" accept="image/*" multiple onChange={handleImageUpload} style={{ display: 'none' }} />
                         </label>
+                        
                       </div>
-                    )}
+                    </div>
                   </div>
 
                   <div style={{ display: 'flex', gap: '10px', marginTop: '10px' }}>
@@ -568,8 +710,12 @@ const TravelMap = () => {
                     >
                       <div style={{ color: '#9ca3af', fontSize: '20px', cursor: 'grab' }}>☰</div>
                       
-                      {pin.photoUrl && (
-                        <img src={pin.photoUrl} alt="Thumbnail" style={{ width: '40px', height: '40px', objectFit: 'cover', borderRadius: '4px', flexShrink: 0 }} />
+                      {pin.photoUrls && pin.photoUrls.length > 0 && (
+                        <img
+                          src={pin.photoUrls[0]}
+                          onClick={(e) => { e.preventDefault(); e.stopPropagation(); setGallery({ isOpen: true, photos: pin.photoUrls, currentIndex: 0 }); }}
+                          alt="Thumbnail"
+                          style={{ width: '40px', height: '40px', cursor: 'pointer', objectFit: 'cover', borderRadius: '4px', flexShrink: 0 }} />
                       )}
 
                       <div style={{ flex: 1, cursor: 'pointer' }} onClick={() => handleCardClick(pin)}>
@@ -610,7 +756,11 @@ const TravelMap = () => {
           return WORLD_OFFSETS.map(offset => {
             const shiftedRoute = routeCoords.map((coord: any) => [coord[0], coord[1] + offset]);
             const lineColor = trip.id === activeTripId ? "#3b82f6" : "#9ca3af"; 
-            return <Polyline key={`route-${trip.id}-${offset}`} positions={shiftedRoute as any} color={lineColor} weight={4} dashArray="10, 10" />;
+            return <Polyline
+              key={`route-${trip.id}-${offset}-${trip.id === activeTripId}`}
+              positions={shiftedRoute as any}
+              color={lineColor} weight={4}
+              dashArray="10, 10" />;
           });
         })}
 
@@ -629,7 +779,7 @@ const TravelMap = () => {
               <React.Fragment key={`trip-group-${trip.id}`}>
                 {trip.pins.map((pin: any) => (
                   <Marker 
-                    key={`${pin.id}-${offset}-${pinsUnlocked || pin.id === editingPinId}`} 
+                    key={`${pin.id}-${offset}-${pinsUnlocked || pin.id === editingPinId}-${trip.id === activeTripId}`}
                     position={[pin.lat, pin.lng + offset]} 
                     draggable={!uiHidden && ((pinsUnlocked && trip.id === activeTripId) || pin.id === editingPinId)}
                     eventHandlers={{ 
@@ -643,9 +793,12 @@ const TravelMap = () => {
                     ref={(r) => { markerRefs.current[`${pin.id}-${offset}`] = r; }}
                     opacity={trip.id === activeTripId ? 1.0 : 0.6}
                   >
-                    <Popup autoPan={false}>
+
+                    <Popup autoPan={false} minWidth={300} maxWidth={500}>
                       <div style={{ minWidth: '150px' }}>
-                        {pin.photoUrl && <img src={pin.photoUrl} alt={pin.name} style={{ width: '100%', height: '100px', objectFit: 'cover', borderRadius: '4px', marginBottom: '10px' }} />}
+                        
+                        {renderPhotoPreview(pin.photoUrls)}
+
                         <strong style={{ fontSize: '16px' }}>{pin.name}</strong> <br />
                         <p style={{ margin: '8px 0', fontSize: '14px' }}>{pin.blurb}</p>
                         
