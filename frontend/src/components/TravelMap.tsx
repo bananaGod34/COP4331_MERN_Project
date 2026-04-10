@@ -19,6 +19,25 @@ L.Icon.Default.mergeOptions({
 });
 // ---------------------------------
 
+// --- HELPERS ---
+
+// Creates a colored SVG teardrop pin icon for a given hex color
+const getPinIcon = (color: string = '#3b82f6') => {
+  const svg = `
+    <svg xmlns="http://www.w3.org/2000/svg" width="28" height="38" viewBox="0 0 28 38">
+      <path d="M14 0 C6.27 0 0 6.27 0 14 C0 24.5 14 38 14 38 C14 38 28 24.5 28 14 C28 6.27 21.73 0 14 0 Z"
+        fill="${color}" stroke="white" stroke-width="2"/>
+      <circle cx="14" cy="14" r="5" fill="white" opacity="0.85"/>
+    </svg>`;
+  return L.divIcon({
+    html: svg,
+    className: '',
+    iconSize: [28, 38],
+    iconAnchor: [14, 38],
+    popupAnchor: [0, -38],
+  });
+};
+
 // --- SUBCOMPONENTS ---
 
 // Map click listener
@@ -50,7 +69,8 @@ const TravelMap = () => {
     { 
       id: 'trip-1', 
       name: "New Trip", 
-      pins: [] 
+      pins: [],
+      lineColor: '#3b82f6',
     }
   ]);
 
@@ -97,6 +117,7 @@ const TravelMap = () => {
   const [formName, setFormName] = useState('');
   const [formBlurb, setFormBlurb] = useState('');
   const [formPhotos, setFormPhotos] = useState<string[]>([]);
+  const [formPinColor, setFormPinColor] = useState('#3b82f6');
 
   // REFS
   const dragItem = useRef<number | null>(null);
@@ -206,6 +227,7 @@ const TravelMap = () => {
     setFormName('');
     setFormBlurb('');
     setFormPhoto('');
+    setFormPinColor('#3b82f6');
     setOriginalPinCoords(null);
     setCameraTarget({ lat: latlng.lat, lng: latlng.lng, triggerId: Date.now() });
   };
@@ -222,10 +244,10 @@ const TravelMap = () => {
     e.preventDefault();
     if (editingPinId) {
       updateActiveTripPins(tripPins.map(pin => 
-        pin.id === editingPinId ? { ...pin, name: formName, blurb: formBlurb, photoUrls: formPhotos } : pin
+        pin.id === editingPinId ? { ...pin, name: formName, blurb: formBlurb, photoUrls: formPhotos, color: formPinColor } : pin
       ));
     } else if (draftPin) {
-      const newPin = { id: Date.now(), name: formName, lat: draftPin.lat, lng: draftPin.lng, blurb: formBlurb, photoUrls: formPhotos };
+      const newPin = { id: Date.now(), name: formName, lat: draftPin.lat, lng: draftPin.lng, blurb: formBlurb, photoUrls: formPhotos, color: formPinColor };
       updateActiveTripPins([...tripPins, newPin]);
     }
     
@@ -235,6 +257,7 @@ const TravelMap = () => {
     setFormName('');
     setFormBlurb('');
     setFormPhotos([]);
+    setFormPinColor('#3b82f6');
   };
 
   const deletePin = (id: number) => {
@@ -268,7 +291,8 @@ const TravelMap = () => {
     setEditingPinId(pin.id);
     setFormName(pin.name);
     setFormBlurb(pin.blurb);
-    setFormPhotos(pin.photoUrls || []); 
+    setFormPhotos(pin.photoUrls || []);
+    setFormPinColor(pin.color || '#3b82f6');
     setOriginalPinCoords({ lat: pin.lat, lng: pin.lng });
 
     const closest = getClosestLng(pin.lng);
@@ -285,6 +309,7 @@ const TravelMap = () => {
     setEditingPinId(null);
     setOriginalPinCoords(null);
     setFormPhotos([]);
+    setFormPinColor('#3b82f6');
   };
 
   const handleSort = () => {
@@ -317,11 +342,17 @@ const TravelMap = () => {
     setFormName('');
     setFormBlurb('');
     setFormPhoto('');
+    setFormPinColor('#3b82f6');
 
     const newTripData = trips.find(t => t.id === newTripId);
     if (newTripData && newTripData.pins.length > 0) {
       setCameraTarget({ lat: newTripData.pins[0].lat, lng: newTripData.pins[0].lng, triggerId: Date.now() });
     }
+  };
+
+  const handleTripLineColorChange = (color: string) => {
+    setTrips(trips.map(t => t.id === activeTripId ? { ...t, lineColor: color } : t));
+    setIsDirty(true);
   };
 
   const handleCreateNewTrip = () => {
@@ -355,7 +386,7 @@ const TravelMap = () => {
     if (!name) return;
 
     if (tripModal.mode === 'create') {
-      const newTrip = { id: `trip-${Date.now()}`, name, pins: [] };
+      const newTrip = { id: `trip-${Date.now()}`, name, pins: [], lineColor: '#3b82f6' };
       setTrips([...trips, newTrip]);
       setActiveTripId(newTrip.id);
       setVisibleTripIds(prev => [...prev, newTrip.id]);
@@ -613,7 +644,7 @@ const TravelMap = () => {
             </label>
             */}
             
-            <div style={{ display: 'flex', gap: '5px' }}>
+            <div style={{ display: 'flex', gap: '5px', alignItems: 'center' }}>
               {/* Dark Mode Toggle Switch */}
               <div
                 style={{ display: 'flex', alignItems: 'center', gap: '6px', flex: 1, padding: '5px 8px', borderRadius: '4px', background: 'var(--border-light)', cursor: 'pointer' }}
@@ -684,6 +715,32 @@ const TravelMap = () => {
                     <textarea className="form-input" style={{ height: '100px', resize: 'none' }} required value={formBlurb} onChange={(e) => setFormBlurb(e.target.value)} />
                   </div>
 
+                  {/* Pin Color Picker */}
+                  <div>
+                    <label style={{ fontSize: '14px', fontWeight: 'bold', display: 'block', marginBottom: '8px' }}>Pin Color</label>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                      <input
+                        type="color"
+                        value={formPinColor}
+                        onChange={(e) => setFormPinColor(e.target.value)}
+                        style={{ width: '40px', height: '36px', padding: '2px', border: '1px solid var(--border-input)', borderRadius: '6px', cursor: 'pointer', background: 'var(--bg-panel)' }}
+                      />
+                      <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
+                        {['#3b82f6','#ef4444','#10b981','#f59e0b','#8b5cf6','#ec4899','#06b6d4','#000000'].map(c => (
+                          <div
+                            key={c}
+                            onClick={() => setFormPinColor(c)}
+                            style={{
+                              width: '22px', height: '22px', borderRadius: '50%', background: c, cursor: 'pointer',
+                              border: formPinColor === c ? '3px solid var(--text-main)' : '2px solid var(--border-light)',
+                              boxSizing: 'border-box',
+                            }}
+                          />
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+
                   {/* Multiple Photo Upload */}
                   <div>
                     <label style={{ fontSize: '14px', fontWeight: 'bold' }}>Photos</label>
@@ -721,6 +778,42 @@ const TravelMap = () => {
               // VIEW 2: ITINERARY LIST
               <>
                 <h2 style={{ marginTop: 0 }}>{activeTrip.name} Itinerary</h2>
+
+                {/* Trip Style Section */}
+                <div style={{ background: 'var(--bg-panel)', border: '1px solid var(--border-light)', borderRadius: '8px', padding: '12px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                  <p style={{ margin: 0, fontSize: '13px', fontWeight: 'bold', color: 'var(--text-muted)' }}>TRIP STYLE</p>
+
+                  {/* Line Color */}
+                  <div>
+                    <label style={{ fontSize: '13px', fontWeight: 'bold', display: 'block', marginBottom: '6px' }}>Line Color</label>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      <input
+                        type="color"
+                        value={(activeTrip as any).lineColor || '#3b82f6'}
+                        onChange={(e) => handleTripLineColorChange(e.target.value)}
+                        style={{ width: '36px', height: '32px', padding: '2px', border: '1px solid var(--border-input)', borderRadius: '6px', cursor: 'pointer', background: 'var(--bg-panel)' }}
+                      />
+                      <div style={{ display: 'flex', gap: '5px', flexWrap: 'wrap' }}>
+                        {['#3b82f6','#ef4444','#10b981','#f59e0b','#8b5cf6','#ec4899','#06b6d4','#000000'].map(c => (
+                          <div
+                            key={c}
+                            onClick={() => handleTripLineColorChange(c)}
+                            style={{
+                              width: '20px', height: '20px', borderRadius: '4px', background: c, cursor: 'pointer',
+                              border: ((activeTrip as any).lineColor || '#3b82f6') === c ? '3px solid var(--text-main)' : '2px solid var(--border-light)',
+                              boxSizing: 'border-box',
+                            }}
+                          />
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+
+                  <p style={{ margin: 0, fontSize: '12px', color: 'var(--text-muted)' }}>
+                    To change a pin's color, double-click it or click Edit in its popup.
+                  </p>
+                </div>
+
                 {tripPins.length === 0 && <p style={{ fontSize: '14px', color: 'var(--text-muted)' }}>Click anywhere on the map to drop your first pin!</p>}
                 
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
@@ -764,8 +857,7 @@ const TravelMap = () => {
       >
         <ZoomControl position="bottomleft" />
         <TileLayer
-          key={darkMode ? "dark" : "light"}
-          url={darkMode ? "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png" : "https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png"}
+          url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png"
         />
         <MapClickHandler onMapClick={handleMapClick} isPopupOpen={isPopupOpen} />
         <MapCameraController target={cameraTarget} />
@@ -776,7 +868,7 @@ const TravelMap = () => {
           const routeCoords = calculateWrappedRoute(trip.pins);
           return WORLD_OFFSETS.map(offset => {
             const shiftedRoute = routeCoords.map((coord: any) => [coord[0], coord[1] + offset]);
-            const lineColor = trip.id === activeTripId ? "#3b82f6" : "#9ca3af"; 
+            const lineColor = trip.id === activeTripId ? ((trip as any).lineColor || '#3b82f6') : '#9ca3af';
             return <Polyline
               key={`route-${trip.id}-${offset}-${trip.id === activeTripId}`}
               positions={shiftedRoute as any}
@@ -790,7 +882,7 @@ const TravelMap = () => {
           <CircleMarker
             center={[activeFocusLocation.lat, activeFocusLocation.lng]}
             radius={25}
-            pathOptions={{ color: '#3b82f6', fillColor: '#3b82f6', fillOpacity: 0.3 }} />
+            pathOptions={{ color: formPinColor, fillColor: formPinColor, fillOpacity: 0.3 }} />
         )}
 
         {/* Saved Pins (triple rendered for dateline wrapping) */}
@@ -803,6 +895,7 @@ const TravelMap = () => {
                     key={`${pin.id}-${offset}-${pinsUnlocked || pin.id === editingPinId}-${trip.id === activeTripId}`}
                     position={[pin.lat, pin.lng + offset]} 
                     draggable={!uiHidden && ((pinsUnlocked && trip.id === activeTripId) || pin.id === editingPinId)}
+                    icon={getPinIcon(pin.color || '#3b82f6')}
                     eventHandlers={{ 
                       dragend: (e) => {
                         const position = e.target.getLatLng();
@@ -843,6 +936,7 @@ const TravelMap = () => {
           <Marker
             position={[draftPin.lat, draftPin.lng]}
             opacity={0.7}
+            icon={getPinIcon(formPinColor)}
             draggable={true}
             eventHandlers={{
               dragend: (e) => {
