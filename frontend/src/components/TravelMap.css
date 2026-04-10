@@ -49,7 +49,7 @@
 
 /* Invert tiles */
 .dark-mode .leaflet-tile-pane {
-  filter: brightness(0.90) invert(1) hue-rotate(145deg) contrast(1.5);
+  filter: brightness(0.90) invert(1) hue-rotate(190deg) contrast(1.5);
 }
 
 
