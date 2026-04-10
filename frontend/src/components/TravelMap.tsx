@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useMemo } from 'react';
 import { MapContainer, TileLayer, Marker, Popup, Polyline, useMapEvents, ZoomControl, useMap, CircleMarker } from 'react-leaflet';
 import { useNavigate } from 'react-router-dom';
 import 'leaflet/dist/leaflet.css';
@@ -25,17 +25,29 @@ L.Icon.Default.mergeOptions({
 // Creates a colored SVG teardrop pin icon for a given hex color
 const getPinIcon = (color: string = '#3b82f6') => {
   const svg = `
-    <svg xmlns="http://www.w3.org/2000/svg" width="28" height="38" viewBox="0 0 28 38">
-      <path d="M14 0 C6.27 0 0 6.27 0 14 C0 24.5 14 38 14 38 C14 38 28 24.5 28 14 C28 6.27 21.73 0 14 0 Z"
-        fill="${color}" stroke="white" stroke-width="2"/>
-      <circle cx="14" cy="14" r="5" fill="white" opacity="0.85"/>
+    <svg xmlns="http://www.w3.org/2000/svg" width="36" height="46" viewBox="-4 -2 36 46">
+      <filter id="pin-shadow" x="-50%" y="-50%" width="200%" height="200%">
+        <feDropShadow dx="0" dy="2" stdDeviation="2" flood-color="#000000" flood-opacity="0.35"/>
+      </filter>
+      
+      {/* By combining the teardrop (first M) and the circle (second M) into one path 
+        and using fill-rule="evenodd", it punches a transparent hole in the middle! 
+      */}
+      <path filter="url(#pin-shadow)"
+        d="M14 0 C6.27 0 0 6.27 0 14 C0 24.5 14 38 14 38 C14 38 28 24.5 28 14 C28 6.27 21.73 0 14 0 Z
+           M 14 9 A 5 5 0 1 0 14 19 A 5 5 0 1 0 14 9 Z"
+        fill="${color}" 
+        fill-rule="evenodd"
+        stroke="#ffffff" 
+        stroke-width="1.5" />
     </svg>`;
+    
   return L.divIcon({
     html: svg,
-    className: '',
-    iconSize: [28, 38],
-    iconAnchor: [14, 38],
-    popupAnchor: [0, -38],
+    className: '', 
+    iconSize: [36, 46],
+    iconAnchor: [18, 40], 
+    popupAnchor: [0, -40],
   });
 };
 
@@ -108,7 +120,10 @@ const TravelMap = () => {
   const [originalPinCoords, setOriginalPinCoords] = useState<{lat: number, lng: number} | null>(null);
 
   // STATE: Dark Mode
-  const [darkMode, setDarkMode] = useState(false);
+  const [darkMode, setDarkMode] = useState(() => {
+    const savedTheme = localStorage.getItem('travelmap_theme');
+    return savedTheme === 'dark';
+  });
 
   // STATE: Saving
   const [isDirty, setIsDirty] = useState(false);
@@ -155,6 +170,33 @@ const TravelMap = () => {
     loadTripsFromServer();
   }, []);
 
+  // prompt when unsaved changes
+  useEffect(() => {
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      if (isDirty) {
+        e.preventDefault();
+      }
+    };
+
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    return () => window.removeEventListener('beforeunload', handleBeforeUnload);
+  }, [isDirty]);
+
+  // escape key listener
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        if (gallery.isOpen) setGallery(prev => ({ ...prev, isOpen: false }));
+        else if (tripModal.isOpen) setTripModal(prev => ({ ...prev, isOpen: false }));
+        else if (editingPinId) cancelForm();
+        else if (uiHidden) setUiHidden(false);
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [gallery.isOpen, tripModal.isOpen, editingPinId, uiHidden]);
+
   // --- EFFECTS ---
   // toggle dark mode
   useEffect(() => {
@@ -162,10 +204,37 @@ const TravelMap = () => {
     if (mapRef.current?.getContainer()) {
       mapRef.current.getContainer().classList.toggle('dark-mode', darkMode);
     }
+    
+    localStorage.setItem('travelmap_theme', darkMode ? 'dark' : 'light');
+
     return () => {
       document.body.classList.remove('dark-mode');
     };
   }, [darkMode]);
+
+  // dark mode display helper
+  const getDisplayColor = (hex: string) => {
+    const cleanHex = hex.replace('#', '');
+    if (cleanHex.length !== 6) return hex;
+
+    const r = parseInt(cleanHex.substring(0, 2), 16);
+    const g = parseInt(cleanHex.substring(2, 4), 16);
+    const b = parseInt(cleanHex.substring(4, 6), 16);
+
+    // W3C formula for calculating accessible contrast
+    // https://www.w3.org/WAI/GL/wiki/Relative_luminance
+    const brightness = (r * 299 + g * 587 + b * 114) / 1000;
+
+    if (darkMode && brightness < 40) {
+      return '#d2d8e0';
+    }
+    
+    if (!darkMode && brightness > 230) {
+      return '#000000';
+    }
+
+    return hex;
+  };
 
   // camera whip helper
   const getClosestLng = (targetLng: number) => {
@@ -231,7 +300,7 @@ const TravelMap = () => {
     setEditingPinId(null);
     setFormName('');
     setFormBlurb('');
-    setFormPhoto('');
+    setFormPhotos([]);
     setOriginalPinCoords(null);
     setCameraTarget({ lat: latlng.lat, lng: latlng.lng, triggerId: Date.now() });
   };
@@ -264,14 +333,12 @@ const TravelMap = () => {
   };
 
   const deletePin = (id: number) => {
-    if (window.confirm("Are you sure you want to permanently delete this stop?")) {
-      isPopupOpen.current = false; 
-      updateActiveTripPins(tripPins.filter(pin => pin.id !== id));
-      if (editingPinId === id) {
-        setEditingPinId(null);
-        setOriginalPinCoords(null);
-        setFormPhoto('');
-      }
+    isPopupOpen.current = false; 
+    updateActiveTripPins(tripPins.filter(pin => pin.id !== id));
+    if (editingPinId === id) {
+      setEditingPinId(null);
+      setOriginalPinCoords(null);
+      setFormPhotos([]);
     }
   };
 
@@ -333,7 +400,7 @@ const TravelMap = () => {
     }
   };
 
-  const handleSwitchTrip = (newTripId: string) => {
+  const handleSwitchTrip = (newTripId: string, clickedPin?: any) => {
     setActiveTripId(newTripId);
     setIsSidebarOpen(true); 
     if (!visibleTripIds.includes(newTripId)) setVisibleTripIds(prev => [...prev, newTripId]);
@@ -342,10 +409,15 @@ const TravelMap = () => {
     setEditingPinId(null);
     setFormName('');
     setFormBlurb('');
-    setFormPhoto('');
+    setFormPhotos([]); 
+    isPopupOpen.current = false;
 
     const newTripData = trips.find(t => t.id === newTripId);
-    if (newTripData && newTripData.pins.length > 0) {
+    
+    if (clickedPin) {
+      const closest = getClosestLng(clickedPin.lng);
+      setCameraTarget({ lat: clickedPin.lat, lng: closest.lng, triggerId: Date.now() });
+    } else if (newTripData && newTripData.pins.length > 0) {
       setCameraTarget({ lat: newTripData.pins[0].lat, lng: newTripData.pins[0].lng, triggerId: Date.now() });
     }
   };
@@ -365,7 +437,7 @@ const TravelMap = () => {
   };
 
   const handleDeleteTrip = () => {
-    if (window.confirm(`Are you sure you want to permanently delete ${activeTrip?.name}?`)) {
+    if (window.confirm(`Are you sure you want to delete ${activeTrip?.name}?`)) {
       const remainingTrips = trips.filter(t => t.id !== activeTripId);
       if (remainingTrips.length > 0) {
         setTrips(remainingTrips);
@@ -431,15 +503,16 @@ const TravelMap = () => {
     }
     return coords;
   };
-
-  const routeCoordinates = calculateWrappedRoute(tripPins);
+  
   const mapCenter = [30.0, -80.0]; //>>>currently centered on Orlando uhhhhh maybe change to user location or something later?
   //>>>we can also save their last map position and use that
 
   const editingPinData = tripPins.find(p => p.id === editingPinId);
   const activeFocusLocation = draftPin || (editingPinData ? { lat: editingPinData.lat, lng: editingPinData.lng } : null);
 
-  const visibleTripsData = trips.filter(t => visibleTripIds.includes(t.id));
+  const visibleTripsData = useMemo(() => {
+    return trips.filter(t => visibleTripIds.includes(t.id));
+  }, [trips, visibleTripIds]);
 
   const renderPhotoPreview = (photos: string[] | undefined) => {
     if (!photos || photos.length === 0) return null;
@@ -594,9 +667,11 @@ const TravelMap = () => {
               <button onClick={handleCreateNewTrip} className="mini-btn mini-btn-default" style={{ padding: '6px 10px', fontWeight: 'bold', flexShrink: 0 }}>+ New</button>
             </div>
 
+            {/* Trip List */}
             <div style={{ maxHeight: '200px', overflowY: 'auto', marginBottom: '15px', display: 'flex', flexDirection: 'column', gap: '6px' }}>
               {trips.map(trip => {
                 const isActive = trip.id === activeTripId;
+                const displayColor = getDisplayColor((trip as any).lineColor || '#3b82f6');
                 
                 return (
                   <div 
@@ -605,10 +680,11 @@ const TravelMap = () => {
                     style={{ 
                       display: 'flex', alignItems: 'center', justifyContent: 'space-between', 
                       padding: '10px', borderRadius: '8px', cursor: isActive ? 'default' : 'pointer',
-                      backgroundColor: isActive ? 'var(--accent-blue)' : 'transparent',
-                      color: isActive ? 'white' : 'var(--text-main)',
-                      border: isActive ? 'none' : '1px solid var(--border-light)',
-                      transition: 'all 0.2s ease'
+                      backgroundColor: isActive ? 'var(--border-light)' : 'transparent',
+                      borderLeft: isActive ? `5px solid ${displayColor}` : '5px solid transparent',
+                      color: 'var(--text-main)',
+                      minHeight: '46px',
+                      boxSizing: 'border-box'
                     }}
                   >
                     <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flex: 1 }}>
@@ -619,6 +695,13 @@ const TravelMap = () => {
                         onClick={(e) => e.stopPropagation()} 
                         style={{ cursor: 'pointer', transform: 'scale(1.2)' }}
                       />
+
+                      <div style={{ 
+                        width: '14px', height: '14px', borderRadius: '50%', 
+                        backgroundColor: displayColor, flexShrink: 0, 
+                        boxShadow: '0 1px 3px rgba(0,0,0,0.2)' 
+                      }} />
+
                       <strong style={{ fontSize: '15px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: isActive ? '120px' : '180px' }}>
                         {trip.name}
                       </strong>
@@ -626,8 +709,8 @@ const TravelMap = () => {
 
                     {isActive && (
                       <div style={{ display: 'flex', gap: '5px' }}>
-                        <button onClick={(e) => { e.stopPropagation(); handleRenameTrip(); }} style={{ background: 'rgba(255,255,255,0.2)', border: 'none', color: 'white', cursor: 'pointer', borderRadius: '4px', padding: '4px 6px', fontSize: '12px' }}>✏️</button>
-                        <button onClick={(e) => { e.stopPropagation(); handleDeleteTrip(); }} style={{ background: 'rgba(255,255,255,0.2)', border: 'none', color: 'white', cursor: 'pointer', borderRadius: '4px', padding: '4px 6px', fontSize: '12px' }}>🗑️</button>
+                        <button onClick={(e) => { e.stopPropagation(); handleRenameTrip(); }} style={{ background: 'var(--bg-panel)', border: '1px solid var(--border-input)', color: 'var(--text-main)', cursor: 'pointer', borderRadius: '4px', padding: '4px 6px', fontSize: '12px' }}>✏️</button>
+                        <button onClick={(e) => { e.stopPropagation(); handleDeleteTrip(); }} style={{ background: 'var(--bg-panel)', border: '1px solid var(--border-input)', color: 'var(--text-main)', cursor: 'pointer', borderRadius: '4px', padding: '4px 6px', fontSize: '12px' }}>🗑️</button>
                       </div>
                     )}
                   </div>
@@ -644,7 +727,7 @@ const TravelMap = () => {
             </label>
             */}
             
-            <div style={{ display: 'flex', gap: '5px', alignItems: 'center' }}>
+            <div style={{ display: 'flex', gap: '5px', alignItems: 'center', minWidth: '220px' }}>
               {/* Dark Mode Toggle Switch */}
               <div
                 style={{ display: 'flex', alignItems: 'center', gap: '6px', flex: 1, padding: '5px 8px', borderRadius: '4px', background: 'var(--border-light)', cursor: 'pointer' }}
@@ -683,6 +766,7 @@ const TravelMap = () => {
               position: 'absolute', 
               top: '20px', 
               right: isSidebarOpen ? '350px' : '0', 
+              color: 'var(--text-main)',
               width: '40px', 
               height: '40px', 
               background: 'var(--bg-panel)', 
@@ -765,20 +849,27 @@ const TravelMap = () => {
                         type="color"
                         value={(activeTrip as any).lineColor || '#3b82f6'}
                         onChange={(e) => handleTripLineColorChange(e.target.value)}
-                        style={{ width: '36px', height: '32px', padding: '2px', border: '1px solid var(--border-input)', borderRadius: '6px', cursor: 'pointer', background: 'var(--bg-panel)' }}
+                        style={{ 
+                          width: '36px', height: '32px', padding: '2px', border: '1px solid var(--border-input)', 
+                          borderRadius: '6px', cursor: 'pointer', background: 'var(--bg-panel)',
+                          filter: (darkMode && ((activeTrip as any).lineColor || '#3b82f6') === '#000000') ? 'invert(1)' : 'none'
+                        }}
                       />
                       <div style={{ display: 'flex', gap: '5px', flexWrap: 'wrap' }}>
-                        {['#3b82f6','#ef4444','#10b981','#f59e0b','#8b5cf6','#ec4899','#06b6d4','#000000'].map(c => (
-                          <div
-                            key={c}
-                            onClick={() => handleTripLineColorChange(c)}
-                            style={{
-                              width: '20px', height: '20px', borderRadius: '4px', background: c, cursor: 'pointer',
-                              border: ((activeTrip as any).lineColor || '#3b82f6') === c ? '3px solid var(--text-main)' : '2px solid var(--border-light)',
-                              boxSizing: 'border-box',
-                            }}
-                          />
-                        ))}
+                        {['#3b82f6','#ef4444','#10b981','#f59e0b','#8b5cf6','#ec4899','#06b6d4','#000000'].map(c => {
+                          const isSelected = ((activeTrip as any).lineColor || '#3b82f6') === c;
+                          return (
+                            <div
+                              key={c}
+                              onClick={() => handleTripLineColorChange(c)}
+                              style={{
+                                width: '20px', height: '20px', borderRadius: '4px', cursor: 'pointer', boxSizing: 'border-box',
+                                background: getDisplayColor(c),
+                                border: isSelected ? '3px solid var(--text-main)' : '2px solid var(--border-light)',
+                              }}
+                            />
+                          )
+                        })}
                       </div>
                     </div>
                   </div>
@@ -803,9 +894,11 @@ const TravelMap = () => {
                       )}
 
                       <div style={{ flex: 1, cursor: 'pointer' }} onClick={() => handleCardClick(pin)}>
-                        <h4 style={{ margin: '0 0 5px 0' }}>{index + 1}. {pin.name}</h4>
+                        <h4 style={{ margin: '0 0 5px 0' }}>
+                          {index + 1}. {pin.name}
+                        </h4>
                         <p style={{ margin: 0, fontSize: '13px', color: 'var(--text-muted)' }}>
-                          {pin.blurb.substring(0, 30)}{pin.blurb.length > 30 ? '...' : ''}
+                          {pin.blurb.substring(0, 48)}{pin.blurb.length > 48 ? '...' : ''}
                         </p>
                       </div>
                     </div>
@@ -823,6 +916,7 @@ const TravelMap = () => {
         center={mapCenter as any}
         zoom={6}
         zoomControl={false}
+        doubleClickZoom={false}
         style={{ height: '100%', width: '100%' }}
       >
         <ZoomControl position="bottomleft" />
@@ -839,12 +933,16 @@ const TravelMap = () => {
           const routeCoords = calculateWrappedRoute(trip.pins);
           return WORLD_OFFSETS.map(offset => {
             const shiftedRoute = routeCoords.map((coord: any) => [coord[0], coord[1] + offset]);
-            const lineColor = trip.id === activeTripId ? ((trip as any).lineColor || '#3b82f6') : '#9ca3af';
+            const displayColor = getDisplayColor((trip as any).lineColor || '#3b82f6');
+            
             return <Polyline
-              key={`route-${trip.id}-${offset}-${lineColor}`}
+              key={`route-${trip.id}-${offset}-${displayColor}-${trip.id === activeTripId}`}
               positions={shiftedRoute as any}
-              color={lineColor} weight={4}
-              dashArray="10, 10" />;
+              color={displayColor} 
+              weight={4}
+              opacity={trip.id === activeTripId ? 1.0 : 0.4}
+              dashArray="10, 10" 
+            />;
           });
         })}
 
@@ -853,7 +951,10 @@ const TravelMap = () => {
           <CircleMarker
             center={[activeFocusLocation.lat, activeFocusLocation.lng]}
             radius={25}
-            pathOptions={{ color: (activeTrip as any).lineColor || '#3b82f6', fillColor: (activeTrip as any).lineColor || '#3b82f6', fillOpacity: 0.3 }} />
+            pathOptions={{
+              color: getDisplayColor((activeTrip as any).lineColor || '#3b82f6'),
+              fillColor: getDisplayColor((activeTrip as any).lineColor || '#3b82f6'),
+              fillOpacity: 0.3 }} />
         )}
 
         {/* Saved Pins (triple rendered for dateline wrapping) */}
@@ -861,42 +962,76 @@ const TravelMap = () => {
           <React.Fragment key={`world-copy-${offset}`}>
             {visibleTripsData.map(trip => (
               <React.Fragment key={`trip-group-${trip.id}`}>
-                {trip.pins.map((pin: any) => (
-                  <Marker 
-                    key={`${pin.id}-${offset}-${pinsUnlocked || pin.id === editingPinId}-${trip.id === activeTripId}`}
-                    position={[pin.lat, pin.lng + offset]} 
-                    draggable={!uiHidden && ((pinsUnlocked && trip.id === activeTripId) || pin.id === editingPinId)}
-                    icon={getPinIcon((trip as any).lineColor || '#3b82f6')}
-                    eventHandlers={{ 
-                      dragend: (e) => {
-                        const position = e.target.getLatLng();
-                        const trueLng = position.lng - offset;
-                        updateActiveTripPins(tripPins.map(p => p.id === pin.id ? { ...p, lat: position.lat, lng: trueLng } : p));
-                      },
-                      dblclick: () => { if (!uiHidden) startEditing(pin); }
-                    }}
-                    ref={(r) => { markerRefs.current[`${pin.id}-${offset}`] = r; }}
-                    opacity={trip.id === activeTripId ? 1.0 : 0.6}
-                  >
+                {trip.pins.map((pin: any, index: number) => {
+                  const displayColor = getDisplayColor((trip as any).lineColor || '#3b82f6');
 
-                    <Popup autoPan={false} minWidth={300} maxWidth={500}>
-                      <div style={{ minWidth: '150px' }}>
-                        
-                        {renderPhotoPreview(pin.photoUrls)}
+                  return (
+                    <Marker 
+                      key={`${pin.id}-${offset}-${pinsUnlocked || pin.id === editingPinId}-${trip.id === activeTripId}`}
+                      position={[pin.lat, pin.lng + offset]} 
+                      draggable={!uiHidden && ((pinsUnlocked && trip.id === activeTripId) || pin.id === editingPinId)}
+                      icon={getPinIcon(displayColor)}
+                      eventHandlers={{ 
+                        dragend: (e) => {
+                          const position = e.target.getLatLng();
+                          const trueLng = position.lng - offset;
+                          updateActiveTripPins(tripPins.map(p => p.id === pin.id ? { ...p, lat: position.lat, lng: trueLng } : p));
+                        },
+                        dblclick: () => { if (!uiHidden) startEditing(pin); },
+                        click: () => {
+                        if (trip.id !== activeTripId) {
+                          handleSwitchTrip(trip.id, pin);
+                          
+                          setTimeout(() => {
+                            if (markerRefs.current[`${pin.id}-${offset}`]) {
+                              markerRefs.current[`${pin.id}-${offset}`].openPopup();
+                              isPopupOpen.current = true; 
+                            }
+                          }, 150);
+                        }
+                      }
+                      }}
+                      ref={(r) => { markerRefs.current[`${pin.id}-${offset}`] = r; }}
+                      opacity={trip.id === activeTripId ? 1.0 : 0.6}
+                    >
 
-                        <strong style={{ fontSize: '16px' }}>{pin.name}</strong> <br />
-                        <p style={{ margin: '8px 0', fontSize: '14px' }}>{pin.blurb}</p>
-                        
-                        {trip.id === activeTripId && (
-                          <div style={{ display: 'flex', gap: '5px', marginTop: '10px', borderTop: '1px solid var(--border-light)', paddingTop: '10px' }}>
-                            <button onClick={(e) => { e.preventDefault(); e.stopPropagation(); startEditing(pin); }} className="mini-btn mini-btn-default">Edit</button>
-                            <button onClick={(e) => { e.preventDefault(); e.stopPropagation(); deletePin(pin.id); }} className="mini-btn mini-btn-danger">Delete</button>
-                          </div>
-                        )}
-                      </div>
-                    </Popup>
-                  </Marker>
-                ))}
+                      <Popup autoPan={false} minWidth={300} maxWidth={500}>
+                        <div style={{ minWidth: '150px' }}>
+                          
+                          {renderPhotoPreview(pin.photoUrls)}
+
+                          <strong style={{ fontSize: '16px' }}>{pin.name}</strong> <br />
+                          <p style={{ margin: '8px 0', fontSize: '14px' }}>{pin.blurb}</p>
+                          
+                          {trip.id === activeTripId && (
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '15px', paddingTop: '10px', borderTop: '1px solid var(--border-light)' }}>
+                              
+                              <button 
+                                onClick={(e) => { e.preventDefault(); e.stopPropagation(); if (index > 0) handleCardClick(trip.pins[index - 1]); }}
+                                style={{ visibility: index > 0 ? 'visible' : 'hidden', background: 'none', border: 'none', color: 'var(--text-main)', cursor: 'pointer', fontSize: '16px', padding: '0 5px' }}
+                              >
+                                ◀
+                              </button>
+
+                              <div style={{ display: 'flex', gap: '5px' }}>
+                                <button onClick={(e) => { e.preventDefault(); e.stopPropagation(); startEditing(pin); }} className="mini-btn mini-btn-default">Edit</button>
+                                <button onClick={(e) => { e.preventDefault(); e.stopPropagation(); deletePin(pin.id); }} className="mini-btn mini-btn-danger">Delete</button>
+                              </div>
+
+                              <button 
+                                onClick={(e) => { e.preventDefault(); e.stopPropagation(); if (index < trip.pins.length - 1) handleCardClick(trip.pins[index + 1]); }}
+                                style={{ visibility: index < trip.pins.length - 1 ? 'visible' : 'hidden', background: 'none', border: 'none', color: 'var(--text-main)', cursor: 'pointer', fontSize: '16px', padding: '0 5px' }}
+                              >
+                                ▶
+                              </button>
+                              
+                            </div>
+                          )}
+                        </div>
+                      </Popup>
+                    </Marker>
+                  )}
+                )}
               </React.Fragment>
             ))}
           </React.Fragment>
@@ -907,7 +1042,7 @@ const TravelMap = () => {
           <Marker
             position={[draftPin.lat, draftPin.lng]}
             opacity={0.7}
-            icon={getPinIcon((activeTrip as any).lineColor || '#3b82f6')}
+            icon={getPinIcon(getDisplayColor((activeTrip as any).lineColor || '#3b82f6'))}
             draggable={true}
             eventHandlers={{
               dragend: (e) => {
