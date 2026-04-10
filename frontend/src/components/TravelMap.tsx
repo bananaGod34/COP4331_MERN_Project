@@ -160,7 +160,12 @@ const TravelMap = () => {
   // toggle dark mode
   useEffect(() => {
     document.body.classList.toggle('dark-mode', darkMode);
-    return () => document.body.classList.remove('dark-mode'); // cleanup on unmount
+    if (mapRef.current?.getContainer()) {
+      mapRef.current.getContainer().classList.toggle('dark-mode', darkMode);
+    }
+    return () => {
+      document.body.classList.remove('dark-mode');
+    };
   }, [darkMode]);
 
   // camera whip helper
