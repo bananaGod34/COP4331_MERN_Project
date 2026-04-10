@@ -855,6 +855,12 @@ const TravelMap = () => {
         <TileLayer
           url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png"
         />
+        /* this makes tiles too dark and idk why invert isnt working in css
+        <TileLayer
+          key={darkMode ? "dark" : "light"}
+          url={darkMode ? "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png" : "https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png"}
+        />
+        */
         <MapClickHandler onMapClick={handleMapClick} isPopupOpen={isPopupOpen} />
         <MapCameraController target={cameraTarget} />
         
