@@ -565,7 +565,7 @@ const TravelMap = () => {
   };
 
   return (
-    <div className={`map-wrapper ${uiHidden ? 'zen-mode' : ''}`}>
+    <main className={`map-wrapper ${uiHidden ? 'zen-mode' : ''}`}>
       <style>
         {`
           .dark-mode .leaflet-popup-content-wrapper,
@@ -579,6 +579,10 @@ const TravelMap = () => {
           }
         `}
       </style>
+
+      <h1 style={{ position: 'absolute', width: '1px', height: '1px', padding: 0, margin: '-1px', overflow: 'hidden', clip: 'rect(0, 0, 0, 0)', whiteSpace: 'nowrap', border: 0 }}>
+        Travel Map Dashboard
+      </h1>
 
       {/* Add Trip Modal */}
       {tripModal.isOpen && (
@@ -601,6 +605,7 @@ const TravelMap = () => {
                 className="form-input"
                 type="text"
                 placeholder="e.g., Disney World 2025"
+                aria-label="Trip Name"
                 value={tripModal.inputValue}
                 onChange={(e) => setTripModal({...tripModal, inputValue: e.target.value})}
               />
@@ -620,10 +625,17 @@ const TravelMap = () => {
           backgroundColor: 'rgba(0,0,0,0.92)', zIndex: 10000, 
           display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center'
         }}>
-          <button onClick={() => setGallery({ ...gallery, isOpen: false })} style={{ position: 'absolute', top: '20px', right: '30px', background: 'none', border: 'none', color: 'white', fontSize: '40px', cursor: 'pointer', zIndex: 10001 }}>✖</button>
+          <button
+            onClick={() => setGallery({ ...gallery, isOpen: false })} 
+            style={{ position: 'absolute', top: '20px', right: '30px', background: 'none', border: 'none', color: 'white', fontSize: '40px', cursor: 'pointer', zIndex: 10001 }}
+            aria-label="Close Gallery"
+          >
+            ✖
+          </button>
 
           {gallery.photos.length > 1 && (
-            <button 
+            <button
+              aria-label="Previous Photo"
               onClick={(e) => { e.stopPropagation(); setGallery({ ...gallery, currentIndex: (gallery.currentIndex - 1 + gallery.photos.length) % gallery.photos.length }); }}
               style={{ position: 'absolute', left: '20px', top: '50%', transform: 'translateY(-50%)', background: 'rgba(255,255,255,0.1)', border: 'none', color: 'white', fontSize: '40px', cursor: 'pointer', padding: '15px 25px', borderRadius: '12px', zIndex: 10001 }}
             >
@@ -636,7 +648,8 @@ const TravelMap = () => {
           </div>
           
           {gallery.photos.length > 1 && (
-            <button 
+            <button
+              aria-label="Next Photo"
               onClick={(e) => { e.stopPropagation(); setGallery({ ...gallery, currentIndex: (gallery.currentIndex + 1) % gallery.photos.length }); }}
               style={{ position: 'absolute', right: '20px', top: '50%', transform: 'translateY(-50%)', background: 'rgba(255,255,255,0.1)', border: 'none', color: 'white', fontSize: '40px', cursor: 'pointer', padding: '15px 25px', borderRadius: '12px', zIndex: 10001 }}
             >
@@ -652,7 +665,11 @@ const TravelMap = () => {
 
       {/* Zen Mode */}
       {uiHidden && (
-        <button onClick={() => setUiHidden(false)} className="btn btn-blue" style={{ position: 'absolute', top: '20px', left: '20px', zIndex: 1000, boxShadow: 'var(--shadow-float)' }}>
+        <button
+          onClick={() => setUiHidden(false)}
+          className="btn btn-blue"
+          aria-label="Show UI"
+          style={{ position: 'absolute', top: '20px', left: '20px', zIndex: 1000, boxShadow: 'var(--shadow-float)' }}>
           👁️ Show UI
         </button>
       )}
@@ -661,7 +678,7 @@ const TravelMap = () => {
         <>
           <div className="floating-panel">
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '15px', gap: '15px' }}>
-              <h3 style={{ margin: 0 }}>Your Trips</h3>
+              <h2 style={{ margin: 0, fontSize: '18px' }}>Your Trips</h2>
               <button onClick={handleCreateNewTrip} className="mini-btn mini-btn-default" style={{ padding: '6px 10px', fontWeight: 'bold', flexShrink: 0 }}>+ New</button>
             </div>
 
@@ -688,6 +705,7 @@ const TravelMap = () => {
                     <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flex: 1 }}>
                       <input 
                         type="checkbox" 
+                        aria-label={`Toggle visibility for ${trip.name}`}
                         checked={visibleTripIds.includes(trip.id)} 
                         onChange={() => toggleVisibility(trip.id)}
                         onClick={(e) => e.stopPropagation()} 
@@ -707,8 +725,8 @@ const TravelMap = () => {
 
                     {isActive && (
                       <div style={{ display: 'flex', gap: '5px' }}>
-                        <button onClick={(e) => { e.stopPropagation(); handleRenameTrip(); }} style={{ background: 'var(--bg-panel)', border: '1px solid var(--border-input)', color: 'var(--text-main)', cursor: 'pointer', borderRadius: '4px', padding: '4px 6px', fontSize: '12px' }}>✏️</button>
-                        <button onClick={(e) => { e.stopPropagation(); handleDeleteTrip(); }} style={{ background: 'var(--bg-panel)', border: '1px solid var(--border-input)', color: 'var(--text-main)', cursor: 'pointer', borderRadius: '4px', padding: '4px 6px', fontSize: '12px' }}>🗑️</button>
+                        <button onClick={(e) => { e.stopPropagation(); handleRenameTrip(); }} aria-label={`Edit ${trip.name}`} style={{ background: 'var(--bg-panel)', border: '1px solid var(--border-input)', color: 'var(--text-main)', cursor: 'pointer', borderRadius: '4px', padding: '4px 6px', fontSize: '12px' }}>✏️</button>
+                        <button onClick={(e) => { e.stopPropagation(); handleDeleteTrip(); }} aria-label={`Delete ${trip.name}`} style={{ background: 'var(--bg-panel)', border: '1px solid var(--border-input)', color: 'var(--text-main)', cursor: 'pointer', borderRadius: '4px', padding: '4px 6px', fontSize: '12px' }}>🗑️</button>
                       </div>
                     )}
                   </div>
@@ -729,6 +747,7 @@ const TravelMap = () => {
               {/* Dark Mode Toggle Switch */}
               <div
                 style={{ display: 'flex', alignItems: 'center', gap: '6px', flex: 1, padding: '5px 8px', borderRadius: '4px', background: 'var(--border-light)', cursor: 'pointer' }}
+                aria-label="Toggle Dark Mode"
                 onClick={() => setDarkMode(d => !d)}
               >
                 <span style={{ fontSize: '12px', color: 'var(--text-main)', userSelect: 'none' }}>
@@ -748,7 +767,10 @@ const TravelMap = () => {
                   }} />
                 </div>
               </div>
-              <button onClick={() => setUiHidden(true)} className="mini-btn mini-btn-default" style={{ flex: 1 }}>👁️</button>
+              <button
+                onClick={() => setUiHidden(true)}
+                aria-label="Enter Zen Mode"
+                className="mini-btn mini-btn-default" style={{ flex: 1 }}>👁️</button>
             </div>
             <button disabled={!isDirty || isSaving} onClick={handleSaveTrips} className="btn" style={{ background: 'none', border: '1px solid var(--accent-blue)', color: 'var(--accent-blue)', padding: '6px 10px', fontSize: '14px', width: '100%', marginTop: '10px', fontWeight: 'bold', opacity: (!isDirty || isSaving) ? 0.6 : 1, cursor: (!isDirty || isSaving) ? 'not-allowed' : 'pointer' }}>
               {isSaving ? 'Saving...' : (isDirty ? 'Save Changes' : 'Saved')}
@@ -759,7 +781,8 @@ const TravelMap = () => {
           </div>
           
           <button 
-            onClick={() => setIsSidebarOpen(!isSidebarOpen)} 
+            onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+            aria-label={isSidebarOpen ? "Close Sidebar" : "Open Sidebar"}
             style={{ 
               position: 'absolute', 
               top: '20px', 
@@ -790,11 +813,23 @@ const TravelMap = () => {
                 <form onSubmit={handleSavePin} style={{ display: 'flex', flexDirection: 'column', gap: '15px', marginTop: '10px' }}>
                   <div>
                     <label style={{ fontSize: '14px', fontWeight: 'bold' }}>Location Name</label>
-                    <input className="form-input" type="text" required value={formName} onChange={(e) => setFormName(e.target.value)}/>
+                    <input
+                      className="form-input"
+                      type="text"
+                      aria-label="Location Name"
+                      required value={formName}
+                      onChange={(e) => setFormName(e.target.value)}/>
                   </div>
                   <div>
                     <label style={{ fontSize: '14px', fontWeight: 'bold' }}>Travel Blurb</label>
-                    <textarea className="form-input" style={{ height: '100px', resize: 'none' }} required value={formBlurb} onChange={(e) => setFormBlurb(e.target.value)} />
+                    <textarea
+                      className="form-input"
+                      style={{ height: '100px', resize: 'none' }}
+                      aria-label="Travel Blurb"
+                      required
+                      value={formBlurb}
+                      onChange={(e) => setFormBlurb(e.target.value)}
+                    />
                   </div>
 
                   {/* Multiple Photo Upload */}
@@ -804,7 +839,12 @@ const TravelMap = () => {
                       {formPhotos.map((photo, idx) => (
                         <div key={idx} style={{ position: 'relative', minWidth: '100px' }}>
                           <img src={photo} alt={`Preview ${idx}`} style={{ width: '100px', height: '100px', objectFit: 'cover', borderRadius: '6px', border: '1px solid var(--border-light)' }} />
-                          <button type="button" onClick={() => setFormPhotos(formPhotos.filter((_, i) => i !== idx))} style={{ position: 'absolute', top: '5px', right: '5px', background: 'rgba(239, 68, 68, 0.9)', color: 'white', border: 'none', borderRadius: '4px', padding: '2px 6px', cursor: 'pointer', fontSize: '10px', fontWeight: 'bold' }}>
+                          <button
+                            type="button"
+                            onClick={() => setFormPhotos(formPhotos.filter((_, i) => i !== idx))}
+                            style={{ position: 'absolute', top: '5px', right: '5px', background: 'rgba(239, 68, 68, 0.9)', color: 'white', border: 'none', borderRadius: '4px', padding: '2px 6px', cursor: 'pointer', fontSize: '10px', fontWeight: 'bold' }}
+                            aria-label="Remove Photo"
+                          >
                             X
                           </button>
                         </div>
@@ -817,7 +857,11 @@ const TravelMap = () => {
                           color: 'var(--accent-blue)', fontWeight: 'bold', fontSize: '24px' 
                         }}>
                           +
-                          <input type="file" accept="image/*" multiple onChange={handleImageUpload} style={{ display: 'none' }} />
+                          <input
+                            type="file"
+                            accept="image/*"
+                            aria-label="Upload Photos"
+                            multiple onChange={handleImageUpload} style={{ display: 'none' }} />
                         </label>
                         
                       </div>
@@ -845,6 +889,7 @@ const TravelMap = () => {
                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                       <input
                         type="color"
+                        aria-label="Select Trip Line Color"
                         value={(activeTrip as any).lineColor || '#3b82f6'}
                         onChange={(e) => handleTripLineColorChange(e.target.value)}
                         style={{ 
@@ -966,7 +1011,9 @@ const TravelMap = () => {
                   return (
                     <Marker 
                       key={`${pin.id}-${offset}-${pinsUnlocked || pin.id === editingPinId}-${trip.id === activeTripId}`}
-                      position={[pin.lat, pin.lng + offset]} 
+                      position={[pin.lat, pin.lng + offset]}
+                      title={pin.name}
+                      alt={`Map pin for ${pin.name}`}
                       draggable={!uiHidden && ((pinsUnlocked && trip.id === activeTripId) || pin.id === editingPinId)}
                       icon={getPinIcon(displayColor)}
                       eventHandlers={{ 
@@ -1005,6 +1052,7 @@ const TravelMap = () => {
                             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '15px', paddingTop: '10px', borderTop: '1px solid var(--border-light)' }}>
                               
                               <button 
+                                aria-label="Previous Stop"
                                 onClick={(e) => { e.preventDefault(); e.stopPropagation(); if (index > 0) handleCardClick(trip.pins[index - 1]); }}
                                 style={{ visibility: index > 0 ? 'visible' : 'hidden', background: 'none', border: 'none', color: 'var(--text-main)', cursor: 'pointer', fontSize: '16px', padding: '0 5px' }}
                               >
@@ -1016,7 +1064,8 @@ const TravelMap = () => {
                                 <button onClick={(e) => { e.preventDefault(); e.stopPropagation(); deletePin(pin.id); }} className="mini-btn mini-btn-danger">Delete</button>
                               </div>
 
-                              <button 
+                              <button
+                                aria-label="Next Stop"
                                 onClick={(e) => { e.preventDefault(); e.stopPropagation(); if (index < trip.pins.length - 1) handleCardClick(trip.pins[index + 1]); }}
                                 style={{ visibility: index < trip.pins.length - 1 ? 'visible' : 'hidden', background: 'none', border: 'none', color: 'var(--text-main)', cursor: 'pointer', fontSize: '16px', padding: '0 5px' }}
                               >
@@ -1039,6 +1088,8 @@ const TravelMap = () => {
         {draftPin && (
           <Marker
             position={[draftPin.lat, draftPin.lng]}
+            title="New Draft Pin"
+            alt="New Draft Pin"
             opacity={0.7}
             icon={getPinIcon(getDisplayColor((activeTrip as any).lineColor || '#3b82f6'))}
             draggable={true}
@@ -1051,7 +1102,7 @@ const TravelMap = () => {
           />
         )}
       </MapContainer>
-    </div>
+    </main>
   );
 };
 

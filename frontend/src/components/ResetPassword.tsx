@@ -37,7 +37,7 @@ const ResetPassword = () => {
       } else {
         setMessage('Password updated successfully!');
         setIsSuccess(true);
-        setTimeout(() => navigate('/login'), 3000); // Auto-redirect after 3 seconds
+        setTimeout(() => navigate('/login'), 3000);
       }
     } catch (error) {
       setMessage('Could not connect to the server.');
@@ -45,7 +45,7 @@ const ResetPassword = () => {
   };
 
   return (
-    <div className="auth-page">
+    <main className="auth-page">
       <div className="auth-card">
         <h2 style={{ marginTop: '0' }}>Create New Password</h2>
         <p style={{ color: 'var(--text-muted)', marginBottom: '25px', fontSize: '14px' }}>
@@ -63,7 +63,8 @@ const ResetPassword = () => {
             <input 
               className="form-input"
               type="password" 
-              placeholder="New Password" 
+              placeholder="New Password"
+              aria-label="New Password"
               required
               value={newPassword}
               onChange={(e) => setNewPassword(e.target.value)} 
@@ -71,7 +72,8 @@ const ResetPassword = () => {
             <input 
               className="form-input"
               type="password" 
-              placeholder="Confirm New Password" 
+              placeholder="Confirm New Password"
+              aria-label="Confirm New Password" 
               required
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)} 
@@ -88,7 +90,7 @@ const ResetPassword = () => {
           </div>
         )}
       </div>
-    </div>
+    </main>
   );
 };
 

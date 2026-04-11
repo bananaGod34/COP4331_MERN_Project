@@ -47,7 +47,7 @@ const Signup = () => {
   };
 
   return (
-    <div className="auth-page">
+    <main className="auth-page">
       <div className="auth-card">
         <h2 style={{ marginTop: '0' }}>Create Account</h2>
         <p style={{ color: 'var(--text-muted)', marginBottom: '25px', fontSize: '14px' }}>
@@ -60,27 +60,33 @@ const Signup = () => {
           <div style={{ display: 'flex', gap: '10px' }}>
             <input 
               className="form-input" type="text" placeholder="First Name" required
+              aria-label="First Name"
               value={firstName} onChange={(e) => setFirstName(e.target.value)} 
             />
             <input 
               className="form-input" type="text" placeholder="Last Name" required
+              aria-label="Last Name"
               value={lastName} onChange={(e) => setLastName(e.target.value)} 
             />
           </div>
           <input 
             className="form-input" type="email" placeholder="Email Address" required
+            aria-label="Email Address"
             value={email} onChange={(e) => setEmail(e.target.value)} 
           />
           <input 
             className="form-input" type="text" placeholder="Username" required
+            aria-label="Username"
             value={loginName} onChange={(e) => setLoginName(e.target.value)} 
           />
           <input 
             className="form-input" type="password" placeholder="Password" required
+            aria-label="Password"
             value={loginPassword} onChange={(e) => setPassword(e.target.value)} 
           />
           <input 
             className="form-input" type="password" placeholder="Confirm Password" required
+            aria-label="Confirm Password"
             value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} 
           />
           <button className="btn btn-green" type="submit">
@@ -92,7 +98,7 @@ const Signup = () => {
           Already have an account? <Link to="/login" className="auth-link">Log in</Link>
         </div>
       </div>
-    </div>
+    </main>
   );
 };
 

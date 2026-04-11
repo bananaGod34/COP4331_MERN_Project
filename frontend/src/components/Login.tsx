@@ -37,7 +37,7 @@ const Login = () => {
   };
 
   return (
-    <div className="auth-page">
+    <main className="auth-page">
       <div className="auth-card">
         <h2 style={{ marginTop: '0' }}>Landmark</h2>
         <p style={{ color: 'var(--text-muted)', marginBottom: '25px', fontSize: '14px' }}>
@@ -51,6 +51,7 @@ const Login = () => {
             className="form-input"
             type="text" 
             placeholder="Username" 
+            aria-label="Username"
             value={loginName}
             onChange={(e) => setLoginName(e.target.value)} 
           />
@@ -58,6 +59,7 @@ const Login = () => {
             className="form-input"
             type="password" 
             placeholder="Password" 
+            aria-label="Password"
             value={loginPassword}
             onChange={(e) => setPassword(e.target.value)} 
           />
@@ -76,7 +78,7 @@ const Login = () => {
           Don't have an account? <Link to="/signup" className="auth-link">Sign up</Link>
         </div>
       </div>
-    </div>
+    </main>
   );
 };
 

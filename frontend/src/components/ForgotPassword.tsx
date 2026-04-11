@@ -33,7 +33,7 @@ const ForgotPassword = () => {
   };
 
   return (
-    <div className="auth-page">
+    <main className="auth-page">
       <div className="auth-card">
         <h2 style={{ marginTop: '0' }}>Reset Password</h2>
         <p style={{ color: 'var(--text-muted)', marginBottom: '25px', fontSize: '14px' }}>
@@ -51,7 +51,8 @@ const ForgotPassword = () => {
             <input 
               className="form-input"
               type="email" 
-              placeholder="Email Address" 
+              placeholder="Email Address"
+              aria-label="Email Address"
               required
               value={email}
               onChange={(e) => setEmail(e.target.value)} 
@@ -66,7 +67,7 @@ const ForgotPassword = () => {
           Remember your password? <Link to="/login" className="auth-link">Back to Login</Link>
         </div>
       </div>
-    </div>
+    </main>
   );
 };
 
