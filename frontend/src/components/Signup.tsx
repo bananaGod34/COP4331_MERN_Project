@@ -4,6 +4,7 @@ import { useNavigate, Link } from 'react-router-dom';
 const Signup = () => {
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
+  const [email, setEmail] = useState('');
   const [loginName, setLoginName] = useState('');
   const [loginPassword, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -19,7 +20,7 @@ const Signup = () => {
       return setMessage('Passwords do not match');
     }
 
-    const obj = { firstName, lastName, login: loginName, password: loginPassword };
+    const obj = { firstName, lastName, email, login: loginName, password: loginPassword };
     const js = JSON.stringify(obj);
 
     try {
@@ -66,6 +67,10 @@ const Signup = () => {
               value={lastName} onChange={(e) => setLastName(e.target.value)} 
             />
           </div>
+          <input 
+            className="form-input" type="email" placeholder="Email Address" required
+            value={email} onChange={(e) => setEmail(e.target.value)} 
+          />
           <input 
             className="form-input" type="text" placeholder="Username" required
             value={loginName} onChange={(e) => setLoginName(e.target.value)} 

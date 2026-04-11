@@ -61,6 +61,12 @@ const Login = () => {
             value={loginPassword}
             onChange={(e) => setPassword(e.target.value)} 
           />
+
+          {/*style={{ fontSize: '13px', color: 'var(--text-muted)', textDecoration: 'none' }}*/}
+          <div style={{ textAlign: 'right', marginTop: '-5px', fontSize: '14px' }}>
+            <Link to="/forgot-password" className="auth-link">Forgot password?</Link>
+          </div>
+
           <button className="btn btn-blue" type="submit">
             Login
           </button>
