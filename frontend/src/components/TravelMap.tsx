@@ -937,9 +937,9 @@ const TravelMap = () => {
                       )}
 
                       <div style={{ flex: 1, cursor: 'pointer' }} onClick={() => handleCardClick(pin)}>
-                        <h4 style={{ margin: '0 0 5px 0' }}>
+                        <h3 style={{ margin: '0 0 5px 0', fontSize: '15px', color: 'var(--text-main)' }}>
                           {index + 1}. {pin.name}
-                        </h4>
+                        </h3>
                         <p style={{ margin: 0, fontSize: '13px', color: 'var(--text-muted)' }}>
                           {pin.blurb.substring(0, 48)}{pin.blurb.length > 48 ? '...' : ''}
                         </p>
