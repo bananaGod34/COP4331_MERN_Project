@@ -2,7 +2,7 @@ console.log("step 1");
 require('dotenv').config();
 
 const crypto = require('crypto');
-const nodemailer = require('nodemailer');
+const { Resend } = require('resend');
 
 console.log("step 2");
 const url = process.env.MONGODB_URI;
@@ -26,13 +26,8 @@ const app = express();
 app.use(cors());
 app.use(express.json({ limit: '10mb' }));
 
-const transporter = nodemailer.createTransport({
-  service: 'gmail',
-  auth: {
-    user: process.env.EMAIL_USER,     //gmail address
-    pass: process.env.EMAIL_PASSWORD  //gmail app password
-  }
-});
+const resend = new Resend(process.env.RESEND_API_KEY);
+console.log('RESEND_API_KEY:', process.env.RESEND_API_KEY ? 'SET' : 'NOT SET');
 
 app.use((req, res, next) => 
 {
@@ -114,9 +109,9 @@ app.post('/api/signup', async (req, res) => {
 
     const verifyLink = `https://landmarkmerncop4331.online/verify-email?token=${verificationToken}`;
 
-    await transporter.sendMail({
-      from: `"Your App Name" <${process.env.EMAIL_USER}>`,
-      to: login, // assumes login is an email address
+    await resend.emails.send({
+      from: 'Landmark <onboarding@resend.dev>',
+      to: login,
       subject: 'Verify your email',
       html: `
         <h2>Welcome, ${firstName}!</h2>
@@ -176,8 +171,6 @@ app.put('/api/users/:userId/trips', async (req, res) => {
     res.status(500).json({ error: 'Server error' });
   }
 });
-
-const crypto = require('crypto');
 
 app.post('/api/auth/verify-email', async (req, res) => {
   const { token } = req.body;
@@ -254,8 +247,8 @@ app.post('/api/auth/forgot-password', async (req, res) => {
     //send email
     const resetLink = `${process.env.FRONTEND_URL}/reset-password?token=${resetToken}`;
 
-    await transporter.sendMail({
-      from: `"Landmark" <${process.env.EMAIL_USER}>`,
+    await resend.emails.send({
+      from: 'Landmark <onboarding@resend.dev>',
       to: email,
       subject: 'Password Reset Request',
       html: `
