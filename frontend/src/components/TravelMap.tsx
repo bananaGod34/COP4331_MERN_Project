@@ -1151,7 +1151,8 @@ const TravelMap = () => {
 
                 if (scrollArea) {
                   if (deltaY < 0) {
-                    const isAtBottom = Math.abs(scrollArea.scrollHeight - scrollArea.clientHeight - scrollArea.scrollTop) <= 10;
+                    const maxScroll = scrollArea.scrollHeight - scrollArea.clientHeight;
+                    const isAtBottom = scrollArea.scrollTop >= (maxScroll - 10);
                     
                     if (!isAtBottom) {
                        swipeState.current.isDragging = false; 
