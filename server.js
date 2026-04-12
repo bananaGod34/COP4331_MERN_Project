@@ -23,6 +23,16 @@ const app = express();
 app.use(cors());
 app.use(express.json({ limit: '10mb' }));
 
+const nodemailer = require('nodemailer');
+
+const transporter = nodemailer.createTransport({
+  service: 'gmail',
+  auth: {
+    user: process.env.EMAIL_USER,     //gmail address
+    pass: process.env.EMAIL_PASSWORD  //gmail app password
+  }
+});
+
 app.use((req, res, next) => 
 {
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -82,6 +92,10 @@ app.post('/api/signup', async (req, res) => {
       return res.status(400).json({ error: 'Username already taken' });
     }
 
+    //generate verification token
+    const verificationToken = crypto.randomBytes(32).toString('hex');
+    const tokenExpiry = new Date(Date.now() + 24 * 60 * 60 * 1000); //24 hours
+    
     // create new user
     const newUser = {
       firstName: firstName,
@@ -89,10 +103,36 @@ app.post('/api/signup', async (req, res) => {
       login: login,
       password: password,
       createdAt: new Date(),
-      trips: []
+      trips: [],
+      is_verified: false,
+      verification_token: verificationToken,
+      token_expires_at: tokenExpiry
     };
 
     const result = await db.collection('users').insertOne(newUser);
+
+    const verifyLink = `https://landmarkmerncop4331.online/verify-email?token=${verificationToken}`;
+
+    await transporter.sendMail({
+      from: `"Your App Name" <${process.env.EMAIL_USER}>`,
+      to: login, // assumes login is an email address
+      subject: 'Verify your email',
+      html: `
+        <h2>Welcome, ${firstName}!</h2>
+        <p>Click the button below to verify your email address.</p>
+        <a href="${verifyLink}" style="
+          background:#3b82f6;
+          color:white;
+          padding:12px 24px;
+          border-radius:6px;
+          text-decoration:none;
+          display:inline-block;
+        ">Verify Email</a>
+        <p>This link expires in 24 hours.</p>
+        <p>If you didn't create an account, ignore this email.</p>
+      `
+    });
+    
     res.status(200).json({
       error: '',
       id: result.insertedId
@@ -133,6 +173,49 @@ app.put('/api/users/:userId/trips', async (req, res) => {
     res.json({ error: '' });
   } catch (err) {
     res.status(500).json({ error: 'Server error' });
+  }
+});
+
+const crypto = require('crypto');
+
+app.post('/api/auth/verify-email', async (req, res) => {
+  const { token } = req.body;
+
+  if (!token) {
+    return res.status(400).json({ error: 'Token is required.' });
+  }
+
+  try {
+    const db = await connectDB();
+
+    const user = await db.collection('users').findOne({
+      verification_token: token,
+      is_verified: { $ne: true }
+    });
+
+    if (!user) {
+      return res.status(400).json({ error: 'Invalid or already used verification token.' });
+    }
+
+    // Check token expiry
+    if (user.token_expires_at && new Date() > new Date(user.token_expires_at)) {
+      return res.status(400).json({ error: 'Verification link has expired.' });
+    }
+
+    // Mark as verified and clear token
+    await db.collection('users').updateOne(
+      { _id: user._id },
+      {
+        $set: { is_verified: true },
+        $unset: { verification_token: '', token_expires_at: '' }
+      }
+    );
+
+    return res.status(200).json({ message: 'Email verified successfully!' });
+
+  } catch (err) {
+    console.error('Verify email error:', err);
+    return res.status(500).json({ error: 'Server error. Please try again.' });
   }
 });
 
