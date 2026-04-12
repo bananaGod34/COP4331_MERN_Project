@@ -8,6 +8,11 @@ html, body, #root {
 
 * {
   box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
+}
+
+body {
+  overscroll-behavior-y: none;
 }
 
 :root {

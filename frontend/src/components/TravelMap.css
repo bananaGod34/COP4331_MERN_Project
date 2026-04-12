@@ -25,7 +25,15 @@
   --info-text: #bfdbfe;
 }
 
-.map-wrapper { height: 100vh; width: 100%; position: relative; overflow: hidden; color: var(--text-main); }
+.map-wrapper {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 100%;
+  width: 100%; 
+  overflow: hidden; 
+  color: var(--text-main);
+}
 
 .floating-panel { position: absolute; top: 20px; left: 20px; z-index: 1000; background-color: var(--bg-panel); padding: 15px; border-radius: 8px; box-shadow: var(--shadow-float); }
 
@@ -95,6 +103,13 @@
   display: flex;
   gap: 10px;
   margin-top: 20px;
+  padding-bottom: env(safe-area-inset-bottom, 15px);
+}
+
+@media (min-width: 769px) {
+  .mobile-only {
+    display: none !important;
+  }
 }
 
 @media (max-width: 768px) {
@@ -102,12 +117,7 @@
     display: none !important;
   }
 
-  .mobile-drag-handle {
-    display: flex !important;
-  }
-
   .map-wrapper {
-    height: 100dvh;
     width: 100vw;
   }
 
@@ -140,22 +150,46 @@
     border-top: 1px solid var(--border-light);
     padding-top: 15px;
   }
-
+  
   .sidebar {
     position: fixed;
-    top: auto;
+    top: auto !important;
     bottom: 0;
     left: 0;
     width: 100%;
-    height: 50vh;
-    border-radius: 20px 20px 0 0; 
+    height: auto;
+    max-height: 85svh;
+    transform: none !important;
+    padding: 0;
+    padding-bottom: env(safe-area-inset-bottom, 15px);
+    border-radius: 20px 20px 0 0;
     box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.15);
-    transform: translateY(0); 
-    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    z-index: 1000;
+    box-sizing: border-box;
   }
 
-  .sidebar.closed {
-    transform: translateY(calc(100% - 60px)); 
+  .sheet-header {
+    padding-bottom: 15px;
+    transition: padding 0.3s ease;
+  }
+
+  .sheet-content {
+    transition: max-height 0.3s ease-in-out, opacity 0.2s ease, margin 0.3s ease;
+    max-height: 1000px;
+    opacity: 1;
+    transform: translateZ(0);
+    overscroll-behavior: contain;
+  }
+
+  .sidebar.closed .sheet-header {
+    padding-bottom: 5px;
+  }
+
+  .sidebar.closed .sheet-content {
+    max-height: 0;
+    opacity: 0;
+    margin: 0;
+    overflow: hidden;
   }
 
   .sidebar-toggle-btn {
@@ -169,21 +203,26 @@
   }
 
   .sidebar h2 {
-    margin-top: 10px !important;
+    margin-top: 0px !important;
+    margin-bottom: 0px !important;
+    transition: margin 0.3s ease;
+  }
+
+  .sidebar.closed h2 {
+    margin-bottom: 10px !important;
   }
 
   .action-footer {
-    position: sticky;
-    bottom: -15px;
-    
-    margin-left: -15px;
-    margin-right: -15px;
-    margin-bottom: -15px;
-    
-    padding: 15px; 
-    
-    background-color: var(--bg-panel);
-    border-top: 1px solid var(--border-light);
-    z-index: 10;
+    position: relative;
+    bottom: 0;
+    margin: 0; 
+    padding: 15px;
+    background: transparent;
+    border-top: none;
+    transition: padding 0.3s ease;
+  }
+
+  .sidebar.closed .action-footer {
+    padding: 0px 15px 15px 15px; 
   }
 }

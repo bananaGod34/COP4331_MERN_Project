@@ -63,16 +63,17 @@ const MapClickHandler = ({ onMapClick, isPopupOpen }: any) => {
 // Pan to target pin
 const MapCameraController = ({ target, isSidebarOpen }: any) => {
   const map = useMap();
+  const lastTriggerId = useRef<number | null>(null);
   
   useEffect(() => {
-    if (target) {
+    if (target && target.triggerId !== lastTriggerId.current) {
+      lastTriggerId.current = target.triggerId;
+      
       const isMobile = window.innerWidth <= 768;
       
       if (isMobile && isSidebarOpen) {
         const targetPoint = map.project([target.lat, target.lng], map.getZoom());
-        
         targetPoint.y += (window.innerHeight * 0.25);
-        
         const offsetLatLng = map.unproject(targetPoint, map.getZoom());
         map.panTo(offsetLatLng, { animate: true, duration: 0.4 });
       } else {
@@ -82,7 +83,7 @@ const MapCameraController = ({ target, isSidebarOpen }: any) => {
   }, [target, map, isSidebarOpen]);
   
   return null;
-};
+}
 
 // --- MAIN COMPONENT ---
 
@@ -160,6 +161,8 @@ const TravelMap = () => {
   const isPopupOpen = useRef(false);
   const mapRef = useRef<any>(null);
   const longPressTimer = useRef<any>(null);
+  const swipeStartY = useRef<number | null>(null);
+  const touchCoords = useRef<{x: number, y: number} | null>(null);
 
   const WORLD_OFFSETS = [-1080, -720, -360, 0, 360, 720, 1080];
 
@@ -323,13 +326,16 @@ const TravelMap = () => {
 
   const handleMapClick = (latlng: any) => {
     if (editingPinId || uiHidden) return;
+    setIsSidebarOpen(true);
     setDraftPin({ lat: latlng.lat, lng: latlng.lng });
-    setEditingPinId(null);
-    setFormName('');
-    setFormBlurb('');
-    setFormPhotos([]);
-    setOriginalPinCoords(null);
     setCameraTarget({ lat: latlng.lat, lng: latlng.lng, triggerId: Date.now() });
+    if (!draftPin) {
+      setEditingPinId(null);
+      setFormName('');
+      setFormBlurb('');
+      setFormPhotos([]);
+      setOriginalPinCoords(null);
+    }
   };
 
   const handleMarkerDragEnd = (id: number, event: any) => {
@@ -340,8 +346,8 @@ const TravelMap = () => {
     ));
   };
 
-  const handleSavePin = (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSavePin = (e?: React.FormEvent | React.MouseEvent) => {
+    if (e) e.preventDefault();
     if (editingPinId) {
       updateActiveTripPins(tripPins.map(pin => 
         pin.id === editingPinId ? { ...pin, name: formName, blurb: formBlurb, photoUrls: formPhotos } : pin
@@ -360,12 +366,14 @@ const TravelMap = () => {
   };
 
   const deletePin = (id: number) => {
-    isPopupOpen.current = false; 
-    updateActiveTripPins(tripPins.filter(pin => pin.id !== id));
-    if (editingPinId === id) {
-      setEditingPinId(null);
-      setOriginalPinCoords(null);
-      setFormPhotos([]);
+    if (window.confirm(`Are you sure you want to delete ${tripPins.find(p => p.id === id)?.name}?`)) {
+      isPopupOpen.current = false; 
+      updateActiveTripPins(tripPins.filter(pin => pin.id !== id));
+      if (editingPinId === id) {
+        setEditingPinId(null);
+        setOriginalPinCoords(null);
+        setFormPhotos([]);
+      }
     }
   };
 
@@ -540,6 +548,12 @@ const TravelMap = () => {
   const editingPinData = tripPins.find(p => p.id === editingPinId);
   const activeFocusLocation = draftPin || (editingPinData ? { lat: editingPinData.lat, lng: editingPinData.lng } : null);
 
+  const getSheetTitle = () => {
+    if (editingPinId) return `Edit ${formName || 'Stop'}`;
+    if (draftPin) return 'New Stop Details';
+    return `${activeTrip?.name || 'Trip'} Itinerary`;
+  };
+
   const visibleTripsData = useMemo(() => {
     return trips.filter(t => visibleTripIds.includes(t.id));
   }, [trips, visibleTripIds]);
@@ -659,22 +673,19 @@ const TravelMap = () => {
             display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center'
           }}
           onTouchStart={(e) => {
-            setTouchEnd(null);
-            setTouchStart({ x: e.targetTouches[0].clientX, y: e.targetTouches[0].clientY });
+            touchCoords.current = { x: e.targetTouches[0].clientX, y: e.targetTouches[0].clientY };
           }}
-          onTouchMove={(e) => setTouchEnd({ x: e.targetTouches[0].clientX, y: e.targetTouches[0].clientY })}
-          onTouchEnd={() => {
-            if (!touchStart || !touchEnd) return;
-            const distanceX = touchStart.x - touchEnd.x;
-            const isLeftSwipe = distanceX > minSwipeDistance;
-            const isRightSwipe = distanceX < -minSwipeDistance;
+          onTouchEnd={(e) => {
+            if (!touchCoords.current) return;
+            const distanceX = touchCoords.current.x - e.changedTouches[0].clientX;
 
-            if (isLeftSwipe && gallery.photos.length > 1) {
+            if (distanceX > 50 && gallery.photos.length > 1) {
               setGallery({ ...gallery, currentIndex: (gallery.currentIndex + 1) % gallery.photos.length });
             }
-            if (isRightSwipe && gallery.photos.length > 1) {
+            if (distanceX < -50 && gallery.photos.length > 1) {
               setGallery({ ...gallery, currentIndex: (gallery.currentIndex - 1 + gallery.photos.length) % gallery.photos.length });
             }
+            touchCoords.current = null;
           }}
         >
           <button
@@ -869,8 +880,33 @@ const TravelMap = () => {
           </button>
 
           {/* Right Sidebar */}
-          <div className={`sidebar ${!isSidebarOpen ? 'closed' : ''}`}>
-            {/* Mobile Sidebar Handle */}
+          <div className={`sidebar ${!isSidebarOpen ? 'closed' : ''}`} style={{ display: 'flex', flexDirection: 'column' }} onClick={() => !isSidebarOpen && setIsSidebarOpen(true)}>
+            <div 
+              className="sheet-header" 
+              style={{ flexShrink: 0, display: 'flex', flexDirection: 'column', touchAction: 'none', cursor: 'grab' }}
+              
+              onTouchStart={(e) => {
+                touchCoords.current = { x: e.targetTouches[0].clientX, y: e.targetTouches[0].clientY };
+              }}
+              onTouchEnd={(e) => {
+                if (!touchCoords.current) return;
+                const distanceY = touchCoords.current.y - e.changedTouches[0].clientY;
+                if (distanceY < -50) setIsSidebarOpen(false);
+                if (distanceY > 50) setIsSidebarOpen(true);
+                touchCoords.current = null;
+              }}
+            >
+              
+              <div className="mobile-only" style={{ width: '100%', height: '30px', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+                <div style={{ width: '40px', height: '5px', backgroundColor: 'var(--border-input)', borderRadius: '3px' }} />
+              </div>
+
+              <h2 style={{ margin: 0, fontSize: '20px', padding: '0 15px' }}>
+                {getSheetTitle()}
+              </h2>
+            </div>
+
+            {/*
             <div
               className="mobile-drag-handle"
               style={{
@@ -902,174 +938,227 @@ const TravelMap = () => {
             >
               <div style={{ width: '40px', height: '5px', backgroundColor: 'var(--border-input)', borderRadius: '3px' }} />
             </div>
-            {(draftPin || editingPinId) ? (
-              // VIEW 1: FORM (Add/Edit)
-              <>
-                <h2 style={{ marginTop: 0 }}>{editingPinId ? "Edit Stop" : "New Stop Details"}</h2>
-                <div className="info-box">📍 You can freely drag this pin on the map to adjust its exact location.</div>
+            */}
 
-                <form onSubmit={handleSavePin} style={{ display: 'flex', flexDirection: 'column', gap: '15px', marginTop: '10px' }}>
-                  <div>
-                    <label style={{ fontSize: '14px', fontWeight: 'bold' }}>Location Name</label>
-                    <input
-                      className="form-input"
-                      type="text"
-                      aria-label="Location Name"
-                      required value={formName}
-                      onChange={(e) => setFormName(e.target.value)}/>
-                  </div>
-                  <div>
-                    <label style={{ fontSize: '14px', fontWeight: 'bold' }}>Travel Blurb</label>
-                    <textarea
-                      className="form-input"
-                      style={{ height: '100px', resize: 'none' }}
-                      aria-label="Travel Blurb"
-                      required
-                      value={formBlurb}
-                      onChange={(e) => setFormBlurb(e.target.value)}
-                    />
-                  </div>
-
-                  {/* Multiple Photo Upload */}
-                  <div>
-                    <label style={{ fontSize: '14px', fontWeight: 'bold' }}>Photos</label>
-                    <div style={{ display: 'flex', gap: '10px', overflowX: 'auto', paddingBottom: '10px', marginTop: '5px' }}>
-                      {formPhotos.map((photo, idx) => (
-                        <div key={idx} style={{ position: 'relative', minWidth: '100px' }}>
-                          <img src={photo} alt={`Preview ${idx}`} style={{ width: '100px', height: '100px', objectFit: 'cover', borderRadius: '6px', border: '1px solid var(--border-light)' }} />
-                          <button
-                            type="button"
-                            onClick={() => setFormPhotos(formPhotos.filter((_, i) => i !== idx))}
-                            style={{ position: 'absolute', top: '5px', right: '5px', background: 'rgba(239, 68, 68, 0.9)', color: 'white', border: 'none', borderRadius: '4px', padding: '2px 6px', cursor: 'pointer', fontSize: '10px', fontWeight: 'bold' }}
-                            aria-label="Remove Photo"
-                          >
-                            X
-                          </button>
-                        </div>
-                      ))}
-                      
-                      <div style={{ minWidth: '100px', height: '100px', border: '2px dashed var(--border-input)', borderRadius: '6px' }}>
-                        <label style={{ 
-                          display: 'flex', alignItems: 'center', justifyContent: 'center', 
-                          width: '100%', height: '100%', cursor: 'pointer', 
-                          color: 'var(--accent-blue)', fontWeight: 'bold', fontSize: '24px' 
-                        }}>
-                          +
-                          <input
-                            type="file"
-                            accept="image/*"
-                            aria-label="Upload Photos"
-                            multiple onChange={handleImageUpload} style={{ display: 'none' }} />
-                        </label>
-                        
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="action-footer">
-                    <button type="submit" className="btn btn-blue" style={{ flex: 1, padding: '12px' }}>
-                      {editingPinId ? "Update Pin" : "Save Pin"}
-                    </button>
-                    <button type="button" onClick={cancelForm} className="btn btn-red" style={{ flex: 1, padding: '12px' }}>
-                      Cancel
-                    </button>
-                  </div>
-                </form>
-              </>
-            ) : (
-              // VIEW 2: ITINERARY LIST
-              <>
-                <h2 style={{ marginTop: 0 }}>{activeTrip.name} Itinerary</h2>
-
-                {/* Trip Style Section */}
-                <div style={{ background: 'var(--bg-panel)', border: '1px solid var(--border-light)', borderRadius: '8px', padding: '12px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                  <p style={{ margin: 0, fontSize: '13px', fontWeight: 'bold', color: 'var(--text-muted)' }}>TRIP STYLE</p>
-
-                  {/* Trip Color */}
-                  <div>
-                    <label style={{ fontSize: '13px', fontWeight: 'bold', display: 'block', marginBottom: '6px' }}>Trip Color</label>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                      <input
-                        type="color"
-                        aria-label="Select Trip Line Color"
-                        value={(activeTrip as any).lineColor || '#3b82f6'}
-                        onChange={(e) => handleTripLineColorChange(e.target.value)}
-                        style={{ 
-                          width: '36px', height: '32px', padding: '2px', border: '1px solid var(--border-input)', 
-                          borderRadius: '6px', cursor: 'pointer', background: 'var(--bg-panel)',
-                          filter: (darkMode && ((activeTrip as any).lineColor || '#3b82f6') === '#000000') ? 'invert(1)' : 'none'
-                        }}
-                      />
-                      <div style={{ display: 'flex', gap: '5px', flexWrap: 'wrap' }}>
-                        {['#3b82f6','#ef4444','#10b981','#f59e0b','#8b5cf6','#ec4899','#06b6d4','#000000'].map(c => {
-                          const isSelected = ((activeTrip as any).lineColor || '#3b82f6') === c;
-                          return (
-                            <div
-                              key={c}
-                              onClick={() => handleTripLineColorChange(c)}
-                              style={{
-                                width: '20px', height: '20px', borderRadius: '4px', cursor: 'pointer', boxSizing: 'border-box',
-                                background: getDisplayColor(c),
-                                border: isSelected ? '3px solid var(--text-main)' : '2px solid var(--border-light)',
-                              }}
-                            />
-                          )
-                        })}
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                {tripPins.length === 0 && <p style={{ fontSize: '14px', color: 'var(--text-muted)' }}>Click anywhere on the map to drop your first pin!</p>}
+            {/* ZONE 2 */}
+            <div 
+              className="sheet-content"
+              style={{ flex: 1, overflowY: 'auto', padding: '0 15px' }}
+              onTouchStart={(e) => {
+                if ((e.target as HTMLElement).closest('.desktop-drag')) return; 
                 
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                  {tripPins.map((pin, index) => (
-                    <div 
-                      key={pin.id} className="trip-card"
-                      draggable={activeDragId === pin.id}
-                      onDragStart={(e) => (dragItem.current = index)}
-                      onDragEnter={(e) => (dragOverItem.current = index)}
-                      onDragEnd={handleSort}
-                      onDragOver={(e) => e.preventDefault()}
-                      onDoubleClick={() => startEditing(pin)}
-                      onTouchStart={() => {
-                        longPressTimer.current = setTimeout(() => startEditing(pin), 500);
-                      }}
-                      onTouchEnd={() => clearTimeout(longPressTimer.current)}
-                      onTouchMove={() => clearTimeout(longPressTimer.current)}
-                    >
-                      <span 
+                swipeStartY.current = e.targetTouches[0].clientY;
+              }}
+              onTouchEnd={(e) => {
+                if (swipeStartY.current === null) return;
+                const distanceY = e.changedTouches[0].clientY - swipeStartY.current;
+                const isAtTop = e.currentTarget.scrollTop <= 0;
+                
+                if (isAtTop && distanceY > 80) setIsSidebarOpen(false);
+                swipeStartY.current = null; 
+              }}
+            >
+              {(draftPin || editingPinId) ? (
+                // VIEW 1: FORM (Add/Edit)
+                <>
+                  <div className="info-box">📍 You can freely drag this pin on the map to adjust its exact location.</div>
+
+                  <form onSubmit={handleSavePin} style={{ display: 'flex', flexDirection: 'column', gap: '15px', marginTop: '10px' }}>
+                    <div>
+                      <label style={{ fontSize: '14px', fontWeight: 'bold' }}>Location Name</label>
+                      <input
+                        className="form-input"
+                        type="text"
+                        aria-label="Location Name"
+                        required value={formName}
+                        onChange={(e) => setFormName(e.target.value)}/>
+                    </div>
+                    <div>
+                      <label style={{ fontSize: '14px', fontWeight: 'bold' }}>Travel Blurb</label>
+                      <textarea
+                        className="form-input"
+                        style={{ height: '100px', resize: 'none' }}
+                        aria-label="Travel Blurb"
+                        required
+                        value={formBlurb}
+                        onChange={(e) => setFormBlurb(e.target.value)}
+                      />
+                    </div>
+
+                    {/* Multiple Photo Upload */}
+                    <div>
+                      <label style={{ fontSize: '14px', fontWeight: 'bold' }}>Photos</label>
+                      <div style={{ display: 'flex', gap: '10px', overflowX: 'auto', paddingBottom: '10px', marginTop: '5px' }}>
+                        {formPhotos.map((photo, idx) => (
+                          <div key={idx} style={{ position: 'relative', minWidth: '100px' }}>
+                            <img src={photo} alt={`Preview ${idx}`} style={{ width: '100px', height: '100px', objectFit: 'cover', borderRadius: '6px', border: '1px solid var(--border-light)' }} />
+                            <button
+                              type="button"
+                              onClick={() => setFormPhotos(formPhotos.filter((_, i) => i !== idx))}
+                              style={{ position: 'absolute', top: '5px', right: '5px', background: 'rgba(239, 68, 68, 0.9)', color: 'white', border: 'none', borderRadius: '4px', padding: '2px 6px', cursor: 'pointer', fontSize: '10px', fontWeight: 'bold' }}
+                              aria-label="Remove Photo"
+                            >
+                              X
+                            </button>
+                          </div>
+                        ))}
+                        
+                        <div style={{ minWidth: '100px', height: '100px', border: '2px dashed var(--border-input)', borderRadius: '6px' }}>
+                          <label style={{ 
+                            display: 'flex', alignItems: 'center', justifyContent: 'center', 
+                            width: '100%', height: '100%', cursor: 'pointer', 
+                            color: 'var(--accent-blue)', fontWeight: 'bold', fontSize: '24px' 
+                          }}>
+                            +
+                            <input
+                              type="file"
+                              accept="image/*"
+                              aria-label="Upload Photos"
+                              multiple onChange={handleImageUpload} style={{ display: 'none' }} />
+                          </label>
+                          
+                        </div>
+                      </div>
+                    </div>
+                  </form>
+                </>
+              ) : (
+                // VIEW 2: ITINERARY LIST
+                <>
+                  {/* Trip Style Section */}
+                  <div style={{ background: 'var(--bg-panel)', border: '1px solid var(--border-light)', borderRadius: '8px', padding: '12px', display: 'flex', flexDirection: 'column', gap: '10px', marginBottom: '15px' }}>
+                    <p style={{ margin: 0, fontSize: '13px', fontWeight: 'bold', color: 'var(--text-muted)' }}>TRIP STYLE</p>
+
+                    {/* Trip Color */}
+                    <div>
+                      <label style={{ fontSize: '13px', fontWeight: 'bold', display: 'block', marginBottom: '6px' }}>Trip Color</label>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <input
+                          type="color"
+                          aria-label="Select Trip Line Color"
+                          value={(activeTrip as any).lineColor || '#3b82f6'}
+                          onChange={(e) => handleTripLineColorChange(e.target.value)}
+                          style={{ 
+                            width: '36px', height: '32px', padding: '2px', border: '1px solid var(--border-input)', 
+                            borderRadius: '6px', cursor: 'pointer', background: 'var(--bg-panel)',
+                            filter: (darkMode && ((activeTrip as any).lineColor || '#3b82f6') === '#000000') ? 'invert(1)' : 'none'
+                          }}
+                        />
+                        <div style={{ display: 'flex', gap: '5px', flexWrap: 'wrap' }}>
+                          {['#3b82f6','#ef4444','#10b981','#f59e0b','#8b5cf6','#ec4899','#06b6d4','#000000'].map(c => {
+                            const isSelected = ((activeTrip as any).lineColor || '#3b82f6') === c;
+                            return (
+                              <div
+                                key={c}
+                                onClick={() => handleTripLineColorChange(c)}
+                                style={{
+                                  width: '20px', height: '20px', borderRadius: '4px', cursor: 'pointer', boxSizing: 'border-box',
+                                  background: getDisplayColor(c),
+                                  border: isSelected ? '3px solid var(--text-main)' : '2px solid var(--border-light)',
+                                }}
+                              />
+                            )
+                          })}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {tripPins.length === 0 && <p style={{ fontSize: '14px', color: 'var(--text-muted)' }}>Click anywhere on the map to drop your first pin!</p>}
+                  
+                  {/* Trip Cards */}
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', paddingBottom: '40px' }}>
+                    {tripPins.map((pin, index) => (
+                      <div 
+                        key={pin.id} className="trip-card"
+                        draggable={activeDragId === pin.id}
+                        onDragStart={(e) => (dragItem.current = index)}
+                        onDragEnter={(e) => (dragOverItem.current = index)}
+                        onDragEnd={handleSort}
+                        onDragOver={(e) => e.preventDefault()}
+                        onDoubleClick={() => startEditing(pin)}
+                        onTouchStart={() => {
+                          longPressTimer.current = setTimeout(() => startEditing(pin), 500);
+                        }}
+                        onTouchEnd={() => clearTimeout(longPressTimer.current)}
+                        onTouchMove={() => clearTimeout(longPressTimer.current)}
+                      >
+                        <div 
                           className="desktop-drag" 
-                          style={{ fontSize: '20px', cursor: 'grab', touchAction: 'none' }}
+                          style={{ 
+                            width: '44px',
+                            height: '44px', 
+                            display: 'flex', 
+                            alignItems: 'center', 
+                            justifyContent: 'center', 
+                            fontSize: '20px', 
+                            cursor: 'grab', 
+                            touchAction: 'none',
+                            marginLeft: '-10px',
+                            color: 'var(--text-muted)' 
+                          }}
                           onMouseDown={() => setActiveDragId(pin.id)}
                           onTouchStart={() => setActiveDragId(pin.id)}
                           onMouseUp={() => setActiveDragId(null)}
                           onTouchEnd={() => setActiveDragId(null)}
                         >
                           ☰
-                        </span>
-                      
-                      {pin.photoUrls && pin.photoUrls.length > 0 && (
-                        <img
-                          src={pin.photoUrls[0]}
-                          onClick={(e) => { e.preventDefault(); e.stopPropagation(); setGallery({ isOpen: true, photos: pin.photoUrls, currentIndex: 0 }); }}
-                          alt="Thumbnail"
-                          style={{ width: '40px', height: '40px', cursor: 'pointer', objectFit: 'cover', borderRadius: '4px', flexShrink: 0 }} />
-                      )}
+                        </div>
+                        
+                        {pin.photoUrls && pin.photoUrls.length > 0 && (
+                          <img
+                            src={pin.photoUrls[0]}
+                            onClick={(e) => { e.preventDefault(); e.stopPropagation(); setGallery({ isOpen: true, photos: pin.photoUrls, currentIndex: 0 }); }}
+                            alt="Thumbnail"
+                            style={{ width: '40px', height: '40px', cursor: 'pointer', objectFit: 'cover', borderRadius: '4px', flexShrink: 0 }} />
+                        )}
 
-                      <div style={{ flex: 1, cursor: 'pointer' }} onClick={() => handleCardClick(pin)}>
-                        <h3 style={{ margin: '0 0 5px 0', fontSize: '15px', color: 'var(--text-main)' }}>
-                          {index + 1}. {pin.name}
-                        </h3>
-                        <p style={{ margin: 0, fontSize: '13px', color: 'var(--text-muted)' }}>
-                          {pin.blurb.substring(0, 48)}{pin.blurb.length > 48 ? '...' : ''}
-                        </p>
+                        <div style={{ flex: 1, cursor: 'pointer' }} onClick={() => handleCardClick(pin)}>
+                          <h3 style={{ margin: '0 0 5px 0', fontSize: '15px', color: 'var(--text-main)' }}>
+                            {index + 1}. {pin.name}
+                          </h3>
+                          <p style={{ margin: 0, fontSize: '13px', color: 'var(--text-muted)' }}>
+                            {pin.blurb.substring(0, 48)}{pin.blurb.length > 48 ? '...' : ''}
+                          </p>
+                        </div>
+
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            deletePin(pin.id);
+                          }}
+                          aria-label="Delete Stop"
+                          style={{
+                            background: 'none',
+                            border: 'none',
+                            color: 'var(--accent-red)',
+                            fontSize: '18px',
+                            cursor: 'pointer',
+                            padding: '10px',
+                            marginLeft: '5px'
+                          }}
+                        >
+                          🗑️
+                        </button>
                       </div>
-                    </div>
-                  ))}
-                </div>
-              </>
+                    ))}
+                  </div>
+                </>
+              )}
+            </div>
+
+            {/* ZONE 3 */}
+            {(draftPin || editingPinId) && (
+              <div className="action-footer">
+                <button type="button" onClick={handleSavePin} className="btn btn-blue" style={{ flex: 1, padding: '12px' }}>
+                  {editingPinId ? "Update Pin" : "Save Pin"}
+                </button>
+                <button type="button" onClick={cancelForm} className="btn btn-red" style={{ flex: 1, padding: '12px' }}>
+                  Cancel
+                </button>
+              </div>
             )}
+
           </div>
         </>
       )}
@@ -1183,7 +1272,7 @@ const TravelMap = () => {
 
                               <div style={{ display: 'flex', gap: '5px' }}>
                                 <button onClick={(e) => { e.preventDefault(); e.stopPropagation(); startEditing(pin); }} className="mini-btn mini-btn-default">Edit</button>
-                                <button onClick={(e) => { e.preventDefault(); e.stopPropagation(); deletePin(pin.id); }} className="mini-btn mini-btn-danger">Delete</button>
+                                <button onClick={(e) => {e.preventDefault(); e.stopPropagation(); deletePin(pin.id); }} className="mini-btn mini-btn-danger">Delete</button>
                               </div>
 
                               <button
