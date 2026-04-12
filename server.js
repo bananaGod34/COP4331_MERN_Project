@@ -108,7 +108,7 @@ app.post('/api/signup', async (req, res) => {
 
     const result = await db.collection('users').insertOne(newUser);
 
-    const verifyLink = `https://landmarkmerncop4331.online/verify-email?token=${verificationToken}`;
+    const verifyLink = `https://landmarkmerncop4331.online/verify?token=${verificationToken}`;
 
     await resend.emails.send({
       from: 'Landmark <noreply@landmarkmerncop4331.online>',
@@ -280,6 +280,9 @@ app.post('/api/auth/forgot-password', async (req, res) => {
 app.post('/api/auth/reset-password', async (req, res) => {
   const { token, newPassword } = req.body;
 
+  console.log('Reset attempt - token:', token ? 'present' : 'missing');
+  console.log('Reset attempt - newPassword:', newPassword ? 'present' : 'missing');
+
   if (!token || !newPassword) {
     return res.status(400).json({ error: 'Token and new password are required.' });
   }
@@ -292,6 +295,8 @@ app.post('/api/auth/reset-password', async (req, res) => {
       reset_token_expires: { $gt: new Date() } //token not expired
     });
 
+    console.log('User found:', user ? user.login : 'NOT FOUND');
+    
     if (!user) {
       return res.status(400).json({ error: 'Invalid or expired reset token.' });
     }
