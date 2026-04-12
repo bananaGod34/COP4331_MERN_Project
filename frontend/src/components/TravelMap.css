@@ -37,7 +37,26 @@
 
 .floating-panel { position: absolute; top: 20px; left: 20px; z-index: 1000; background-color: var(--bg-panel); padding: 15px; border-radius: 8px; box-shadow: var(--shadow-float); }
 
-.sidebar { position: absolute; top: 0; right: 0; width: 350px; height: 100%; background-color: var(--bg-sidebar); z-index: 1000; box-shadow: var(--shadow-sidebar); padding: 30px; box-sizing: border-box; overflow-y: auto; display: flex; flex-direction: column; gap: 15px; font-family: Inter, system-ui, sans-serif; }
+.sidebar { 
+  position: absolute; 
+  top: 0; 
+  right: 0; 
+  width: 350px; 
+  height: 100%; 
+  background-color: var(--bg-sidebar); 
+  z-index: 1000; 
+  box-shadow: var(--shadow-sidebar); 
+  padding: 20px; 
+  box-sizing: border-box; 
+  overflow-y: auto; 
+  display: flex; 
+  flex-direction: column; 
+  gap: 15px; 
+  font-family: Inter, system-ui, sans-serif;
+
+  transition: transform 0.3s ease-in-out, background-color 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+  transform: translateX(0);
+}
 
 .trip-card { background-color: var(--bg-panel); padding: 15px; border-radius: 8px; border: 1px solid var(--border-light); display: flex; gap: 15px; align-items: center; }
 
@@ -57,6 +76,10 @@
 
 .mobile-drag-handle {
   display: none !important;
+}
+
+.leaflet-tile-pane {
+  transition: filter 0.4s ease-in-out;
 }
 
 /* Invert tiles */
@@ -82,6 +105,12 @@
   background-color: var(--bg-sidebar);
 }
 
+*, *::before, *::after {
+  transition-property: background-color, color, border-color, box-shadow, fill, stroke;
+  transition-duration: 0.3s;
+  transition-timing-function: ease-in-out;
+}
+
 .desktop-drag {
   touch-action: none;
 }
@@ -90,13 +119,38 @@
   display: none;
 }
 
-.sidebar {
-  transition: transform 0.3s ease-in-out; 
-  transform: translateX(0);
-}
-
 .sidebar.closed {
   transform: translateX(100%);
+}
+
+.color-ribbon::-webkit-scrollbar {
+  display: none;
+}
+.color-ribbon {
+  display: flex;
+  align-items: flex-start;
+  padding: 8px 0;
+}
+
+.preset-colors-wrapper {
+  display: flex;
+  gap: 12px;
+  padding: 0 4px;
+}
+
+.custom-color-btn, .color-swatch-btn {
+  width: 36px;
+  height: 36px;
+}
+.ribbon-divider {
+  height: 36px;
+}
+
+.trip-card.selected-card {
+  border-color: var(--accent-blue);
+  box-shadow: 0 0 0 1px var(--accent-blue);
+  background-color: var(--bg-panel);
+  transition: border-color 0.3s ease-in-out, box-shadow 0.3s ease-in-out, background-color 0.3s ease-in-out;
 }
 
 .action-footer {
@@ -109,6 +163,17 @@
 @media (min-width: 769px) {
   .mobile-only {
     display: none !important;
+  }
+  .preset-colors-wrapper {
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+  .custom-color-btn, .color-swatch-btn {
+    width: 24px;
+    height: 24px;
+  }
+  .ribbon-divider {
+    height: 24px;
   }
 }
 
@@ -158,7 +223,7 @@
     left: 0;
     width: 100%;
     height: auto;
-    max-height: 85svh;
+    max-height: 50svh;
     transform: none !important;
     padding: 0;
     padding-bottom: env(safe-area-inset-bottom, 15px);
@@ -166,6 +231,12 @@
     box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.15);
     z-index: 1000;
     box-sizing: border-box;
+
+    transition: max-height 0.3s cubic-bezier(0.4, 0, 0.2, 1), background-color 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+  }
+
+  .sidebar.expanded {
+    max-height: 90svh;
   }
 
   .sheet-header {
@@ -174,7 +245,7 @@
   }
 
   .sheet-content {
-    transition: max-height 0.3s ease-in-out, opacity 0.2s ease, margin 0.3s ease;
+    transition: max-height 0.3s ease-in-out, opacity 0.2s ease, margin 0.3s ease, background-color 0.3s ease-in-out;
     max-height: 1000px;
     opacity: 1;
     transform: translateZ(0);
@@ -210,6 +281,24 @@
 
   .sidebar.closed h2 {
     margin-bottom: 10px !important;
+  }
+
+  .color-ribbon {
+    overflow-x: auto;
+    align-items: center;
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+    -webkit-mask-image: linear-gradient(to right, black 85%, transparent 100%);
+    mask-image: linear-gradient(to right, black 85%, transparent 100%);
+    padding-right: 40px;
+  }
+  
+  .color-ribbon::-webkit-scrollbar {
+    display: none;
+  }
+
+  .preset-colors-wrapper {
+    flex-wrap: nowrap;
   }
 
   .action-footer {

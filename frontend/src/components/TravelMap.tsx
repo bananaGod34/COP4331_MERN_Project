@@ -4,6 +4,11 @@ import { useNavigate } from 'react-router-dom';
 import 'leaflet/dist/leaflet.css';
 import './TravelMap.css';
 
+// Drag n Drop
+import { DndContext, closestCenter, KeyboardSensor, PointerSensor, TouchSensor, useSensor, useSensors } from '@dnd-kit/core';
+import { arrayMove, SortableContext, sortableKeyboardCoordinates, verticalListSortingStrategy, useSortable } from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
+
 // --->>>TEMPORARY PIN ICON FIX---
 // >>>probably just replace with custom icons later
 import L from 'leaflet';
@@ -85,8 +90,105 @@ const MapCameraController = ({ target, isSidebarOpen }: any) => {
   return null;
 }
 
-// --- MAIN COMPONENT ---
+// --- COMPONENTS ---
 
+// Draggable card subcomponent
+const SortableTripCard = ({ 
+  pin, 
+  index, 
+  selectedCardId, 
+  activeTrip, 
+  handleCardClick, 
+  startEditing, 
+  deletePin,
+  getDisplayColor,
+  setGallery
+}: any) => {
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: pin.id });
+  const longPressTimer = React.useRef<NodeJS.Timeout>();
+
+  const isSelected = selectedCardId === pin.id;
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    position: 'relative' as const,
+    zIndex: isDragging ? 999 : 1,
+    opacity: isDragging ? 0.8 : 1,
+    boxShadow: isDragging ? '0 10px 25px rgba(0,0,0,0.2)' : undefined,
+  };
+
+  return (
+    <div 
+      ref={setNodeRef} 
+      className={`trip-card ${isSelected ? 'selected-card' : ''}`}
+      style={{
+        ...style,
+        borderColor: isSelected ? getDisplayColor((activeTrip as any)?.lineColor || '#3b82f6') : undefined,
+        boxShadow: isSelected ? `0 0 0 1px ${getDisplayColor((activeTrip as any)?.lineColor || '#3b82f6')}` : style.boxShadow
+      }}
+      onDoubleClick={() => startEditing(pin)}
+      onTouchStart={() => {
+        longPressTimer.current = setTimeout(() => startEditing(pin), 500);
+      }}
+      onTouchEnd={() => clearTimeout(longPressTimer.current)}
+      onTouchMove={() => clearTimeout(longPressTimer.current)}
+    >
+      <div 
+        {...attributes} 
+        {...listeners} 
+        className="desktop-drag" 
+        style={{ width: '44px', height: '44px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '20px', cursor: 'grab', touchAction: 'none', marginLeft: '-10px', color: 'var(--text-muted)' }}
+      >
+        ☰
+      </div>
+
+      {/* Thumbnail */}
+      {pin.photoUrls && pin.photoUrls.length > 0 && (
+        <img
+          src={pin.photoUrls[0]}
+          onClick={(e) => { e.preventDefault(); e.stopPropagation(); setGallery({ isOpen: true, photos: pin.photoUrls, currentIndex: 0 }); }}
+          alt="Thumbnail"
+          style={{ width: '40px', height: '40px', cursor: 'pointer', objectFit: 'cover', borderRadius: '4px', flexShrink: 0 }} />
+      )}
+
+      {/* Text Content */}
+      <div style={{ flex: 1, cursor: 'pointer' }} onClick={() => handleCardClick(pin)}>
+        <h3 style={{ margin: '0 0 5px 0', fontSize: '15px', color: 'var(--text-main)' }}>
+          {index + 1}. {pin.name}
+        </h3>
+        <p style={{ margin: 0, fontSize: '13px', color: 'var(--text-muted)' }}>
+          {pin.blurb.substring(0, 48)}{pin.blurb.length > 48 ? '...' : ''}
+        </p>
+      </div>
+
+      {/* Action Buttons */}
+      {isSelected && (
+        <div style={{ display: 'flex', gap: '2px', marginLeft: '5px' }}>
+          <button
+            onClick={(e) => { e.stopPropagation(); startEditing(pin); }}
+            aria-label="Edit Stop"
+            style={{ background: 'none', border: 'none', color: 'var(--accent-blue)', fontSize: '18px', cursor: 'pointer', padding: '10px' }}
+          >
+            ✏️
+          </button>
+          <button
+            onClick={(e) => {
+              e.stopPropagation(); 
+              if (window.confirm(`Are you sure you want to delete ${pin.name}?`)) deletePin(pin.id);
+            }}
+            aria-label="Delete Stop"
+            style={{ background: 'none', border: 'none', color: 'var(--accent-red)', fontSize: '18px', cursor: 'pointer', padding: '10px' }}
+          >
+            🗑️
+          </button>
+        </div>
+      )}
+    </div>
+  );
+};
+
+// Main Component
 const TravelMap = () => {
   const [trips, setTrips] = useState([
     { 
@@ -120,6 +222,7 @@ const TravelMap = () => {
   const tripPins = activeTrip ? activeTrip.pins : [];
 
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+  const [isSheetExpanded, setIsSheetExpanded] = useState(false);
   const [visibleTripIds, setVisibleTripIds] = useState<string[]>(['trip-1', 'trip-2']);
   const [uiHidden, setUiHidden] = useState(false);
 
@@ -128,6 +231,7 @@ const TravelMap = () => {
   const [pinsUnlocked, setPinsUnlocked] = useState(false); 
   const [cameraTarget, setCameraTarget] = useState<{lat: number, lng: number, triggerId: number} | null>(null);
   const [originalPinCoords, setOriginalPinCoords] = useState<{lat: number, lng: number} | null>(null);
+  const [selectedCardId, setSelectedCardId] = useState<number | null>(null);
 
   //>>>MOBILE MENU
   const [isMobileScreen, setIsMobileScreen] = useState(window.innerWidth <= 768);
@@ -163,8 +267,28 @@ const TravelMap = () => {
   const longPressTimer = useRef<any>(null);
   const swipeStartY = useRef<number | null>(null);
   const touchCoords = useRef<{x: number, y: number} | null>(null);
+  const activePolylinesRef = useRef<Record<number, any>>({});
+  const highlightCirclesRef = useRef<Record<number, any>>({});
+  const isDraggingMapPin = useRef(false);
 
   const WORLD_OFFSETS = [-1080, -720, -360, 0, 360, 720, 1080];
+
+  // Drag n Drop sensors
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 5 } }), // Desktop
+    useSensor(TouchSensor, { activationConstraint: { delay: 150, tolerance: 5 } }), // Mobile
+    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
+  );
+
+  const handleDragEnd = (event: any) => {
+    setActiveDragId(null);
+    const { active, over } = event;
+    if (active.id !== over?.id) {
+      const oldIndex = tripPins.findIndex((pin) => pin.id === active.id);
+      const newIndex = tripPins.findIndex((pin) => pin.id === over?.id);
+      updateActiveTripPins(arrayMove(tripPins, oldIndex, newIndex));
+    }
+  };
 
   // UseEffect to Load In User Data
   useEffect(() => {
@@ -440,7 +564,7 @@ const TravelMap = () => {
     if(editingPinId) cancelForm();
 
     setActiveTripId(newTripId);
-    setIsSidebarOpen(true); 
+    setIsSidebarOpen(true);
     if (!visibleTripIds.includes(newTripId)) setVisibleTripIds(prev => [...prev, newTripId]);
     
     setDraftPin(null);
@@ -863,36 +987,54 @@ const TravelMap = () => {
             style={{ 
               position: 'absolute', 
               top: '20px', 
-              right: isSidebarOpen ? '350px' : '0', 
+              right: '0',
+              transform: isSidebarOpen ? 'translateX(-350px)' : 'translateX(0)',
               color: 'var(--text-main)',
               width: '40px', 
-              height: '40px', 
-              background: 'var(--bg-panel)', 
+              height: '40px',
+              background: 'var(--bg-sidebar)',
               border: '1px solid var(--border-light)', 
+              borderRight: 'none', 
               borderRadius: '8px 0 0 8px', 
               cursor: 'pointer', 
               zIndex: 1001, 
-              boxShadow: '-2px 2px 5px rgba(0,0,0,0.1)',
-              transition: 'right 0.3s ease-in-out'
+              boxShadow: '-2px 2px 4px rgba(0,0,0,0.05)',
+              transition: 'transform 0.3s ease-in-out, background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease'
             }}
           >
             {isSidebarOpen ? '▶' : '◀'}
           </button>
 
           {/* Right Sidebar */}
-          <div className={`sidebar ${!isSidebarOpen ? 'closed' : ''}`} style={{ display: 'flex', flexDirection: 'column' }} onClick={() => !isSidebarOpen && setIsSidebarOpen(true)}>
+          <div
+            className={`sidebar ${!isSidebarOpen ? 'closed' : ''} ${isSheetExpanded ? 'expanded' : ''}`}
+            style={{ display: 'flex', flexDirection: 'column' }}
+            onClick={() => { if (!isSidebarOpen) { setIsSidebarOpen(true); setIsSheetExpanded(false); } }}
+          >
+
+            {/* ZONE 1 */}
             <div 
               className="sheet-header" 
               style={{ flexShrink: 0, display: 'flex', flexDirection: 'column', touchAction: 'none', cursor: 'grab' }}
-              
               onTouchStart={(e) => {
                 touchCoords.current = { x: e.targetTouches[0].clientX, y: e.targetTouches[0].clientY };
               }}
               onTouchEnd={(e) => {
                 if (!touchCoords.current) return;
                 const distanceY = touchCoords.current.y - e.changedTouches[0].clientY;
-                if (distanceY < -50) setIsSidebarOpen(false);
-                if (distanceY > 50) setIsSidebarOpen(true);
+                
+                if (distanceY < -50) {
+                  if (isSheetExpanded) setIsSheetExpanded(false);
+                  else setIsSidebarOpen(false);
+                }
+                if (distanceY > 50) {
+                  if (!isSidebarOpen) {
+                    setIsSidebarOpen(true);
+                    setIsSheetExpanded(false);
+                  } else {
+                    setIsSheetExpanded(true);
+                  }
+                }
                 touchCoords.current = null;
               }}
             >
@@ -946,15 +1088,16 @@ const TravelMap = () => {
               style={{ flex: 1, overflowY: 'auto', padding: '0 15px' }}
               onTouchStart={(e) => {
                 if ((e.target as HTMLElement).closest('.desktop-drag')) return; 
-                
                 swipeStartY.current = e.targetTouches[0].clientY;
               }}
               onTouchEnd={(e) => {
                 if (swipeStartY.current === null) return;
                 const distanceY = e.changedTouches[0].clientY - swipeStartY.current;
                 const isAtTop = e.currentTarget.scrollTop <= 0;
-                
-                if (isAtTop && distanceY > 80) setIsSidebarOpen(false);
+                if (isAtTop && distanceY > 80) {
+                  if (isSheetExpanded) setIsSheetExpanded(false);
+                  else setIsSidebarOpen(false);
+                }
                 swipeStartY.current = null; 
               }}
             >
@@ -1025,11 +1168,9 @@ const TravelMap = () => {
               ) : (
                 // VIEW 2: ITINERARY LIST
                 <>
-                  {/* Trip Style Section */}
+                  {/*
                   <div style={{ background: 'var(--bg-panel)', border: '1px solid var(--border-light)', borderRadius: '8px', padding: '12px', display: 'flex', flexDirection: 'column', gap: '10px', marginBottom: '15px' }}>
                     <p style={{ margin: 0, fontSize: '13px', fontWeight: 'bold', color: 'var(--text-muted)' }}>TRIP STYLE</p>
-
-                    {/* Trip Color */}
                     <div>
                       <label style={{ fontSize: '13px', fontWeight: 'bold', display: 'block', marginBottom: '6px' }}>Trip Color</label>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
@@ -1062,86 +1203,82 @@ const TravelMap = () => {
                         </div>
                       </div>
                     </div>
+                  </div>*/}
+
+                  <div style={{ background: 'var(--bg-panel)', border: '1px solid var(--border-light)', borderRadius: '8px', padding: '12px', display: 'flex', flexDirection: 'column', gap: '10px', marginBottom: '15px' }}>
+                    <p style={{ margin: 0, fontSize: '13px', fontWeight: 'bold', color: 'var(--text-muted)' }}>TRIP STYLE</p>
+
+                    <div>
+                      <label style={{ fontSize: '13px', fontWeight: 'bold', display: 'block', marginBottom: '8px' }}>Trip Color</label>
+                      <div className="color-ribbon">
+                        <div className="custom-color-btn" style={{ position: 'relative', borderRadius: '50%', overflow: 'hidden', border: '2px solid var(--border-light)', flexShrink: 0 }}>
+                          <input
+                            type="color"
+                            aria-label="Select Custom Trip Line Color"
+                            value={(activeTrip as any).lineColor || '#3b82f6'}
+                            onChange={(e) => handleTripLineColorChange(e.target.value)}
+                            style={{ position: 'absolute', top: '-10px', left: '-10px', width: '60px', height: '60px', padding: 0, border: 'none', cursor: 'pointer' }}
+                          />
+                        </div>
+                        <div className="ribbon-divider" style={{ width: '1px', backgroundColor: 'var(--border-input)', flexShrink: 0, margin: '0 8px' }} />
+                        <div className="preset-colors-wrapper">
+                          {[
+                            '#ef4444', '#f97316', '#f59e0b', '#84cc16', 
+                            '#10b981', '#14b8a6', '#06b6d4', '#3b82f6', 
+                            '#6366f1', '#8b5cf6', '#ec4899', '#000000'
+                          ].map(c => {
+                            const isSelected = ((activeTrip as any).lineColor || '#3b82f6') === c;
+                            return (
+                              <button
+                                key={c}
+                                type="button"
+                                className="color-swatch-btn"
+                                aria-label={`Select color ${c}`}
+                                onClick={() => handleTripLineColorChange(c)}
+                                style={{
+                                  borderRadius: '50%', cursor: 'pointer', padding: 0, flexShrink: 0,
+                                  background: getDisplayColor(c),
+                                  border: isSelected ? '3px solid var(--text-main)' : '2px solid transparent',
+                                  boxShadow: isSelected ? '0 0 0 2px var(--bg-panel) inset' : '0 2px 4px rgba(0,0,0,0.1)',
+                                  transition: 'transform 0.1s ease, border-color 0.3s ease, box-shadow 0.3s ease, background-color 0.3s ease',
+                                  transform: isSelected ? 'scale(1.1)' : 'scale(1)'
+                                }}
+                              />
+                            )
+                          })}
+                        </div>
+                      </div>
+                    </div>
                   </div>
 
                   {tripPins.length === 0 && <p style={{ fontSize: '14px', color: 'var(--text-muted)' }}>Click anywhere on the map to drop your first pin!</p>}
                   
                   {/* Trip Cards */}
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', paddingBottom: '40px' }}>
-                    {tripPins.map((pin, index) => (
-                      <div 
-                        key={pin.id} className="trip-card"
-                        draggable={activeDragId === pin.id}
-                        onDragStart={(e) => (dragItem.current = index)}
-                        onDragEnter={(e) => (dragOverItem.current = index)}
-                        onDragEnd={handleSort}
-                        onDragOver={(e) => e.preventDefault()}
-                        onDoubleClick={() => startEditing(pin)}
-                        onTouchStart={() => {
-                          longPressTimer.current = setTimeout(() => startEditing(pin), 500);
-                        }}
-                        onTouchEnd={() => clearTimeout(longPressTimer.current)}
-                        onTouchMove={() => clearTimeout(longPressTimer.current)}
-                      >
-                        <div 
-                          className="desktop-drag" 
-                          style={{ 
-                            width: '44px',
-                            height: '44px', 
-                            display: 'flex', 
-                            alignItems: 'center', 
-                            justifyContent: 'center', 
-                            fontSize: '20px', 
-                            cursor: 'grab', 
-                            touchAction: 'none',
-                            marginLeft: '-10px',
-                            color: 'var(--text-muted)' 
-                          }}
-                          onMouseDown={() => setActiveDragId(pin.id)}
-                          onTouchStart={() => setActiveDragId(pin.id)}
-                          onMouseUp={() => setActiveDragId(null)}
-                          onTouchEnd={() => setActiveDragId(null)}
-                        >
-                          ☰
-                        </div>
+                  <div style={{ position: 'relative', display: 'flex', flexDirection: 'column', gap: '15px', paddingBottom: '40px', marginLeft: '10px' }}>
+                    {tripPins.length > 1 && (
+                      <div style={{ position: 'absolute', top: '30px', bottom: '70px', left: '22px', width: '2px', backgroundColor: 'var(--border-light)', zIndex: 0 }} />
+                    )}
+
+                    <DndContext sensors={sensors} collisionDetection={closestCenter} onDragStart={(e) => setActiveDragId(e.active.id as number)} onDragEnd={handleDragEnd}>
+                      <SortableContext items={tripPins.map(p => p.id)} strategy={verticalListSortingStrategy}>
                         
-                        {pin.photoUrls && pin.photoUrls.length > 0 && (
-                          <img
-                            src={pin.photoUrls[0]}
-                            onClick={(e) => { e.preventDefault(); e.stopPropagation(); setGallery({ isOpen: true, photos: pin.photoUrls, currentIndex: 0 }); }}
-                            alt="Thumbnail"
-                            style={{ width: '40px', height: '40px', cursor: 'pointer', objectFit: 'cover', borderRadius: '4px', flexShrink: 0 }} />
-                        )}
-
-                        <div style={{ flex: 1, cursor: 'pointer' }} onClick={() => handleCardClick(pin)}>
-                          <h3 style={{ margin: '0 0 5px 0', fontSize: '15px', color: 'var(--text-main)' }}>
-                            {index + 1}. {pin.name}
-                          </h3>
-                          <p style={{ margin: 0, fontSize: '13px', color: 'var(--text-muted)' }}>
-                            {pin.blurb.substring(0, 48)}{pin.blurb.length > 48 ? '...' : ''}
-                          </p>
-                        </div>
-
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            deletePin(pin.id);
-                          }}
-                          aria-label="Delete Stop"
-                          style={{
-                            background: 'none',
-                            border: 'none',
-                            color: 'var(--accent-red)',
-                            fontSize: '18px',
-                            cursor: 'pointer',
-                            padding: '10px',
-                            marginLeft: '5px'
-                          }}
-                        >
-                          🗑️
-                        </button>
-                      </div>
-                    ))}
+                        {tripPins.map((pin, index) => (
+                          <SortableTripCard 
+                            key={pin.id} 
+                            pin={pin} 
+                            index={index} 
+                            selectedCardId={selectedCardId} 
+                            activeTrip={activeTrip}
+                            getDisplayColor={getDisplayColor}
+                            setGallery={setGallery}
+                            handleCardClick={handleCardClick} 
+                            startEditing={startEditing} 
+                            deletePin={deletePin} 
+                          />
+                        ))}
+                        
+                      </SortableContext>
+                    </DndContext>
                   </div>
                 </>
               )}
@@ -1190,7 +1327,13 @@ const TravelMap = () => {
             
             return <Polyline
               key={`route-${trip.id}-${offset}-${displayColor}-${trip.id === activeTripId}`}
-              positions={shiftedRoute as any}
+              ref={(el) => {
+                if (trip.id === activeTripId && el) {
+                  activePolylinesRef.current[offset] = el;
+                }
+              }}
+              
+              positions={shiftedRoute}
               color={displayColor} 
               weight={4}
               opacity={trip.id === activeTripId ? 1.0 : 0.4}
@@ -1200,22 +1343,28 @@ const TravelMap = () => {
         })}
 
         {/* Highlight Ring >>>i wanna get rid of this later, it doesnt look good */}
-        {activeFocusLocation && (
+        {activeFocusLocation && WORLD_OFFSETS.map(offset => (
           <CircleMarker
-            center={[activeFocusLocation.lat, activeFocusLocation.lng]}
+            key={`highlight-${selectedCardId}-${offset}`}
+            ref={(el) => {
+              if (el) highlightCirclesRef.current[offset] = el;
+            }}
+            center={[activeFocusLocation.lat, activeFocusLocation.lng + offset]}
             radius={25}
             pathOptions={{
               color: getDisplayColor((activeTrip as any).lineColor || '#3b82f6'),
               fillColor: getDisplayColor((activeTrip as any).lineColor || '#3b82f6'),
-              fillOpacity: 0.3 }} />
-        )}
+              fillOpacity: 0.3 
+            }} 
+          />
+        ))}
 
         {/* Saved Pins (triple rendered for dateline wrapping) */}
         {WORLD_OFFSETS.map(offset => (
           <React.Fragment key={`world-copy-${offset}`}>
             {visibleTripsData.map(trip => (
               <React.Fragment key={`trip-group-${trip.id}`}>
-                {trip.pins.map((pin: any, index: number) => {
+                {[...trip.pins].sort((a, b) => a.id.toString().localeCompare(b.id.toString())).map((pin: any, index: number) => {
                   const displayColor = getDisplayColor((trip as any).lineColor || '#3b82f6');
 
                   return (
@@ -1227,25 +1376,70 @@ const TravelMap = () => {
                       draggable={!uiHidden && ((pinsUnlocked && trip.id === activeTripId) || pin.id === editingPinId)}
                       icon={getPinIcon(displayColor)}
                       eventHandlers={{ 
+                        mousedown: (e) => {
+                            isDraggingMapPin.current = true;
+                            e.target.closePopup(); 
+                          },
+                        dragstart: (e) => {
+                          isDraggingMapPin.current = true;
+                          e.target.closePopup();
+                        },
+                        drag: (e) => {
+                            const liveLatLng = e.target.getLatLng();
+                            const baseLng = liveLatLng.lng - offset; 
+                            const draftPinsForMath = tripPins.map(p => 
+                              p.id === pin.id 
+                                ? { ...p, lat: liveLatLng.lat, lng: baseLng } 
+                                : p
+                            );
+                            const newBaseRoute = calculateWrappedRoute(draftPinsForMath);
+                            WORLD_OFFSETS.forEach(worldOffset => {
+                              const polyRef = activePolylinesRef.current[worldOffset];
+                              if (polyRef) {
+                                const shiftedRoute = newBaseRoute.map((coord: any) => [coord[0], coord[1] + worldOffset]);
+                                polyRef.setLatLngs(shiftedRoute);
+                              }
+                            });
+                            if (selectedCardId === pin.id) {
+                              WORLD_OFFSETS.forEach(worldOffset => {
+                                const circleRef = highlightCirclesRef.current[worldOffset];
+                                if (circleRef) {
+                                  circleRef.setLatLng([liveLatLng.lat, baseLng + worldOffset]);
+                                }
+                              });
+                            }
+                          },
                         dragend: (e) => {
                           const position = e.target.getLatLng();
                           const trueLng = position.lng - offset;
                           updateActiveTripPins(tripPins.map(p => p.id === pin.id ? { ...p, lat: position.lat, lng: trueLng } : p));
+                          setTimeout(() => { isDraggingMapPin.current = false; }, 100);
                         },
-                        dblclick: () => { if (!uiHidden) startEditing(pin); },
                         contextmenu: () => { if (!uiHidden) startEditing(pin); },
-                        click: () => {
-                        if (trip.id !== activeTripId) {
-                          handleSwitchTrip(trip.id, pin);
-                          
-                          setTimeout(() => {
-                            if (markerRefs.current[`${pin.id}-${offset}`]) {
-                              markerRefs.current[`${pin.id}-${offset}`].openPopup();
-                              isPopupOpen.current = true; 
+                        popupopen: () => setSelectedCardId(pin.id),
+                        popupclose: () => {
+                            if (!isDraggingMapPin.current) {
+                              setSelectedCardId(prev => prev === pin.id ? null : prev);
                             }
-                          }, 150);
+                          },
+                        click: () => {
+                          if (editingPinId === pin.id) return;
+                          if (selectedCardId === pin.id) {
+                            if (!uiHidden) startEditing(pin);
+                            return; 
+                          }
+
+                          if (trip.id !== activeTripId) {
+                            handleSwitchTrip(trip.id, pin);
+                            
+                            setTimeout(() => {
+                              if (markerRefs.current[`${pin.id}-${offset}`]) {
+                                markerRefs.current[`${pin.id}-${offset}`].openPopup();
+                                isPopupOpen.current = true; 
+                              }
+                            }, 150);
+                          }
                         }
-                      }
                       }}
                       ref={(r) => { markerRefs.current[`${pin.id}-${offset}`] = r; }}
                       opacity={trip.id === activeTripId ? 1.0 : 0.6}
