@@ -157,9 +157,9 @@ const SortableTripCard = ({
         <div 
           {...attributes} {...listeners} className="desktop-drag" 
           style={{ 
-            padding: '15px', 
-            marginLeft: '-15px', 
-            fontSize: '18px',
+            padding: '20px', 
+            marginLeft: '-20px', 
+            fontSize: '20px',
             display: 'flex', justifyContent: 'center', cursor: 'grab', touchAction: 'none', color: 'var(--text-muted)' }}
         >
           ☰
@@ -1116,12 +1116,11 @@ const TravelMap = () => {
 
               let targetOpen = isSidebarOpen;
               let targetExpanded = isSheetExpanded;
-
+              
               if (finalHeight < 160) { 
                   targetOpen = false;
                   targetExpanded = false;
               }
-              // B. Swiping DOWN
               else if (velocity > 0.5 || deltaY > 50) {
                 if (velocity > 1.2 || deltaY > 180) {
                   targetOpen = false; targetExpanded = false;
@@ -1155,18 +1154,33 @@ const TravelMap = () => {
                 } else {
                    targetHeight = '50svh';
                 }
-                sidebarRef.current.style.transition = 'max-height 0.3s cubic-bezier(0.4, 0, 0.2, 1)';
-                sidebarRef.current.style.maxHeight = targetHeight;
 
+                // stealing the bottom sheet physics from Google Maps
+                const absVelocity = Math.abs(velocity);
+                const duration = Math.max(250, Math.min(550, 550 - (absVelocity * 100)));
+                
+                sidebarRef.current.style.transition = `max-height ${duration}ms cubic-bezier(0.1, 1, 0.2, 1)`;
+                sidebarRef.current.style.maxHeight = targetHeight;
+                
                 setIsSidebarOpen(targetOpen);
                 setIsSheetExpanded(targetExpanded);
+
+                if (sidebarRef.current) {
+                  if (!targetOpen) sidebarRef.current.classList.add('closed');
+                  else sidebarRef.current.classList.remove('closed');
+
+                  if (targetExpanded) sidebarRef.current.classList.add('expanded');
+                  else sidebarRef.current.classList.remove('expanded');
+                }
+                
+                const cleanupTime = Math.max(duration, 350);
 
                 swipeTimeout.current = setTimeout(() => {
                   if (sidebarRef.current) {
                     sidebarRef.current.style.transition = ''; 
                     sidebarRef.current.style.maxHeight = '';  
                   }
-                }, 300);
+                }, cleanupTime);
               }
             }}
           >
