@@ -111,7 +111,7 @@ app.post('/api/signup', async (req, res) => {
     const verifyLink = `https://landmarkmerncop4331.online/verify-email?token=${verificationToken}`;
 
     await resend.emails.send({
-      from: 'Landmark <onboarding@resend.dev>',
+      from: 'Landmark <noreply@landmarkmerncop4331.online>',
       to: newUser.email,
       subject: 'Verify your email',
       html: `
@@ -249,7 +249,7 @@ app.post('/api/auth/forgot-password', async (req, res) => {
     const resetLink = `${process.env.FRONTEND_URL}/reset-password?token=${resetToken}`;
 
     await resend.emails.send({
-      from: 'Landmark <onboarding@resend.dev>',
+      from: 'Landmark <noreply@landmarkmerncop4331.online>',
       to: email,
       subject: 'Password Reset Request',
       html: `
