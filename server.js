@@ -27,6 +27,7 @@ app.use(cors());
 app.use(express.json({ limit: '10mb' }));
 
 const resend = new Resend(process.env.RESEND_API_KEY);
+console.log('RESEND_API_KEY:', process.env.RESEND_API_KEY ? 'SET' : 'NOT SET');
 
 app.use((req, res, next) => 
 {
