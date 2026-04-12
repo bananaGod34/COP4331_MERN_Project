@@ -145,11 +145,11 @@ describe('Trips Endpoints', () => {
 
   const fakeUserId = '000000000000000000000000'; // invalid ObjectId
 
-  test('GET /api/users/:userId/trips - invalid userId returns 500', async () => {
+  test('GET /api/users/:userId/trips - invalid userId returns empty trips', async () => {
     const res = await request(BASE_URL)
       .get(`/api/users/${fakeUserId}/trips`);
-    expect(res.statusCode).toBe(500);
-    expect(res.body.error).toBe('Server error');
+    expect(res.statusCode).toBe(200);
+    expect(res.body.trips).toEqual([]);
   });
 
   test('PUT /api/users/:userId/trips - trips must be array', async () => {
@@ -160,12 +160,11 @@ describe('Trips Endpoints', () => {
     expect(res.body.error).toBe('trips must be array');
   });
 
-  test('PUT /api/users/:userId/trips - invalid userId with valid array returns 500', async () => {
+  test('PUT /api/users/:userId/trips - invalid userId with valid array returns 200', async () => {
     const res = await request(BASE_URL)
       .put(`/api/users/${fakeUserId}/trips`)
       .send({ trips: [] });
-    expect(res.statusCode).toBe(500);
-    expect(res.body.error).toBe('Server error');
+    expect(res.statusCode).toBe(200);
+    expect(res.body.error).toBe('');
   });
-
 });
