@@ -73,9 +73,9 @@ app.post('/api/login', async (req, res) => {
 });
 
 app.post('/api/signup', async (req, res) => {
-  const { firstName, lastName, login, password } = req.body;
+  const { firstName, lastName, email, login, password } = req.body;
 
-  if (!firstName || !lastName || !login || !password) {
+  if (!firstName || !lastName || email! || !login || !password) {
     return res.status(400).json({ error: 'All fields are required' });
   }
 
@@ -96,6 +96,7 @@ app.post('/api/signup', async (req, res) => {
     const newUser = {
       firstName: firstName,
       lastName: lastName,
+      email: email.trim().toLowerCase(),
       login: login,
       password: password,
       createdAt: new Date(),
@@ -111,7 +112,7 @@ app.post('/api/signup', async (req, res) => {
 
     await resend.emails.send({
       from: 'Landmark <onboarding@resend.dev>',
-      to: login,
+      to: newUser.email,
       subject: 'Verify your email',
       html: `
         <h2>Welcome, ${firstName}!</h2>
@@ -223,7 +224,7 @@ app.post('/api/auth/forgot-password', async (req, res) => {
   try {
     const db = await connectDB();
 
-    const user = await db.collection('users').findOne({ login: email });
+    const user = await db.collection('users').findOne({ email: email.trim().toLowerCase() });
 
     if (!user) {
       return res.status(200).json({ message: 'If an account exists, a reset link has been sent.' });
