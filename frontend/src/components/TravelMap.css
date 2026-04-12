@@ -14,6 +14,10 @@
   --info-text: #1e40af;
 }
 
+body, html {
+  overscroll-behavior-y: none; 
+}
+
 .dark-mode {
   --bg-panel: #1f2937;
   --bg-sidebar: #111827;
@@ -262,7 +266,7 @@
     max-height: 1000px;
     opacity: 1;
     transform: translateZ(0);
-    overscroll-behavior: contain;
+    overscroll-behavior: contain !important;
   }
 
   .sidebar.closed .sheet-header {

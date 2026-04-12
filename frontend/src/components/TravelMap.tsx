@@ -1151,16 +1151,16 @@ const TravelMap = () => {
 
                 if (scrollArea) {
                   if (deltaY < 0) {
-                    const isAtBottom = Math.abs(scrollArea.scrollHeight - scrollArea.clientHeight - scrollArea.scrollTop) <= 2;
+                    const isAtBottom = Math.abs(scrollArea.scrollHeight - scrollArea.clientHeight - scrollArea.scrollTop) <= 10;
                     
                     if (!isAtBottom) {
-                       swipeState.current.isDragging = false;
+                       swipeState.current.isDragging = false; 
                        return;
                     }
-                  } 
+                  }
                   else {
-                    if (scrollArea.scrollTop > 0) {
-                       swipeState.current.isDragging = false;
+                    if (scrollArea.scrollTop > 5) {
+                       swipeState.current.isDragging = false; 
                        return;
                     }
                   }
