@@ -56,11 +56,19 @@ const getPinIcon = (color: string = '#3b82f6') => {
 
 // Map click listener
 // Also prevents map clicks from firing when interacting with popups or dragging markers
-const MapClickHandler = ({ onMapClick, isPopupOpen }: any) => {
+const MapClickHandler = ({ onMapClick, popupCount }: any) => {
   useMapEvents({
-    popupopen: () => { isPopupOpen.current = true; },
-    popupclose: () => { setTimeout(() => { isPopupOpen.current = false; }, 50); },
-    click: (e) => { if (!isPopupOpen.current) onMapClick(e.latlng); },
+    popupopen: () => { 
+      popupCount.current += 1; 
+    },
+    popupclose: () => { 
+      setTimeout(() => { 
+        popupCount.current = Math.max(0, popupCount.current - 1); 
+      }, 50); 
+    },
+    click: (e) => { 
+      if (popupCount.current === 0) onMapClick(e.latlng); 
+    },
   });
   return null;
 };
@@ -292,7 +300,7 @@ const TravelMap = () => {
   const dragItem = useRef<number | null>(null);
   const dragOverItem = useRef<number | null>(null);
   const markerRefs = useRef<{ [key: string]: any }>({});
-  const isPopupOpen = useRef(false);
+  const popupCount = useRef(0);
   const mapRef = useRef<any>(null);
   const longPressTimer = useRef<any>(null);
   const swipeStartY = useRef<number | null>(null);
@@ -301,7 +309,7 @@ const TravelMap = () => {
   const highlightCirclesRef = useRef<Record<number, any>>({});
   const isDraggingMapPin = useRef(false);
   const sidebarRef = React.useRef<HTMLDivElement>(null);
-  const swipeState = React.useRef({ startY: 0, lastY: 0, startHeight: 0, time: 0, velocity: 0, isDragging: false });
+  const swipeState = React.useRef({ startY: 0, lastY: 0, startHeight: 0, time: 0, velocity: 0, isDragging: false, hasDecided: false });
   const swipeTimeout = React.useRef<NodeJS.Timeout>();
 
   const WORLD_OFFSETS = [-1080, -720, -360, 0, 360, 720, 1080];
@@ -483,7 +491,7 @@ const TravelMap = () => {
 
   const handleMapClick = (latlng: any) => {
     if (editingPinId || uiHidden) return;
-    setIsSidebarOpen(true);
+    animateSheet(true, false);
     setDraftPin({ lat: latlng.lat, lng: latlng.lng });
     setCameraTarget({ lat: latlng.lat, lng: latlng.lng, triggerId: Date.now() });
     if (!draftPin) {
@@ -520,22 +528,25 @@ const TravelMap = () => {
     setFormName('');
     setFormBlurb('');
     setFormPhotos([]);
+
+    animateSheet(true, false);
   };
 
   const deletePin = (id: number) => {
     if (window.confirm(`Are you sure you want to delete ${tripPins.find(p => p.id === id)?.name}?`)) {
-      isPopupOpen.current = false; 
+      popupCount.current = 0;
       updateActiveTripPins(tripPins.filter(pin => pin.id !== id));
       if (editingPinId === id) {
         setEditingPinId(null);
         setOriginalPinCoords(null);
         setFormPhotos([]);
       }
+      animateSheet(true, false);
     }
   };
 
   const startEditing = (pin: any) => {
-    isPopupOpen.current = false; 
+    popupCount.current = 0;
     
     WORLD_OFFSETS.forEach(offset => {
       if (markerRefs.current[`${pin.id}-${offset}`]) {
@@ -549,7 +560,7 @@ const TravelMap = () => {
       ));
     }
 
-    setIsSidebarOpen(true);
+    animateSheet(true, false);
     setDraftPin(null); 
     setEditingPinId(pin.id);
     setFormName(pin.name);
@@ -571,6 +582,8 @@ const TravelMap = () => {
     setEditingPinId(null);
     setOriginalPinCoords(null);
     setFormPhotos([]);
+
+    animateSheet(true, false);
   };
 
   const handleSort = () => {
@@ -582,6 +595,56 @@ const TravelMap = () => {
       dragOverItem.current = null;
       updateActiveTripPins(_tripPins);
     }
+  };
+
+  const animateSheet = (targetOpen: boolean, targetExpanded: boolean) => {
+    if (!sidebarRef.current) {
+      setIsSidebarOpen(targetOpen);
+      setIsSheetExpanded(targetExpanded);
+      return;
+    }
+
+    if (swipeTimeout.current) clearTimeout(swipeTimeout.current);
+
+    sidebarRef.current.style.height = '100%'; 
+
+    const currentHeight = sidebarRef.current.getBoundingClientRect().height;
+    sidebarRef.current.style.maxHeight = `${currentHeight}px`;
+    sidebarRef.current.style.transition = 'none';
+
+    void sidebarRef.current.offsetHeight; 
+
+    let targetHeight = '';
+    if (!targetOpen) {
+      const header = sidebarRef.current.querySelector('.sheet-header') as HTMLElement;
+      const footer = sidebarRef.current.querySelector('.action-footer') as HTMLElement;
+      targetHeight = `${(header ? header.offsetHeight : 60) + (footer ? footer.offsetHeight : 0) + 15}px`; 
+    } else if (targetExpanded) {
+      targetHeight = `${window.innerHeight * 0.9}px`;
+    } else {
+      targetHeight = `${window.innerHeight * 0.5}px`;
+    }
+
+    sidebarRef.current.style.transition = 'max-height 0.4s cubic-bezier(0.1, 1, 0.2, 1)';
+    sidebarRef.current.style.maxHeight = targetHeight;
+
+    if (!targetOpen) sidebarRef.current.classList.add('closed');
+    else sidebarRef.current.classList.remove('closed');
+
+    if (targetExpanded) sidebarRef.current.classList.add('expanded');
+    else sidebarRef.current.classList.remove('expanded');
+
+    swipeTimeout.current = setTimeout(() => {
+      if (sidebarRef.current) {
+        sidebarRef.current.style.height = ''; 
+        sidebarRef.current.style.transition = ''; 
+        sidebarRef.current.style.maxHeight = '';  
+      }
+      
+      setIsSidebarOpen(targetOpen);
+      setIsSheetExpanded(targetExpanded);
+      swipeTimeout.current = undefined; 
+    }, 400);
   };
 
   const handleCardClick = (pin: any) => {
@@ -597,7 +660,7 @@ const TravelMap = () => {
     if(editingPinId) cancelForm();
 
     setActiveTripId(newTripId);
-    setIsSidebarOpen(true);
+    animateSheet(true, false);
     if (!visibleTripIds.includes(newTripId)) setVisibleTripIds(prev => [...prev, newTripId]);
     
     setDraftPin(null);
@@ -605,7 +668,7 @@ const TravelMap = () => {
     setFormName('');
     setFormBlurb('');
     setFormPhotos([]); 
-    isPopupOpen.current = false;
+    popupCount.current = 0;
 
     const newTripData = trips.find(t => t.id === newTripId);
     
@@ -657,7 +720,7 @@ const TravelMap = () => {
       setTrips([...trips, newTrip]);
       setActiveTripId(newTrip.id);
       setVisibleTripIds(prev => [...prev, newTrip.id]);
-      setIsSidebarOpen(true); 
+      animateSheet(true, false); 
       setIsDirty(true);
     } else if (tripModal.mode === 'rename') {
       setTrips(trips.map(t => t.id === activeTripId ? { ...t, name } : t));
@@ -1045,7 +1108,11 @@ const TravelMap = () => {
             style={{ display: 'flex', flexDirection: 'column' }}
             onClick={(e) => {
               const target = e.target as HTMLElement;
-              if (!target.closest('.trip-card') && !target.closest('.trip-style-box')) {
+              if (
+                !target.closest('.trip-card') && 
+                !target.closest('.trip-style-box') && 
+                !target.closest('.action-footer')
+              ) {
                 setSelectedCardId(null);
               }
             }}
@@ -1053,133 +1120,158 @@ const TravelMap = () => {
             onTouchStart={(e) => {
               if ((e.target as HTMLElement).closest('.desktop-drag')) return;
               if ((e.target as HTMLElement).closest('.color-ribbon')) return;
+              if ((e.target as HTMLElement).closest('button')) return;
+
               const scrollArea = (e.target as HTMLElement).closest('.sheet-content');
               if (scrollArea && scrollArea.scrollTop > 0) return;
 
-              if (swipeTimeout.current) clearTimeout(swipeTimeout.current);
-
               const rect = sidebarRef.current?.getBoundingClientRect();
-
               swipeState.current = {
                 startY: e.touches[0].clientY,
                 lastY: e.touches[0].clientY,
                 startHeight: rect ? rect.height : 0, 
                 time: Date.now(),
                 velocity: 0,
-                isDragging: true
+                isDragging: false, 
+                hasDecided: false 
               };
-
-              if (sidebarRef.current) {
-                sidebarRef.current.style.maxHeight = `${swipeState.current.startHeight}px`;
-                sidebarRef.current.style.transition = 'none';
-
-                if (!isSidebarOpen) sidebarRef.current.classList.remove('closed');
-              }
             }}
             
             onTouchMove={(e) => {
-              if (!swipeState.current.isDragging) return;
+              if (swipeState.current.hasDecided && !swipeState.current.isDragging) return;
 
               const currentY = e.touches[0].clientY;
               const deltaY = currentY - swipeState.current.startY;
+
+              if (!swipeState.current.hasDecided) {
+                if (Math.abs(deltaY) < 10) return;
+
+                swipeState.current.hasDecided = true;
+                const scrollArea = (e.target as HTMLElement).closest('.sheet-content');
+
+                if (scrollArea) {
+                  if (deltaY < 0) {
+                    const isAtBottom = Math.abs(scrollArea.scrollHeight - scrollArea.clientHeight - scrollArea.scrollTop) <= 2;
+                    
+                    if (!isAtBottom) {
+                       swipeState.current.isDragging = false;
+                       return;
+                    }
+                  } 
+                  else {
+                    if (scrollArea.scrollTop > 0) {
+                       swipeState.current.isDragging = false;
+                       return;
+                    }
+                  }
+                }
+
+                swipeState.current.isDragging = true;
+                if (sidebarRef.current) {
+                  if (swipeTimeout.current) clearTimeout(swipeTimeout.current);
+                  sidebarRef.current.style.height = '100%';
+                  sidebarRef.current.style.maxHeight = `${swipeState.current.startHeight}px`;
+                  sidebarRef.current.style.transition = 'none';
+
+                  if (!isSidebarOpen) sidebarRef.current.classList.remove('closed');
+                }
+              }
               
-              const now = Date.now();
-              const deltaTime = now - swipeState.current.time;
-              if (deltaTime > 0) {
-                const instantVelocity = (currentY - swipeState.current.lastY) / deltaTime;
-                swipeState.current.velocity = (swipeState.current.velocity + instantVelocity) / 2;
-              }
-              swipeState.current.lastY = currentY;
-              swipeState.current.time = now;
+              if(swipeState.current.isDragging) {
+                const now = Date.now();
+                const deltaTime = now - swipeState.current.time;
+                if (deltaTime > 0) {
+                  const instantVelocity = (currentY - swipeState.current.lastY) / deltaTime;
+                  swipeState.current.velocity = (swipeState.current.velocity + instantVelocity) / 2;
+                }
+                swipeState.current.lastY = currentY;
+                swipeState.current.time = now;
 
-              let newHeight = swipeState.current.startHeight - deltaY;
+                let newHeight = swipeState.current.startHeight - deltaY;
 
-              const maxVH = window.innerHeight * 0.9;
-              if (newHeight > maxVH) {
-                const excess = newHeight - maxVH;
-                newHeight = maxVH + (excess / 4);
-              }
-              if (newHeight < 60) newHeight = 60;
+                const maxVH = window.innerHeight * 0.9;
+                if (newHeight > maxVH) {
+                  const excess = newHeight - maxVH;
+                  newHeight = maxVH + (excess / 4);
+                }
+                if (newHeight < 60) newHeight = 60;
 
-              if (sidebarRef.current) {
-                sidebarRef.current.style.maxHeight = `${newHeight}px`;
+                if (sidebarRef.current) {
+                  sidebarRef.current.style.maxHeight = `${newHeight}px`;
+                }
               }
             }}
             
             onTouchEnd={(e) => {
-              if (!swipeState.current.isDragging) return;
+              if (!swipeState.current.hasDecided || !swipeState.current.isDragging) return;
               swipeState.current.isDragging = false;
 
               const deltaY = swipeState.current.lastY - swipeState.current.startY;
               const velocity = swipeState.current.velocity;
               const finalHeight = swipeState.current.startHeight - deltaY;
 
-              let targetOpen = isSidebarOpen;
-              let targetExpanded = isSheetExpanded;
-              
-              if (finalHeight < 160) { 
+              const projectedHeight = finalHeight - (velocity * 250); 
+              const vh = window.innerHeight;
+
+              let targetOpen = true;
+              let targetExpanded = false;
+
+              if (projectedHeight > vh * 0.90) { 
+                  targetOpen = true;
+                  targetExpanded = true;
+              }
+              else if (projectedHeight < vh * 0.20) { 
                   targetOpen = false;
                   targetExpanded = false;
               }
-              else if (velocity > 0.5 || deltaY > 50) {
-                if (velocity > 1.2 || deltaY > 180) {
-                  targetOpen = false; targetExpanded = false;
-                } else if (isSheetExpanded) {
+              else { 
+                  targetOpen = true;
                   targetExpanded = false;
-                } else {
+              }
+              if (finalHeight < 140) {
                   targetOpen = false;
-                }
-              }
-              else if (velocity < -0.5 || deltaY < -50) {
-                if (!isSidebarOpen) targetOpen = true;
-                else if (!isSheetExpanded) targetExpanded = true;
-              }
-              else {
-                if (finalHeight < 200) { targetOpen = false; targetExpanded = false; }
-                else if (finalHeight > window.innerHeight * 0.7) { targetOpen = true; targetExpanded = true; }
-                else { targetOpen = true; targetExpanded = false; }
+                  targetExpanded = false;
               }
 
               if (sidebarRef.current) {
+                sidebarRef.current.style.height = '100%'; 
+                
                 let targetHeight = '';
                 if (!targetOpen) {
                    const header = sidebarRef.current.querySelector('.sheet-header') as HTMLElement;
                    const footer = sidebarRef.current.querySelector('.action-footer') as HTMLElement;
                    const hHeight = header ? header.offsetHeight : 60;
                    const fHeight = footer ? footer.offsetHeight : 0;
-                   
                    targetHeight = `${hHeight + fHeight + 15}px`; 
                 } else if (targetExpanded) {
-                   targetHeight = '90svh';
+                   targetHeight = `${window.innerHeight * 0.9}px`; 
                 } else {
-                   targetHeight = '50svh';
+                   targetHeight = `${window.innerHeight * 0.5}px`;
                 }
 
-                // stealing the bottom sheet physics from Google Maps
                 const absVelocity = Math.abs(velocity);
                 const duration = Math.max(250, Math.min(550, 550 - (absVelocity * 100)));
                 
                 sidebarRef.current.style.transition = `max-height ${duration}ms cubic-bezier(0.1, 1, 0.2, 1)`;
                 sidebarRef.current.style.maxHeight = targetHeight;
-                
-                setIsSidebarOpen(targetOpen);
-                setIsSheetExpanded(targetExpanded);
 
-                if (sidebarRef.current) {
-                  if (!targetOpen) sidebarRef.current.classList.add('closed');
-                  else sidebarRef.current.classList.remove('closed');
+                if (!targetOpen) sidebarRef.current.classList.add('closed');
+                else sidebarRef.current.classList.remove('closed');
 
-                  if (targetExpanded) sidebarRef.current.classList.add('expanded');
-                  else sidebarRef.current.classList.remove('expanded');
-                }
+                if (targetExpanded) sidebarRef.current.classList.add('expanded');
+                else sidebarRef.current.classList.remove('expanded');
                 
                 const cleanupTime = Math.max(duration, 350);
 
                 swipeTimeout.current = setTimeout(() => {
                   if (sidebarRef.current) {
+                    sidebarRef.current.style.height = ''; 
                     sidebarRef.current.style.transition = ''; 
                     sidebarRef.current.style.maxHeight = '';  
                   }
+                  
+                  setIsSidebarOpen(targetOpen);
+                  setIsSheetExpanded(targetExpanded);
                 }, cleanupTime);
               }
             }}
@@ -1452,7 +1544,7 @@ const TravelMap = () => {
           url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png"
         />
         
-        <MapClickHandler onMapClick={handleMapClick} isPopupOpen={isPopupOpen} />
+        <MapClickHandler onMapClick={handleMapClick} popupCount={popupCount} />
         <MapCameraController target={cameraTarget} isSidebarOpen={isSidebarOpen}/>
         <MapBackgroundEvents selectedCardId={selectedCardId} setSelectedCardId={setSelectedCardId} />
         
@@ -1574,7 +1666,6 @@ const TravelMap = () => {
                             setTimeout(() => {
                               if (markerRefs.current[`${pin.id}-${offset}`]) {
                                 markerRefs.current[`${pin.id}-${offset}`].openPopup();
-                                isPopupOpen.current = true; 
                               }
                             }, 150);
                           }
@@ -1585,8 +1676,7 @@ const TravelMap = () => {
                     >
 
                       <Popup
-                        autoPanPaddingTopLeft={[10, 50]} 
-                        autoPanPaddingBottomRight={[10, 400]}
+                        autoPan={false}
                         minWidth={300}
                         maxWidth={500}
                       >
