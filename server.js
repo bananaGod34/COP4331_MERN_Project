@@ -34,6 +34,14 @@ const transporter = nodemailer.createTransport({
   }
 });
 
+transporter.verify((error, success) => {
+  if (error) {
+    console.error('Email transporter error:', error.message);
+  } else {
+    console.log('✓ Email server ready');
+  }
+});
+
 app.use((req, res, next) => 
 {
   res.setHeader('Access-Control-Allow-Origin', '*');
