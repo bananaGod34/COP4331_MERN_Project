@@ -47,11 +47,14 @@
 
 .info-box { padding: 10px; background-color: var(--info-bg); color: var(--info-text); border-radius: 6px; font-size: 13px; font-weight: bold; }
 
+.mobile-drag-handle {
+  display: none !important;
+}
+
 /* Invert tiles */
 .dark-mode .leaflet-tile-pane {
   filter: brightness(0.90) invert(1) hue-rotate(175deg) contrast(1.5);
 }
-
 
 /* Popups */
 .dark-mode .leaflet-popup-content-wrapper,
@@ -69,4 +72,118 @@
 
 .dark-mode .leaflet-control-zoom a:hover {
   background-color: var(--bg-sidebar);
+}
+
+.desktop-drag {
+  touch-action: none;
+}
+
+.mobile-panel-header {
+  display: none;
+}
+
+.sidebar {
+  transition: transform 0.3s ease-in-out; 
+  transform: translateX(0);
+}
+
+.sidebar.closed {
+  transform: translateX(100%);
+}
+
+.action-footer {
+  display: flex;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+@media (max-width: 768px) {
+  .desktop-toggle-btn {
+    display: none !important;
+  }
+
+  .mobile-drag-handle {
+    display: flex !important;
+  }
+
+  .map-wrapper {
+    height: 100dvh;
+    width: 100vw;
+  }
+
+  .floating-panel {
+    top: 15px;
+    left: 15px;
+    width: auto;
+    min-width: 120px;
+    padding: 12px 15px;
+  }
+
+  .mobile-panel-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    cursor: pointer;
+    user-select: none;
+  }
+
+  .desktop-panel-header h3 {
+    display: none;
+  }
+
+  .floating-panel.mobile-collapsed .panel-content {
+    display: none;
+  }
+  
+  .floating-panel:not(.mobile-collapsed) .panel-content {
+    margin-top: 15px;
+    border-top: 1px solid var(--border-light);
+    padding-top: 15px;
+  }
+
+  .sidebar {
+    position: fixed;
+    top: auto;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 50vh;
+    border-radius: 20px 20px 0 0; 
+    box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.15);
+    transform: translateY(0); 
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .sidebar.closed {
+    transform: translateY(calc(100% - 60px)); 
+  }
+
+  .sidebar-toggle-btn {
+    position: absolute;
+    top: -20px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+  }
+
+  .sidebar h2 {
+    margin-top: 10px !important;
+  }
+
+  .action-footer {
+    position: sticky;
+    bottom: -15px;
+    
+    margin-left: -15px;
+    margin-right: -15px;
+    margin-bottom: -15px;
+    
+    padding: 15px; 
+    
+    background-color: var(--bg-panel);
+    border-top: 1px solid var(--border-light);
+    z-index: 10;
+  }
 }

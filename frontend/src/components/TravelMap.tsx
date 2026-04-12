@@ -61,13 +61,26 @@ const MapClickHandler = ({ onMapClick, isPopupOpen }: any) => {
 };
 
 // Pan to target pin
-const MapCameraController = ({ target }: any) => {
+const MapCameraController = ({ target, isSidebarOpen }: any) => {
   const map = useMap();
+  
   useEffect(() => {
     if (target) {
-      map.panTo([target.lat, target.lng], { animate: true, duration: 0.4 });
+      const isMobile = window.innerWidth <= 768;
+      
+      if (isMobile && isSidebarOpen) {
+        const targetPoint = map.project([target.lat, target.lng], map.getZoom());
+        
+        targetPoint.y += (window.innerHeight * 0.25);
+        
+        const offsetLatLng = map.unproject(targetPoint, map.getZoom());
+        map.panTo(offsetLatLng, { animate: true, duration: 0.4 });
+      } else {
+        map.panTo([target.lat, target.lng], { animate: true, duration: 0.4 });
+      }
     }
-  }, [target, map]);
+  }, [target, map, isSidebarOpen]);
+  
   return null;
 };
 
@@ -115,6 +128,11 @@ const TravelMap = () => {
   const [cameraTarget, setCameraTarget] = useState<{lat: number, lng: number, triggerId: number} | null>(null);
   const [originalPinCoords, setOriginalPinCoords] = useState<{lat: number, lng: number} | null>(null);
 
+  //>>>MOBILE MENU
+  const [isMobileScreen, setIsMobileScreen] = useState(window.innerWidth <= 768);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [activeDragId, setActiveDragId] = useState<number | null>(null);
+
   // STATE: Dark Mode
   const [darkMode, setDarkMode] = useState(() => {
     const savedTheme = localStorage.getItem('travelmap_theme');
@@ -130,12 +148,18 @@ const TravelMap = () => {
   const [formBlurb, setFormBlurb] = useState('');
   const [formPhotos, setFormPhotos] = useState<string[]>([]);
 
+  // STATE: Touch Gestures
+  const [touchStart, setTouchStart] = useState<{x: number, y: number} | null>(null);
+  const [touchEnd, setTouchEnd] = useState<{x: number, y: number} | null>(null);
+  const minSwipeDistance = 50;
+
   // REFS
   const dragItem = useRef<number | null>(null);
   const dragOverItem = useRef<number | null>(null);
   const markerRefs = useRef<{ [key: string]: any }>({});
   const isPopupOpen = useRef(false);
   const mapRef = useRef<any>(null);
+  const longPressTimer = useRef<any>(null);
 
   const WORLD_OFFSETS = [-1080, -720, -360, 0, 360, 720, 1080];
 
@@ -192,6 +216,13 @@ const TravelMap = () => {
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [gallery.isOpen, tripModal.isOpen, editingPinId, uiHidden]);
+
+  // mobile screen resize listener
+  useEffect(() => {
+    const handleResize = () => setIsMobileScreen(window.innerWidth <= 768);
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   // --- EFFECTS ---
   // toggle dark mode
@@ -353,6 +384,7 @@ const TravelMap = () => {
       ));
     }
 
+    setIsSidebarOpen(true);
     setDraftPin(null); 
     setEditingPinId(pin.id);
     setFormName(pin.name);
@@ -620,11 +652,31 @@ const TravelMap = () => {
 
       {/* Photo Gallery Modal */}
       {gallery.isOpen && (
-        <div style={{
-          position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh',
-          backgroundColor: 'rgba(0,0,0,0.92)', zIndex: 10000, 
-          display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center'
-        }}>
+        <div
+          style={{
+            position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh',
+            backgroundColor: 'rgba(0,0,0,0.92)', zIndex: 10000, 
+            display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center'
+          }}
+          onTouchStart={(e) => {
+            setTouchEnd(null);
+            setTouchStart({ x: e.targetTouches[0].clientX, y: e.targetTouches[0].clientY });
+          }}
+          onTouchMove={(e) => setTouchEnd({ x: e.targetTouches[0].clientX, y: e.targetTouches[0].clientY })}
+          onTouchEnd={() => {
+            if (!touchStart || !touchEnd) return;
+            const distanceX = touchStart.x - touchEnd.x;
+            const isLeftSwipe = distanceX > minSwipeDistance;
+            const isRightSwipe = distanceX < -minSwipeDistance;
+
+            if (isLeftSwipe && gallery.photos.length > 1) {
+              setGallery({ ...gallery, currentIndex: (gallery.currentIndex + 1) % gallery.photos.length });
+            }
+            if (isRightSwipe && gallery.photos.length > 1) {
+              setGallery({ ...gallery, currentIndex: (gallery.currentIndex - 1 + gallery.photos.length) % gallery.photos.length });
+            }
+          }}
+        >
           <button
             onClick={() => setGallery({ ...gallery, isOpen: false })} 
             style={{ position: 'absolute', top: '20px', right: '30px', background: 'none', border: 'none', color: 'white', fontSize: '40px', cursor: 'pointer', zIndex: 10001 }}
@@ -676,111 +728,125 @@ const TravelMap = () => {
 
       {!uiHidden && (
         <>
-          <div className="floating-panel">
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '15px', gap: '15px' }}>
-              <h2 style={{ margin: 0, fontSize: '18px' }}>Your Trips</h2>
-              <button onClick={handleCreateNewTrip} className="mini-btn mini-btn-default" style={{ padding: '6px 10px', fontWeight: 'bold', flexShrink: 0 }}>+ New</button>
+          {/* Floating Panel */}
+          <div className={`floating-panel ${!isMobileMenuOpen ? 'mobile-collapsed' : ''}`}>
+
+            {/* Mobile Menu Header */}
+            <div className="mobile-panel-header" onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}>
+              <strong style={{ fontSize: '16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <span style={{ fontSize: '20px' }}>{isMobileMenuOpen ? '✖' : '☰'}</span> 
+                {!isMobileMenuOpen && 'Menu'}
+              </strong>
             </div>
 
-            {/* Trip List */}
-            <div style={{ maxHeight: '200px', overflowY: 'auto', marginBottom: '15px', display: 'flex', flexDirection: 'column', gap: '6px' }}>
-              {trips.map(trip => {
-                const isActive = trip.id === activeTripId;
-                const displayColor = getDisplayColor((trip as any).lineColor || '#3b82f6');
-                
-                return (
-                  <div 
-                    key={`list-${trip.id}`} 
-                    onClick={() => handleSwitchTrip(trip.id)}
-                    style={{ 
-                      display: 'flex', alignItems: 'center', justifyContent: 'space-between', 
-                      padding: '10px', borderRadius: '8px', cursor: isActive ? 'default' : 'pointer',
-                      backgroundColor: isActive ? 'var(--border-light)' : 'transparent',
-                      borderLeft: isActive ? `5px solid ${displayColor}` : '5px solid transparent',
-                      color: 'var(--text-main)',
-                      minHeight: '46px',
-                      boxSizing: 'border-box'
-                    }}
-                  >
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flex: 1 }}>
-                      <input 
-                        type="checkbox" 
-                        aria-label={`Toggle visibility for ${trip.name}`}
-                        checked={visibleTripIds.includes(trip.id)} 
-                        onChange={() => toggleVisibility(trip.id)}
-                        onClick={(e) => e.stopPropagation()} 
-                        style={{ cursor: 'pointer', transform: 'scale(1.2)' }}
-                      />
-
-                      <div style={{ 
-                        width: '14px', height: '14px', borderRadius: '50%', 
-                        backgroundColor: displayColor, flexShrink: 0, 
-                        boxShadow: '0 1px 3px rgba(0,0,0,0.2)' 
-                      }} />
-
-                      <strong style={{ fontSize: '15px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: isActive ? '120px' : '180px' }}>
-                        {trip.name}
-                      </strong>
-                    </div>
-
-                    {isActive && (
-                      <div style={{ display: 'flex', gap: '5px' }}>
-                        <button onClick={(e) => { e.stopPropagation(); handleRenameTrip(); }} aria-label={`Edit ${trip.name}`} style={{ background: 'var(--bg-panel)', border: '1px solid var(--border-input)', color: 'var(--text-main)', cursor: 'pointer', borderRadius: '4px', padding: '4px 6px', fontSize: '12px' }}>✏️</button>
-                        <button onClick={(e) => { e.stopPropagation(); handleDeleteTrip(); }} aria-label={`Delete ${trip.name}`} style={{ background: 'var(--bg-panel)', border: '1px solid var(--border-input)', color: 'var(--text-main)', cursor: 'pointer', borderRadius: '4px', padding: '4px 6px', fontSize: '12px' }}>🗑️</button>
-                      </div>
-                    )}
-                  </div>
-                );
-              })}
-            </div>
-
-            <hr style={{ border: 'none', borderTop: '1px solid var(--border-light)', marginBottom: '15px' }} />
-            
-            {/*
-            <label style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '14px', cursor: 'pointer', marginBottom: '10px' }}>
-              <input type="checkbox" checked={pinsUnlocked} onChange={(e) => setPinsUnlocked(e.target.checked)} />
-              Unlock active pins
-            </label>
-            */}
-            
-            <div style={{ display: 'flex', gap: '5px', alignItems: 'center', minWidth: '220px' }}>
-              {/* Dark Mode Toggle Switch */}
-              <div
-                style={{ display: 'flex', alignItems: 'center', gap: '6px', flex: 1, padding: '5px 8px', borderRadius: '4px', background: 'var(--border-light)', cursor: 'pointer' }}
-                aria-label="Toggle Dark Mode"
-                onClick={() => setDarkMode(d => !d)}
-              >
-                <span style={{ fontSize: '12px', color: 'var(--text-main)', userSelect: 'none' }}>
-                  {darkMode ? '🌙' : '☀️'}
-                </span>
-                <div style={{
-                  width: '32px', height: '18px', borderRadius: '9px',
-                  background: darkMode ? 'var(--accent-blue)' : '#cbd5e1',
-                  position: 'relative', transition: 'background 0.2s', flexShrink: 0,
-                }}>
-                  <div style={{
-                    position: 'absolute', top: '2px',
-                    left: darkMode ? '16px' : '2px',
-                    width: '14px', height: '14px', borderRadius: '50%',
-                    background: 'white', transition: 'left 0.2s',
-                    boxShadow: '0 1px 3px rgba(0,0,0,0.3)',
-                  }} />
-                </div>
+            {/* Panel Content */}
+            <div className="panel-content">
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '15px', gap: '15px' }}>
+                <h2 style={{ margin: 0, fontSize: '18px' }}>Your Trips</h2>
+                <button onClick={handleCreateNewTrip} className="mini-btn mini-btn-default" style={{ padding: '6px 10px', fontWeight: 'bold', flexShrink: 0 }}>+ New</button>
               </div>
-              <button
-                onClick={() => setUiHidden(true)}
-                aria-label="Enter Zen Mode"
-                className="mini-btn mini-btn-default" style={{ flex: 1 }}>👁️</button>
+
+              {/* Trip List */}
+              <div style={{ maxHeight: '200px', overflowY: 'auto', marginBottom: '15px', display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                {trips.map(trip => {
+                  const isActive = trip.id === activeTripId;
+                  const displayColor = getDisplayColor((trip as any).lineColor || '#3b82f6');
+                  
+                  return (
+                    <div 
+                      key={`list-${trip.id}`} 
+                      onClick={() => handleSwitchTrip(trip.id)}
+                      style={{ 
+                        display: 'flex', alignItems: 'center', justifyContent: 'space-between', 
+                        padding: '10px', borderRadius: '8px', cursor: isActive ? 'default' : 'pointer',
+                        backgroundColor: isActive ? 'var(--border-light)' : 'transparent',
+                        borderLeft: isActive ? `5px solid ${displayColor}` : '5px solid transparent',
+                        color: 'var(--text-main)',
+                        minHeight: '46px',
+                        boxSizing: 'border-box'
+                      }}
+                    >
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flex: 1 }}>
+                        <input 
+                          type="checkbox" 
+                          aria-label={`Toggle visibility for ${trip.name}`}
+                          checked={visibleTripIds.includes(trip.id)} 
+                          onChange={() => toggleVisibility(trip.id)}
+                          onClick={(e) => e.stopPropagation()} 
+                          style={{ cursor: 'pointer', transform: 'scale(1.2)' }}
+                        />
+
+                        <div style={{ 
+                          width: '14px', height: '14px', borderRadius: '50%', 
+                          backgroundColor: displayColor, flexShrink: 0, 
+                          boxShadow: '0 1px 3px rgba(0,0,0,0.2)' 
+                        }} />
+
+                        <strong style={{ fontSize: '15px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: isActive ? '120px' : '180px' }}>
+                          {trip.name}
+                        </strong>
+                      </div>
+
+                      {isActive && (
+                        <div style={{ display: 'flex', gap: '5px' }}>
+                          <button onClick={(e) => { e.stopPropagation(); handleRenameTrip(); }} aria-label={`Edit ${trip.name}`} style={{ background: 'var(--bg-panel)', border: '1px solid var(--border-input)', color: 'var(--text-main)', cursor: 'pointer', borderRadius: '4px', padding: '4px 6px', fontSize: '12px' }}>✏️</button>
+                          <button onClick={(e) => { e.stopPropagation(); handleDeleteTrip(); }} aria-label={`Delete ${trip.name}`} style={{ background: 'var(--bg-panel)', border: '1px solid var(--border-input)', color: 'var(--text-main)', cursor: 'pointer', borderRadius: '4px', padding: '4px 6px', fontSize: '12px' }}>🗑️</button>
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+
+              <hr style={{ border: 'none', borderTop: '1px solid var(--border-light)', marginBottom: '15px' }} />
+              
+              {/*
+              <label style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '14px', cursor: 'pointer', marginBottom: '10px' }}>
+                <input type="checkbox" checked={pinsUnlocked} onChange={(e) => setPinsUnlocked(e.target.checked)} />
+                Unlock active pins
+              </label>
+              */}
+              
+              <div style={{ display: 'flex', gap: '5px', alignItems: 'center', minWidth: '220px' }}>
+                {/* Dark Mode Toggle Switch */}
+                <div
+                  style={{ display: 'flex', alignItems: 'center', gap: '6px', flex: 1, padding: '5px 8px', borderRadius: '4px', background: 'var(--border-light)', cursor: 'pointer' }}
+                  aria-label="Toggle Dark Mode"
+                  onClick={() => setDarkMode(d => !d)}
+                >
+                  <span style={{ fontSize: '12px', color: 'var(--text-main)', userSelect: 'none' }}>
+                    {darkMode ? '🌙' : '☀️'}
+                  </span>
+                  <div style={{
+                    width: '32px', height: '18px', borderRadius: '9px',
+                    background: darkMode ? 'var(--accent-blue)' : '#cbd5e1',
+                    position: 'relative', transition: 'background 0.2s', flexShrink: 0,
+                  }}>
+                    <div style={{
+                      position: 'absolute', top: '2px',
+                      left: darkMode ? '16px' : '2px',
+                      width: '14px', height: '14px', borderRadius: '50%',
+                      background: 'white', transition: 'left 0.2s',
+                      boxShadow: '0 1px 3px rgba(0,0,0,0.3)',
+                    }} />
+                  </div>
+                </div>
+                <button
+                  onClick={() => setUiHidden(true)}
+                  aria-label="Enter Zen Mode"
+                  className="mini-btn mini-btn-default" style={{ flex: 1 }}>👁️</button>
+              </div>
+              <button disabled={!isDirty || isSaving} onClick={handleSaveTrips} className="btn" style={{ background: 'none', border: '1px solid var(--accent-blue)', color: 'var(--accent-blue)', padding: '6px 10px', fontSize: '14px', width: '100%', marginTop: '10px', fontWeight: 'bold', opacity: (!isDirty || isSaving) ? 0.6 : 1, cursor: (!isDirty || isSaving) ? 'not-allowed' : 'pointer' }}>
+                {isSaving ? 'Saving...' : (isDirty ? 'Save Changes' : 'Saved')}
+              </button>
+              <button onClick={handleLogout} className="btn" style={{ background: 'none', border: '1px solid var(--accent-red)', color: 'var(--accent-red)', padding: '6px 10px', fontSize: '14px', width: '100%', marginTop: '10px', fontWeight: 'bold' }}>
+                Sign Out
+              </button>
             </div>
-            <button disabled={!isDirty || isSaving} onClick={handleSaveTrips} className="btn" style={{ background: 'none', border: '1px solid var(--accent-blue)', color: 'var(--accent-blue)', padding: '6px 10px', fontSize: '14px', width: '100%', marginTop: '10px', fontWeight: 'bold', opacity: (!isDirty || isSaving) ? 0.6 : 1, cursor: (!isDirty || isSaving) ? 'not-allowed' : 'pointer' }}>
-              {isSaving ? 'Saving...' : (isDirty ? 'Save Changes' : 'Saved')}
-            </button>
-            <button onClick={handleLogout} className="btn" style={{ background: 'none', border: '1px solid var(--accent-red)', color: 'var(--accent-red)', padding: '6px 10px', fontSize: '14px', width: '100%', marginTop: '10px', fontWeight: 'bold' }}>
-              Sign Out
-            </button>
           </div>
           
-          <button 
+          <button
+            className="desktop-toggle-btn"
             onClick={() => setIsSidebarOpen(!isSidebarOpen)}
             aria-label={isSidebarOpen ? "Close Sidebar" : "Open Sidebar"}
             style={{ 
@@ -803,7 +869,39 @@ const TravelMap = () => {
           </button>
 
           {/* Right Sidebar */}
-          <div className="sidebar"style={{ transform: isSidebarOpen ? 'translateX(0)' : 'translateX(100%)', transition: 'transform 0.3s ease-in-out' }}>
+          <div className={`sidebar ${!isSidebarOpen ? 'closed' : ''}`}>
+            {/* Mobile Sidebar Handle */}
+            <div
+              className="mobile-drag-handle"
+              style={{
+                position: 'absolute',
+                top: 0,
+                left: 0,
+                width: '100%',
+                height: '30px',
+                display: 'flex', 
+                alignItems: 'center',
+                justifyContent: 'center', 
+                cursor: 'grab',
+                touchAction: 'none'
+              }}
+              onTouchStart={(e) => {
+                setTouchEnd(null);
+                setTouchStart({ x: e.targetTouches[0].clientX, y: e.targetTouches[0].clientY });
+              }}
+              onTouchMove={(e) => setTouchEnd({ x: e.targetTouches[0].clientX, y: e.targetTouches[0].clientY })}
+              onTouchEnd={() => {
+                if (!touchStart || !touchEnd) return;
+                const distanceY = touchStart.y - touchEnd.y;
+                const isDownSwipe = distanceY < -minSwipeDistance;
+                const isUpSwipe = distanceY > minSwipeDistance;
+
+                if (isDownSwipe) setIsSidebarOpen(false);
+                if (isUpSwipe) setIsSidebarOpen(true);
+              }}
+            >
+              <div style={{ width: '40px', height: '5px', backgroundColor: 'var(--border-input)', borderRadius: '3px' }} />
+            </div>
             {(draftPin || editingPinId) ? (
               // VIEW 1: FORM (Add/Edit)
               <>
@@ -868,9 +966,13 @@ const TravelMap = () => {
                     </div>
                   </div>
 
-                  <div style={{ display: 'flex', gap: '10px', marginTop: '10px' }}>
-                    <button type="submit" className="btn btn-blue">{editingPinId ? "Update Pin" : "Save Pin"}</button>
-                    <button type="button" onClick={cancelForm} className="btn btn-red">Cancel</button>
+                  <div className="action-footer">
+                    <button type="submit" className="btn btn-blue" style={{ flex: 1, padding: '12px' }}>
+                      {editingPinId ? "Update Pin" : "Save Pin"}
+                    </button>
+                    <button type="button" onClick={cancelForm} className="btn btn-red" style={{ flex: 1, padding: '12px' }}>
+                      Cancel
+                    </button>
                   </div>
                 </form>
               </>
@@ -923,10 +1025,29 @@ const TravelMap = () => {
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
                   {tripPins.map((pin, index) => (
                     <div 
-                      key={pin.id} className="trip-card" draggable 
-                      onDragStart={(e) => (dragItem.current = index)} onDragEnter={(e) => (dragOverItem.current = index)} onDragEnd={handleSort} onDragOver={(e) => e.preventDefault()} onDoubleClick={() => startEditing(pin)}
+                      key={pin.id} className="trip-card"
+                      draggable={activeDragId === pin.id}
+                      onDragStart={(e) => (dragItem.current = index)}
+                      onDragEnter={(e) => (dragOverItem.current = index)}
+                      onDragEnd={handleSort}
+                      onDragOver={(e) => e.preventDefault()}
+                      onDoubleClick={() => startEditing(pin)}
+                      onTouchStart={() => {
+                        longPressTimer.current = setTimeout(() => startEditing(pin), 500);
+                      }}
+                      onTouchEnd={() => clearTimeout(longPressTimer.current)}
+                      onTouchMove={() => clearTimeout(longPressTimer.current)}
                     >
-                      <div style={{ color: '#9ca3af', fontSize: '20px', cursor: 'grab' }}>☰</div>
+                      <span 
+                          className="desktop-drag" 
+                          style={{ fontSize: '20px', cursor: 'grab', touchAction: 'none' }}
+                          onMouseDown={() => setActiveDragId(pin.id)}
+                          onTouchStart={() => setActiveDragId(pin.id)}
+                          onMouseUp={() => setActiveDragId(null)}
+                          onTouchEnd={() => setActiveDragId(null)}
+                        >
+                          ☰
+                        </span>
                       
                       {pin.photoUrls && pin.photoUrls.length > 0 && (
                         <img
@@ -962,13 +1083,13 @@ const TravelMap = () => {
         doubleClickZoom={false}
         style={{ height: '100%', width: '100%' }}
       >
-        <ZoomControl position="bottomleft" />
+        <ZoomControl position={isMobileScreen ? "topright" : "bottomleft"} />
         <TileLayer
           url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png"
         />
         
         <MapClickHandler onMapClick={handleMapClick} isPopupOpen={isPopupOpen} />
-        <MapCameraController target={cameraTarget} />
+        <MapCameraController target={cameraTarget} isSidebarOpen={isSidebarOpen}/>
         
         {/* Polyline (triple rendered for dateline wrapping) */}
         {visibleTripsData.map(trip => {
@@ -1023,6 +1144,7 @@ const TravelMap = () => {
                           updateActiveTripPins(tripPins.map(p => p.id === pin.id ? { ...p, lat: position.lat, lng: trueLng } : p));
                         },
                         dblclick: () => { if (!uiHidden) startEditing(pin); },
+                        contextmenu: () => { if (!uiHidden) startEditing(pin); },
                         click: () => {
                         if (trip.id !== activeTripId) {
                           handleSwitchTrip(trip.id, pin);
