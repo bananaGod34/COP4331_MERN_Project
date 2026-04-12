@@ -219,5 +219,104 @@ app.post('/api/auth/verify-email', async (req, res) => {
   }
 });
 
+app.post('/api/auth/forgot-password', async (req, res) => {
+  const { email } = req.body;
+
+  if (!email) {
+    return res.status(400).json({ error: 'Email is required.' });
+  }
+
+  try {
+    const db = await connectDB();
+
+    const user = await db.collection('users').findOne({ login: email });
+
+    if (!user) {
+      return res.status(200).json({ message: 'If an account exists, a reset link has been sent.' });
+    }
+
+    //generate reset token
+    const resetToken = crypto.randomBytes(32).toString('hex');
+    const resetExpiry = new Date(Date.now() + 1 * 60 * 60 * 1000); // 1 hour
+
+    //store token on user
+    await db.collection('users').updateOne(
+      { _id: user._id },
+      {
+        $set: {
+          reset_token: resetToken,
+          reset_token_expires: resetExpiry
+        }
+      }
+    );
+
+    //send email
+    const resetLink = `${process.env.FRONTEND_URL}/reset-password?token=${resetToken}`;
+
+    await transporter.sendMail({
+      from: `"Landmark" <${process.env.EMAIL_USER}>`,
+      to: email,
+      subject: 'Password Reset Request',
+      html: `
+        <h2>Password Reset</h2>
+        <p>Hi ${user.firstName},</p>
+        <p>Click the button below to reset your password. This link expires in <strong>1 hour</strong>.</p>
+        <a href="${resetLink}" style="
+          background:#3b82f6;
+          color:white;
+          padding:12px 24px;
+          border-radius:6px;
+          text-decoration:none;
+          display:inline-block;
+          margin:16px 0;
+        ">Reset Password</a>
+        <p>If you didn't request this, you can safely ignore this email.</p>
+      `
+    });
+
+    return res.status(200).json({ message: 'If an account exists, a reset link has been sent.' });
+
+  } catch (err) {
+    console.error('Forgot password error:', err);
+    return res.status(500).json({ error: 'Server error. Please try again.' });
+  }
+});
+
+app.post('/api/auth/reset-password', async (req, res) => {
+  const { token, newPassword } = req.body;
+
+  if (!token || !newPassword) {
+    return res.status(400).json({ error: 'Token and new password are required.' });
+  }
+
+  try {
+    const db = await connectDB();
+
+    const user = await db.collection('users').findOne({
+      reset_token: token,
+      reset_token_expires: { $gt: new Date() } //token not expired
+    });
+
+    if (!user) {
+      return res.status(400).json({ error: 'Invalid or expired reset token.' });
+    }
+
+    //update password and clear reset token
+    await db.collection('users').updateOne(
+      { _id: user._id },
+      {
+        $set: { password: newPassword },
+        $unset: { reset_token: '', reset_token_expires: '' }
+      }
+    );
+
+    return res.status(200).json({ message: 'Password reset successfully!' });
+
+  } catch (err) {
+    console.error('Reset password error:', err);
+    return res.status(500).json({ error: 'Server error. Please try again.' });
+  }
+});
+
 console.log("step 6");
 app.listen(5000); // start Node + Express server on port 5000
