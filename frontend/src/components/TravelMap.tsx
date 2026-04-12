@@ -90,6 +90,20 @@ const MapCameraController = ({ target, isSidebarOpen }: any) => {
   return null;
 }
 
+const MapBackgroundEvents = ({ selectedCardId, setSelectedCardId }: any) => {
+  const map = useMapEvents({
+    click: () => setSelectedCardId(null)
+  });
+
+  React.useEffect(() => {
+    if (selectedCardId === null) {
+      map.closePopup();
+    }
+  }, [selectedCardId, map]);
+
+  return null;
+};
+
 // --- COMPONENTS ---
 
 // Draggable card subcomponent
@@ -108,10 +122,14 @@ const SortableTripCard = ({
   const longPressTimer = React.useRef<NodeJS.Timeout>();
 
   const isSelected = selectedCardId === pin.id;
+  const lockedTransform = transform ? { ...transform, x: 0 } : null;
 
   const style = {
-    transform: CSS.Transform.toString(transform),
-    transition,
+    transform: CSS.Translate.toString(lockedTransform),
+    transition: transition 
+      ? `${transition}, background-color 0.3s ease-in-out, border-color 0.3s ease-in-out, box-shadow 0.3s ease-in-out` 
+      : 'background-color 0.3s ease-in-out, border-color 0.3s ease-in-out, box-shadow 0.3s ease-in-out',
+      
     position: 'relative' as const,
     zIndex: isDragging ? 999 : 1,
     opacity: isDragging ? 0.8 : 1,
@@ -125,65 +143,74 @@ const SortableTripCard = ({
       style={{
         ...style,
         borderColor: isSelected ? getDisplayColor((activeTrip as any)?.lineColor || '#3b82f6') : undefined,
-        boxShadow: isSelected ? `0 0 0 1px ${getDisplayColor((activeTrip as any)?.lineColor || '#3b82f6')}` : style.boxShadow
+        boxShadow: isSelected ? `0 0 0 1px ${getDisplayColor((activeTrip as any)?.lineColor || '#3b82f6')}` : style.boxShadow,
+        // Added flex-col so we can stack rows!
+        display: 'flex', flexDirection: 'column', padding: '12px'
       }}
       onDoubleClick={() => startEditing(pin)}
-      onTouchStart={() => {
-        longPressTimer.current = setTimeout(() => startEditing(pin), 500);
-      }}
+      onTouchStart={() => { longPressTimer.current = setTimeout(() => startEditing(pin), 500); }}
       onTouchEnd={() => clearTimeout(longPressTimer.current)}
       onTouchMove={() => clearTimeout(longPressTimer.current)}
     >
-      <div 
-        {...attributes} 
-        {...listeners} 
-        className="desktop-drag" 
-        style={{ width: '44px', height: '44px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '20px', cursor: 'grab', touchAction: 'none', marginLeft: '-10px', color: 'var(--text-muted)' }}
-      >
-        ☰
-      </div>
-
-      {/* Thumbnail */}
-      {pin.photoUrls && pin.photoUrls.length > 0 && (
-        <img
-          src={pin.photoUrls[0]}
-          onClick={(e) => { e.preventDefault(); e.stopPropagation(); setGallery({ isOpen: true, photos: pin.photoUrls, currentIndex: 0 }); }}
-          alt="Thumbnail"
-          style={{ width: '40px', height: '40px', cursor: 'pointer', objectFit: 'cover', borderRadius: '4px', flexShrink: 0 }} />
-      )}
-
-      {/* Text Content */}
-      <div style={{ flex: 1, cursor: 'pointer' }} onClick={() => handleCardClick(pin)}>
-        <h3 style={{ margin: '0 0 5px 0', fontSize: '15px', color: 'var(--text-main)' }}>
-          {index + 1}. {pin.name}
-        </h3>
-        <p style={{ margin: 0, fontSize: '13px', color: 'var(--text-muted)' }}>
-          {pin.blurb.substring(0, 48)}{pin.blurb.length > 48 ? '...' : ''}
-        </p>
-      </div>
-
-      {/* Action Buttons */}
-      {isSelected && (
-        <div style={{ display: 'flex', gap: '2px', marginLeft: '5px' }}>
-          <button
-            onClick={(e) => { e.stopPropagation(); startEditing(pin); }}
-            aria-label="Edit Stop"
-            style={{ background: 'none', border: 'none', color: 'var(--accent-blue)', fontSize: '18px', cursor: 'pointer', padding: '10px' }}
-          >
-            ✏️
-          </button>
-          <button
-            onClick={(e) => {
-              e.stopPropagation(); 
-              if (window.confirm(`Are you sure you want to delete ${pin.name}?`)) deletePin(pin.id);
-            }}
-            aria-label="Delete Stop"
-            style={{ background: 'none', border: 'none', color: 'var(--accent-red)', fontSize: '18px', cursor: 'pointer', padding: '10px' }}
-          >
-            🗑️
-          </button>
+      
+      {/* ROW 1 */}
+      <div style={{ display: 'flex', alignItems: 'center', width: '100%' }}>
+        <div 
+          {...attributes} {...listeners} className="desktop-drag" 
+          style={{ width: '40px', display: 'flex', justifyContent: 'center', cursor: 'grab', touchAction: 'none', marginLeft: '-10px', color: 'var(--text-muted)' }}
+        >
+          ☰
         </div>
-      )}
+
+        {pin.photoUrls && pin.photoUrls.length > 0 && (
+          <img
+            src={pin.photoUrls[0]}
+            onClick={(e) => { e.preventDefault(); e.stopPropagation(); setGallery({ isOpen: true, photos: pin.photoUrls, currentIndex: 0 }); }}
+            alt="Thumbnail"
+            style={{ width: '40px', height: '40px', cursor: 'pointer', objectFit: 'cover', borderRadius: '4px', flexShrink: 0, marginRight: '10px' }} 
+          />
+        )}
+
+        <div style={{ flex: 1, minWidth: 0, cursor: 'pointer' }} onClick={() => handleCardClick(pin)}>
+          <h3 style={{ margin: '0 0 4px 0', fontSize: '15px', color: 'var(--text-main)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+            {index + 1}. {pin.name}
+          </h3>
+          <p style={{ margin: 0, fontSize: '13px', color: 'var(--text-muted)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+            {pin.blurb}
+          </p>
+        </div>
+      </div>
+
+      {/* ROW 2 */}
+      <div 
+        style={{ 
+          display: 'grid', 
+          gridTemplateRows: isSelected ? '1fr' : '0fr', 
+          transition: 'grid-template-rows 0.3s ease-in-out' 
+        }}
+      >
+        <div style={{ overflow: 'hidden' }}>
+          <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px', marginTop: '10px', paddingTop: '8px', borderTop: '1px solid var(--border-light)' }}>
+            <button
+              onClick={(e) => { e.stopPropagation(); startEditing(pin); }}
+              style={{ background: 'var(--bg-sidebar)', border: '1px solid var(--border-input)', borderRadius: '6px', color: 'var(--accent-blue)', fontSize: '14px', fontWeight: 'bold', cursor: 'pointer', padding: '6px 12px', display: 'flex', alignItems: 'center', gap: '6px' }}
+            >
+              ✏️ Edit
+            </button>
+            <button
+              onClick={(e) => {
+                e.stopPropagation(); 
+                if (window.confirm(`Are you sure you want to delete ${pin.name}?`)) deletePin(pin.id);
+              }}
+              style={{ background: 'var(--accent-red-dim)', border: '1px solid transparent', borderRadius: '6px', color: 'var(--accent-red)', fontSize: '14px', fontWeight: 'bold', cursor: 'pointer', padding: '6px 12px', display: 'flex', alignItems: 'center', gap: '6px' }}
+            >
+              🗑️ Delete
+            </button>
+          </div>
+          
+        </div>
+      </div>
+      
     </div>
   );
 };
@@ -270,6 +297,8 @@ const TravelMap = () => {
   const activePolylinesRef = useRef<Record<number, any>>({});
   const highlightCirclesRef = useRef<Record<number, any>>({});
   const isDraggingMapPin = useRef(false);
+  const sidebarRef = React.useRef<HTMLDivElement>(null);
+  const swipeState = React.useRef({ startY: 0, lastY: 0, time: 0, velocity: 0, isDragging: false });
 
   const WORLD_OFFSETS = [-1080, -720, -360, 0, 360, 720, 1080];
 
@@ -999,7 +1028,7 @@ const TravelMap = () => {
               cursor: 'pointer', 
               zIndex: 1001, 
               boxShadow: '-2px 2px 4px rgba(0,0,0,0.05)',
-              transition: 'transform 0.3s ease-in-out, background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease'
+              transition: 'transform 0.3s ease-in-out, background-color 0.3s ease-in-out, border-color 0.3s ease-in-out, color 0.3s ease-in-out'
             }}
           >
             {isSidebarOpen ? '▶' : '◀'}
@@ -1009,34 +1038,86 @@ const TravelMap = () => {
           <div
             className={`sidebar ${!isSidebarOpen ? 'closed' : ''} ${isSheetExpanded ? 'expanded' : ''}`}
             style={{ display: 'flex', flexDirection: 'column' }}
-            onClick={() => { if (!isSidebarOpen) { setIsSidebarOpen(true); setIsSheetExpanded(false); } }}
+            onClick={(e) => {
+              const target = e.target as HTMLElement;
+              if (!target.closest('.trip-card') && !target.closest('.trip-style-box')) {
+                setSelectedCardId(null);
+              }
+            }}
+            onTouchStart={(e) => {
+              if ((e.target as HTMLElement).closest('.desktop-drag')) return;
+              if (e.currentTarget.scrollTop > 0) return;
+
+              swipeState.current = {
+                startY: e.touches[0].clientY,
+                lastY: e.touches[0].clientY,
+                time: Date.now(),
+                velocity: 0,
+                isDragging: true
+              };
+
+              if (sidebarRef.current) sidebarRef.current.style.transition = 'none';
+            }}
+            
+            onTouchMove={(e) => {
+              if (!swipeState.current.isDragging) return;
+
+              const currentY = e.touches[0].clientY;
+              const deltaY = currentY - swipeState.current.startY;
+              const now = Date.now();
+              const deltaTime = now - swipeState.current.time;
+              if (deltaTime > 0) {
+                swipeState.current.velocity = (currentY - swipeState.current.lastY) / deltaTime;
+              }
+              swipeState.current.lastY = currentY;
+              swipeState.current.time = now;
+
+              let translateY = deltaY;
+              if (translateY < 0 && isSheetExpanded) {
+                translateY = translateY / 4; 
+              }
+
+              if (sidebarRef.current && translateY > -50) {
+                sidebarRef.current.style.transform = `translateY(${translateY}px)`;
+              }
+            }}
+            
+            onTouchEnd={(e) => {
+              if (!swipeState.current.isDragging) return;
+              swipeState.current.isDragging = false;
+
+              const deltaY = swipeState.current.lastY - swipeState.current.startY;
+              const velocity = swipeState.current.velocity;
+
+              if (sidebarRef.current) {
+                sidebarRef.current.style.transition = ''; 
+                sidebarRef.current.style.transform = '';  
+              }
+
+              // state machine
+              if (velocity > 0.6 || deltaY > 100) {
+                if (velocity > 1.5 || deltaY > 300) {
+                  setIsSheetExpanded(false);
+                  setIsSidebarOpen(false);
+                } 
+                else if (isSheetExpanded) {
+                  setIsSheetExpanded(false);
+                } else {
+                  setIsSidebarOpen(false);
+                }
+              }
+              else if (velocity < -0.6 || deltaY < -100) {
+                if (!isSheetExpanded && isSidebarOpen) {
+                    setIsSheetExpanded(true);
+                }
+              }
+            }}
           >
 
             {/* ZONE 1 */}
             <div 
               className="sheet-header" 
               style={{ flexShrink: 0, display: 'flex', flexDirection: 'column', touchAction: 'none', cursor: 'grab' }}
-              onTouchStart={(e) => {
-                touchCoords.current = { x: e.targetTouches[0].clientX, y: e.targetTouches[0].clientY };
-              }}
-              onTouchEnd={(e) => {
-                if (!touchCoords.current) return;
-                const distanceY = touchCoords.current.y - e.changedTouches[0].clientY;
-                
-                if (distanceY < -50) {
-                  if (isSheetExpanded) setIsSheetExpanded(false);
-                  else setIsSidebarOpen(false);
-                }
-                if (distanceY > 50) {
-                  if (!isSidebarOpen) {
-                    setIsSidebarOpen(true);
-                    setIsSheetExpanded(false);
-                  } else {
-                    setIsSheetExpanded(true);
-                  }
-                }
-                touchCoords.current = null;
-              }}
             >
               
               <div className="mobile-only" style={{ width: '100%', height: '30px', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
@@ -1104,7 +1185,7 @@ const TravelMap = () => {
               {(draftPin || editingPinId) ? (
                 // VIEW 1: FORM (Add/Edit)
                 <>
-                  <div className="info-box">📍 You can freely drag this pin on the map to adjust its exact location.</div>
+                  <div key="edit-helper-box" className="info-box">📍 You can freely drag this pin on the map to adjust its exact location.</div>
 
                   <form onSubmit={handleSavePin} style={{ display: 'flex', flexDirection: 'column', gap: '15px', marginTop: '10px' }}>
                     <div>
@@ -1133,8 +1214,8 @@ const TravelMap = () => {
                       <label style={{ fontSize: '14px', fontWeight: 'bold' }}>Photos</label>
                       <div style={{ display: 'flex', gap: '10px', overflowX: 'auto', paddingBottom: '10px', marginTop: '5px' }}>
                         {formPhotos.map((photo, idx) => (
-                          <div key={idx} style={{ position: 'relative', minWidth: '100px' }}>
-                            <img src={photo} alt={`Preview ${idx}`} style={{ width: '100px', height: '100px', objectFit: 'cover', borderRadius: '6px', border: '1px solid var(--border-light)' }} />
+                          <div key={idx} style={{ position: 'relative', minWidth: '150px' }}>
+                            <img src={photo} alt={`Preview ${idx}`} style={{ width: '150px', height: '150px', objectFit: 'cover', borderRadius: '6px', border: '1px solid var(--border-light)' }} />
                             <button
                               type="button"
                               onClick={() => setFormPhotos(formPhotos.filter((_, i) => i !== idx))}
@@ -1146,7 +1227,7 @@ const TravelMap = () => {
                           </div>
                         ))}
                         
-                        <div style={{ minWidth: '100px', height: '100px', border: '2px dashed var(--border-input)', borderRadius: '6px' }}>
+                        <div style={{ minWidth: '150px', height: '150px', border: '2px dashed var(--border-input)', borderRadius: '6px' }}>
                           <label style={{ 
                             display: 'flex', alignItems: 'center', justifyContent: 'center', 
                             width: '100%', height: '100%', cursor: 'pointer', 
@@ -1205,7 +1286,7 @@ const TravelMap = () => {
                     </div>
                   </div>*/}
 
-                  <div style={{ background: 'var(--bg-panel)', border: '1px solid var(--border-light)', borderRadius: '8px', padding: '12px', display: 'flex', flexDirection: 'column', gap: '10px', marginBottom: '15px' }}>
+                  <div key="trip-style-box" className="trip-style-box" style={{ background: 'var(--bg-panel)', border: '1px solid var(--border-light)', borderRadius: '8px', padding: '12px', display: 'flex', flexDirection: 'column', gap: '10px', marginBottom: '15px' }}>
                     <p style={{ margin: 0, fontSize: '13px', fontWeight: 'bold', color: 'var(--text-muted)' }}>TRIP STYLE</p>
 
                     <div>
@@ -1316,6 +1397,7 @@ const TravelMap = () => {
         
         <MapClickHandler onMapClick={handleMapClick} isPopupOpen={isPopupOpen} />
         <MapCameraController target={cameraTarget} isSidebarOpen={isSidebarOpen}/>
+        <MapBackgroundEvents selectedCardId={selectedCardId} setSelectedCardId={setSelectedCardId} />
         
         {/* Polyline (triple rendered for dateline wrapping) */}
         {visibleTripsData.map(trip => {
