@@ -177,8 +177,6 @@ app.put('/api/users/:userId/trips', async (req, res) => {
   }
 });
 
-const crypto = require('crypto');
-
 app.post('/api/auth/verify-email', async (req, res) => {
   const { token } = req.body;
 
