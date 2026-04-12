@@ -144,7 +144,6 @@ const SortableTripCard = ({
         ...style,
         borderColor: isSelected ? getDisplayColor((activeTrip as any)?.lineColor || '#3b82f6') : undefined,
         boxShadow: isSelected ? `0 0 0 1px ${getDisplayColor((activeTrip as any)?.lineColor || '#3b82f6')}` : style.boxShadow,
-        // Added flex-col so we can stack rows!
         display: 'flex', flexDirection: 'column', padding: '12px'
       }}
       onDoubleClick={() => startEditing(pin)}
@@ -157,7 +156,11 @@ const SortableTripCard = ({
       <div style={{ display: 'flex', alignItems: 'center', width: '100%' }}>
         <div 
           {...attributes} {...listeners} className="desktop-drag" 
-          style={{ width: '40px', display: 'flex', justifyContent: 'center', cursor: 'grab', touchAction: 'none', marginLeft: '-10px', color: 'var(--text-muted)' }}
+          style={{ 
+            padding: '15px', 
+            marginLeft: '-15px', 
+            fontSize: '18px',
+            display: 'flex', justifyContent: 'center', cursor: 'grab', touchAction: 'none', color: 'var(--text-muted)' }}
         >
           ☰
         </div>
@@ -298,7 +301,8 @@ const TravelMap = () => {
   const highlightCirclesRef = useRef<Record<number, any>>({});
   const isDraggingMapPin = useRef(false);
   const sidebarRef = React.useRef<HTMLDivElement>(null);
-  const swipeState = React.useRef({ startY: 0, lastY: 0, time: 0, velocity: 0, isDragging: false });
+  const swipeState = React.useRef({ startY: 0, lastY: 0, startHeight: 0, time: 0, velocity: 0, isDragging: false });
+  const swipeTimeout = React.useRef<NodeJS.Timeout>();
 
   const WORLD_OFFSETS = [-1080, -720, -360, 0, 360, 720, 1080];
 
@@ -1036,6 +1040,7 @@ const TravelMap = () => {
 
           {/* Right Sidebar */}
           <div
+            ref={sidebarRef}
             className={`sidebar ${!isSidebarOpen ? 'closed' : ''} ${isSheetExpanded ? 'expanded' : ''}`}
             style={{ display: 'flex', flexDirection: 'column' }}
             onClick={(e) => {
@@ -1044,19 +1049,32 @@ const TravelMap = () => {
                 setSelectedCardId(null);
               }
             }}
+            
             onTouchStart={(e) => {
               if ((e.target as HTMLElement).closest('.desktop-drag')) return;
-              if (e.currentTarget.scrollTop > 0) return;
+              if ((e.target as HTMLElement).closest('.color-ribbon')) return;
+              const scrollArea = (e.target as HTMLElement).closest('.sheet-content');
+              if (scrollArea && scrollArea.scrollTop > 0) return;
+
+              if (swipeTimeout.current) clearTimeout(swipeTimeout.current);
+
+              const rect = sidebarRef.current?.getBoundingClientRect();
 
               swipeState.current = {
                 startY: e.touches[0].clientY,
                 lastY: e.touches[0].clientY,
+                startHeight: rect ? rect.height : 0, 
                 time: Date.now(),
                 velocity: 0,
                 isDragging: true
               };
 
-              if (sidebarRef.current) sidebarRef.current.style.transition = 'none';
+              if (sidebarRef.current) {
+                sidebarRef.current.style.maxHeight = `${swipeState.current.startHeight}px`;
+                sidebarRef.current.style.transition = 'none';
+
+                if (!isSidebarOpen) sidebarRef.current.classList.remove('closed');
+              }
             }}
             
             onTouchMove={(e) => {
@@ -1064,21 +1082,27 @@ const TravelMap = () => {
 
               const currentY = e.touches[0].clientY;
               const deltaY = currentY - swipeState.current.startY;
+              
               const now = Date.now();
               const deltaTime = now - swipeState.current.time;
               if (deltaTime > 0) {
-                swipeState.current.velocity = (currentY - swipeState.current.lastY) / deltaTime;
+                const instantVelocity = (currentY - swipeState.current.lastY) / deltaTime;
+                swipeState.current.velocity = (swipeState.current.velocity + instantVelocity) / 2;
               }
               swipeState.current.lastY = currentY;
               swipeState.current.time = now;
 
-              let translateY = deltaY;
-              if (translateY < 0 && isSheetExpanded) {
-                translateY = translateY / 4; 
-              }
+              let newHeight = swipeState.current.startHeight - deltaY;
 
-              if (sidebarRef.current && translateY > -50) {
-                sidebarRef.current.style.transform = `translateY(${translateY}px)`;
+              const maxVH = window.innerHeight * 0.9;
+              if (newHeight > maxVH) {
+                const excess = newHeight - maxVH;
+                newHeight = maxVH + (excess / 4);
+              }
+              if (newHeight < 60) newHeight = 60;
+
+              if (sidebarRef.current) {
+                sidebarRef.current.style.maxHeight = `${newHeight}px`;
               }
             }}
             
@@ -1088,28 +1112,61 @@ const TravelMap = () => {
 
               const deltaY = swipeState.current.lastY - swipeState.current.startY;
               const velocity = swipeState.current.velocity;
+              const finalHeight = swipeState.current.startHeight - deltaY;
+
+              let targetOpen = isSidebarOpen;
+              let targetExpanded = isSheetExpanded;
+
+              if (finalHeight < 160) { 
+                  targetOpen = false;
+                  targetExpanded = false;
+              }
+              // B. Swiping DOWN
+              else if (velocity > 0.5 || deltaY > 50) {
+                if (velocity > 1.2 || deltaY > 180) {
+                  targetOpen = false; targetExpanded = false;
+                } else if (isSheetExpanded) {
+                  targetExpanded = false;
+                } else {
+                  targetOpen = false;
+                }
+              }
+              else if (velocity < -0.5 || deltaY < -50) {
+                if (!isSidebarOpen) targetOpen = true;
+                else if (!isSheetExpanded) targetExpanded = true;
+              }
+              else {
+                if (finalHeight < 200) { targetOpen = false; targetExpanded = false; }
+                else if (finalHeight > window.innerHeight * 0.7) { targetOpen = true; targetExpanded = true; }
+                else { targetOpen = true; targetExpanded = false; }
+              }
 
               if (sidebarRef.current) {
-                sidebarRef.current.style.transition = ''; 
-                sidebarRef.current.style.transform = '';  
-              }
-
-              // state machine
-              if (velocity > 0.6 || deltaY > 100) {
-                if (velocity > 1.5 || deltaY > 300) {
-                  setIsSheetExpanded(false);
-                  setIsSidebarOpen(false);
-                } 
-                else if (isSheetExpanded) {
-                  setIsSheetExpanded(false);
+                let targetHeight = '';
+                if (!targetOpen) {
+                   const header = sidebarRef.current.querySelector('.sheet-header') as HTMLElement;
+                   const footer = sidebarRef.current.querySelector('.action-footer') as HTMLElement;
+                   const hHeight = header ? header.offsetHeight : 60;
+                   const fHeight = footer ? footer.offsetHeight : 0;
+                   
+                   targetHeight = `${hHeight + fHeight + 15}px`; 
+                } else if (targetExpanded) {
+                   targetHeight = '90svh';
                 } else {
-                  setIsSidebarOpen(false);
+                   targetHeight = '50svh';
                 }
-              }
-              else if (velocity < -0.6 || deltaY < -100) {
-                if (!isSheetExpanded && isSidebarOpen) {
-                    setIsSheetExpanded(true);
-                }
+                sidebarRef.current.style.transition = 'max-height 0.3s cubic-bezier(0.4, 0, 0.2, 1)';
+                sidebarRef.current.style.maxHeight = targetHeight;
+
+                setIsSidebarOpen(targetOpen);
+                setIsSheetExpanded(targetExpanded);
+
+                swipeTimeout.current = setTimeout(() => {
+                  if (sidebarRef.current) {
+                    sidebarRef.current.style.transition = ''; 
+                    sidebarRef.current.style.maxHeight = '';  
+                  }
+                }, 300);
               }
             }}
           >
@@ -1167,20 +1224,6 @@ const TravelMap = () => {
             <div 
               className="sheet-content"
               style={{ flex: 1, overflowY: 'auto', padding: '0 15px' }}
-              onTouchStart={(e) => {
-                if ((e.target as HTMLElement).closest('.desktop-drag')) return; 
-                swipeStartY.current = e.targetTouches[0].clientY;
-              }}
-              onTouchEnd={(e) => {
-                if (swipeStartY.current === null) return;
-                const distanceY = e.changedTouches[0].clientY - swipeStartY.current;
-                const isAtTop = e.currentTarget.scrollTop <= 0;
-                if (isAtTop && distanceY > 80) {
-                  if (isSheetExpanded) setIsSheetExpanded(false);
-                  else setIsSidebarOpen(false);
-                }
-                swipeStartY.current = null; 
-              }}
             >
               {(draftPin || editingPinId) ? (
                 // VIEW 1: FORM (Add/Edit)
@@ -1527,7 +1570,12 @@ const TravelMap = () => {
                       opacity={trip.id === activeTripId ? 1.0 : 0.6}
                     >
 
-                      <Popup autoPan={false} minWidth={300} maxWidth={500}>
+                      <Popup
+                        autoPanPaddingTopLeft={[10, 50]} 
+                        autoPanPaddingBottomRight={[10, 400]}
+                        minWidth={300}
+                        maxWidth={500}
+                      >
                         <div style={{ minWidth: '150px' }}>
                           
                           {renderPhotoPreview(pin.photoUrls)}
