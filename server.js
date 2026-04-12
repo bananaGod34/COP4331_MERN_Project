@@ -1,6 +1,9 @@
 console.log("step 1");
 require('dotenv').config();
 
+const crypto = require('crypto');
+const nodemailer = require('nodemailer');
+
 console.log("step 2");
 const url = process.env.MONGODB_URI;
 console.log('MONGODB_URI:', process.env.MONGODB_URI);
@@ -22,8 +25,6 @@ const { connect } = require('node:http2');
 const app = express();
 app.use(cors());
 app.use(express.json({ limit: '10mb' }));
-
-const nodemailer = require('nodemailer');
 
 const transporter = nodemailer.createTransport({
   service: 'gmail',
