@@ -1,6 +1,13 @@
 import React, { useState } from 'react';
 import { useSearchParams, Link, useNavigate } from 'react-router-dom';
 import authBg from '../assets/auth-bg.jpg';
+import ThemeToggle from './ThemeToggle';
+
+const Icons = {
+  Loader: () => <svg className="animate-spin" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="2" x2="12" y2="6"></line><line x1="12" y1="18" x2="12" y2="22"></line><line x1="4.93" y1="4.93" x2="7.76" y2="7.76"></line><line x1="16.24" y1="16.24" x2="19.07" y2="19.07"></line><line x1="2" y1="12" x2="6" y2="12"></line><line x1="18" y1="12" x2="22" y2="12"></line><line x1="4.93" y1="19.07" x2="7.76" y2="16.24"></line><line x1="16.24" y1="7.76" x2="19.07" y2="4.93"></line></svg>,
+  Eye: () => <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>,
+  EyeOff: () => <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line></svg>
+};
 
 const ResetPassword = () => {
   const [searchParams] = useSearchParams();
@@ -11,6 +18,8 @@ const ResetPassword = () => {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [message, setMessage] = useState('');
   const [isSuccess, setIsSuccess] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   const doReset = async (event: React.FormEvent) => {
     event.preventDefault();
@@ -23,6 +32,8 @@ const ResetPassword = () => {
     if (newPassword !== confirmPassword) {
       return setMessage('Passwords do not match.');
     }
+
+    setIsLoading(true);
 
     try {
       const response = await fetch('/api/auth/reset-password', {
@@ -42,11 +53,14 @@ const ResetPassword = () => {
       }
     } catch (error) {
       setMessage('Could not connect to the server.');
+    } finally {
+      setIsLoading(false);
     }
   };
 
   return (
     <main className="auth-page">
+      <ThemeToggle />
       <div className="auth-bg-wrapper">
         <img src={authBg} alt="Travel Background" />
         <div className="auth-bg-overlay" />
@@ -79,20 +93,43 @@ const ResetPassword = () => {
             <form onSubmit={doReset} style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
               <div>
                 <label style={{ display: 'block', fontSize: '13px', fontWeight: 'bold', marginBottom: '6px', color: 'var(--text-main)' }}>New Password</label>
-                <input 
-                  className="form-input" type="password" placeholder="••••••••" required
-                  value={newPassword} onChange={(e) => setNewPassword(e.target.value)} 
-                />
+                <div style={{ position: 'relative' }}>
+                  <input 
+                    autoFocus
+                    className="form-input" 
+                    type={showPassword ? "text" : "password"} 
+                    placeholder="••••••••" required
+                    value={newPassword} onChange={(e) => setNewPassword(e.target.value)} 
+                    style={{ paddingRight: '40px' }}
+                  />
+                  <button 
+                    type="button" onClick={() => setShowPassword(!showPassword)}
+                    style={{ position: 'absolute', right: '10px', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', padding: '4px' }}
+                  >
+                    {showPassword ? <Icons.EyeOff /> : <Icons.Eye />}
+                  </button>
+                </div>
               </div>
               <div>
                 <label style={{ display: 'block', fontSize: '13px', fontWeight: 'bold', marginBottom: '6px', color: 'var(--text-main)' }}>Confirm Password</label>
-                <input 
-                  className="form-input" type="password" placeholder="••••••••" required
-                  value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} 
-                />
+                <div style={{ position: 'relative' }}>
+                  <input 
+                    className="form-input" 
+                    type={showPassword ? "text" : "password"} 
+                    placeholder="••••••••" required
+                    value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} 
+                    style={{ paddingRight: '40px' }}
+                  />
+                </div>
               </div>
-              <button className="btn btn-blue" type="submit" style={{ marginTop: '10px', padding: '14px', fontSize: '16px' }}>
-                Save Password
+              <button 
+                className="btn btn-blue" 
+                type="submit" 
+                disabled={isLoading}
+                style={{ marginTop: '10px', padding: '14px', fontSize: '16px', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '8px', opacity: isLoading ? 0.7 : 1 }}
+              >
+                {isLoading && <Icons.Loader />}
+                <span>{isLoading ? "Saving..." : "Save Password"}</span>
               </button>
             </form>
           ) : (

@@ -3,7 +3,7 @@ html, body, #root {
   padding: 0;
   width: 100%;
   height: 100%;
-  font-family: 'Inter', system-ui, sans-serif;
+  font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
 }
 
 * {
@@ -13,4 +13,12 @@ html, body, #root {
 
 body {
   overscroll-behavior-y: none;
+}
+
+button, input, textarea, select {
+  font-family: inherit;
+}
+
+.leaflet-container {
+  font-family: inherit !important;
 }

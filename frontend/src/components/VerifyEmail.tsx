@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { useSearchParams, Link, useNavigate, useLocation } from 'react-router-dom';
 import authBg from '../assets/auth-bg.jpg';
+import ThemeToggle from './ThemeToggle';
 
 const VerifyEmail = () => {
   const [searchParams] = useSearchParams();
@@ -56,6 +57,7 @@ const VerifyEmail = () => {
 
   return (
     <main className="auth-page">
+        <ThemeToggle />
       <div className="auth-bg-wrapper">
         <img src={authBg} alt="Travel Background" />
         <div className="auth-bg-overlay" />

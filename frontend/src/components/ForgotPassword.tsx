@@ -1,15 +1,22 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import authBg from '../assets/auth-bg.jpg';
+import ThemeToggle from './ThemeToggle';
+
+const Icons = {
+  Loader: () => <svg className="animate-spin" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="2" x2="12" y2="6"></line><line x1="12" y1="18" x2="12" y2="22"></line><line x1="4.93" y1="4.93" x2="7.76" y2="7.76"></line><line x1="16.24" y1="16.24" x2="19.07" y2="19.07"></line><line x1="2" y1="12" x2="6" y2="12"></line><line x1="18" y1="12" x2="22" y2="12"></line><line x1="4.93" y1="19.07" x2="7.76" y2="16.24"></line><line x1="16.24" y1="7.76" x2="19.07" y2="4.93"></line></svg>
+};
 
 const ForgotPassword = () => {
   const [email, setEmail] = useState('');
   const [message, setMessage] = useState('');
   const [isSuccess, setIsSuccess] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
   const doSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
     setMessage('');
+    setIsLoading(true);
 
     try {
       const response = await fetch('/api/auth/forgot-password', {
@@ -30,11 +37,14 @@ const ForgotPassword = () => {
     } catch (error) {
       setMessage('Could not connect to the server.');
       setIsSuccess(false);
+    } finally {
+      setIsLoading(false);
     }
   };
 
   return (
     <main className="auth-page">
+      <ThemeToggle />
       <div className="auth-bg-wrapper">
         <img src={authBg} alt="Travel Background" />
         <div className="auth-bg-overlay" />
@@ -68,12 +78,19 @@ const ForgotPassword = () => {
               <div>
                 <label style={{ display: 'block', fontSize: '13px', fontWeight: 'bold', marginBottom: '6px', color: 'var(--text-main)' }}>Email Address</label>
                 <input 
+                  autoFocus
                   className="form-input" type="email" placeholder="jane@example.com" required
                   value={email} onChange={(e) => setEmail(e.target.value)} 
                 />
               </div>
-              <button className="btn btn-blue" type="submit" style={{ marginTop: '10px', padding: '14px', fontSize: '16px' }}>
-                Send Reset Link
+              <button 
+                className="btn btn-blue" 
+                type="submit" 
+                disabled={isLoading}
+                style={{ marginTop: '10px', padding: '14px', fontSize: '16px', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '8px', opacity: isLoading ? 0.7 : 1 }}
+              >
+                {isLoading && <Icons.Loader />}
+                <span>{isLoading ? "Sending..." : "Send Reset Link"}</span>
               </button>
             </form>
           )}
