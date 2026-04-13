@@ -168,7 +168,7 @@ body, html {
 
 /* Invert tiles */
 .dark-mode .leaflet-tile-pane {
-  filter: brightness(0.6) invert(1) hue-rotate(180deg) contrast(1.7);
+  filter: brightness(0.7) invert(1) hue-rotate(180deg) contrast(1.8);
 }
 
 /* Popups */
