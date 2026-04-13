@@ -1,10 +1,10 @@
-import React, { useState, useRef, useEffect, useMemo } from 'react';
+import React, { useState, useRef, useEffect, useLayoutEffect, useMemo } from 'react';
 import { MapContainer, TileLayer, Marker, Popup, Polyline, useMapEvents, ZoomControl, useMap, CircleMarker } from 'react-leaflet';
 import { useNavigate } from 'react-router-dom';
 import 'leaflet/dist/leaflet.css';
 import './TravelMap.css';
 
-// Drag n Drop
+// Drag n Drop  
 import { DndContext, closestCenter, KeyboardSensor, PointerSensor, TouchSensor, useSensor, useSensors } from '@dnd-kit/core';
 import { arrayMove, SortableContext, sortableKeyboardCoordinates, verticalListSortingStrategy, useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
@@ -309,6 +309,14 @@ const TravelMap = () => {
   });
   const isFirstRender = useRef(true);
 
+  useLayoutEffect(() => {
+    document.documentElement.classList.toggle('dark-mode', darkMode);
+    
+    if (mapRef.current?.getContainer()) {
+      mapRef.current.getContainer().classList.toggle('dark-mode', darkMode);
+    }
+  }, []);
+
   // STATE: Saving
   const [isDirty, setIsDirty] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
@@ -480,26 +488,24 @@ const TravelMap = () => {
   useEffect(() => {
     if (isFirstRender.current) {
       isFirstRender.current = false;
-      document.body.classList.toggle('dark-mode', darkMode);
-      if (mapRef.current?.getContainer()) {
-        mapRef.current.getContainer().classList.toggle('dark-mode', darkMode);
-      }
       return;
     }
 
-    document.body.classList.add('theme-transitioning');
-    document.body.classList.toggle('dark-mode', darkMode);
+    document.documentElement.classList.add('theme-transitioning');
+    document.documentElement.classList.toggle('dark-mode', darkMode);
+    
     if (mapRef.current?.getContainer()) {
       mapRef.current.getContainer().classList.toggle('dark-mode', darkMode);
     }
+    
     localStorage.setItem('travelmap_theme', darkMode ? 'dark' : 'light');
 
     const timer = setTimeout(() => {
-      document.body.classList.remove('theme-transitioning');
+      document.documentElement.classList.remove('theme-transitioning');
     }, 350);
 
     return () => clearTimeout(timer);
-  }, [darkMode]);
+  }, [darkMode]); 
 
   // dark mode display helper
   const getDisplayColor = (hex: string) => {

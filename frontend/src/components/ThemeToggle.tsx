@@ -7,18 +7,24 @@ const ThemeToggle = () => {
 
   const isFirstRender = useRef(true);
 
+  useLayoutEffect(() => {
+    document.documentElement.classList.toggle('dark-mode', darkMode);
+  }, []);
+
   useEffect(() => {
     if (isFirstRender.current) {
       isFirstRender.current = false;
-      document.body.classList.toggle('dark-mode', darkMode);
       return;
     }
-
-    document.body.classList.add('theme-transitioning');
-    document.body.classList.toggle('dark-mode', darkMode);
+    
+    document.documentElement.classList.add('theme-transitioning');
+    document.documentElement.classList.toggle('dark-mode', darkMode);
     localStorage.setItem('travelmap_theme', darkMode ? 'dark' : 'light');
 
-    const timer = setTimeout(() => document.body.classList.remove('theme-transitioning'), 350);
+    const timer = setTimeout(() => {
+      document.documentElement.classList.remove('theme-transitioning');
+    }, 350);
+    
     return () => clearTimeout(timer);
   }, [darkMode]);
 
