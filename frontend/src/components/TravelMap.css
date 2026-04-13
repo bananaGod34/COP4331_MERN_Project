@@ -38,14 +38,14 @@ body, html {
 }
 
 .auth-hero {
-    flex: 1;
-    display: none;
-    background-color: #cbd5e1; 
-    background-image: url("https://picsum.photos/id/28/1500/1000") !important;
-    background-size: cover;
-    background-position: center;
-    position: relative;
-  }
+  flex: 1;
+  display: none;
+  background-color: #cbd5e1; 
+  background-image: url('/auth-bg.jpg') !important;
+  background-size: cover;
+  background-position: center;
+  position: relative;
+}
 
 .auth-hero::after {
   content: '';

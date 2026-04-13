@@ -1,5 +1,6 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { useSearchParams, Link, useNavigate, useLocation } from 'react-router-dom';
+import authBg from '../assets/auth-bg.jpg';
 
 const VerifyEmail = () => {
   const [searchParams] = useSearchParams();
@@ -55,10 +56,17 @@ const VerifyEmail = () => {
 
   return (
     <main className="auth-page">
-      <div className="auth-hero" />
+      <div className="auth-hero" style={{ position: 'relative', overflow: 'hidden' }}>
+        <img 
+          src={authBg} 
+          alt="Travel Background" 
+          style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', objectFit: 'cover' }} 
+        />
+      </div>
+
       <div className="auth-form-side">
         <div className="auth-card" style={{ textAlign: 'center' }}>
-            
+
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px', marginBottom: '30px' }}>
             <svg xmlns="http://www.w3.org/2000/svg" width="32" height="40" viewBox="-4 -2 36 46">
               <path d="M14 0 C6.27 0 0 6.27 0 14 C0 24.5 14 38 14 38 C14 38 28 24.5 28 14 C28 6.27 21.73 0 14 0 Z M 14 9 A 5 5 0 1 0 14 19 A 5 5 0 1 0 14 9 Z" fill="var(--accent-blue)" fillRule="evenodd" />

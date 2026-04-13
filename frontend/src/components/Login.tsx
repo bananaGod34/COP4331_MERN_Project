@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
+import authBg from '../assets/auth-bg.jpg';
 
 const Login = () => {
   const [loginName, setLoginName] = useState('');
@@ -38,7 +39,13 @@ const Login = () => {
 
   return (
     <main className="auth-page">
-      <div className="auth-hero" />
+      <div className="auth-hero" style={{ position: 'relative', overflow: 'hidden' }}>
+        <img 
+          src={authBg} 
+          alt="Travel Background" 
+          style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', objectFit: 'cover' }} 
+        />
+      </div>
 
       <div className="auth-form-side">
         <div className="auth-card">
@@ -61,7 +68,7 @@ const Login = () => {
             <div>
               <label style={{ display: 'block', fontSize: '13px', fontWeight: 'bold', marginBottom: '6px', color: 'var(--text-main)' }}>Username</label>
               <input 
-                className="form-input" type="text" placeholder="Username" 
+                className="form-input" type="text" placeholder="Enter your username" 
                 value={loginName} onChange={(e) => setLoginName(e.target.value)} 
               />
             </div>
@@ -72,7 +79,7 @@ const Login = () => {
                 <Link to="/forgot-password" style={{ fontSize: '12px', color: 'var(--text-muted)', textDecoration: 'none' }}>Forgot password?</Link>
               </div>
               <input 
-                className="form-input" type="password" placeholder="Password" 
+                className="form-input" type="password" placeholder="••••••••" 
                 value={loginPassword} onChange={(e) => setPassword(e.target.value)} 
               />
             </div>

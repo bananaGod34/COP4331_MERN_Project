@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
+import authBg from '../assets/auth-bg.jpg';
 
 const Signup = () => {
   const [firstName, setFirstName] = useState('');
@@ -46,7 +47,13 @@ const Signup = () => {
 
   return (
     <main className="auth-page">
-      <div className="auth-hero" />
+      <div className="auth-hero" style={{ position: 'relative', overflow: 'hidden' }}>
+        <img 
+          src={authBg} 
+          alt="Travel Background" 
+          style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', objectFit: 'cover' }} 
+        />
+      </div>
 
       <div className="auth-form-side">
         <div className="auth-card">
