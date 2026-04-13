@@ -52,6 +52,23 @@ const getPinIcon = (color: string = '#3b82f6') => {
   });
 };
 
+const Icons = {
+  Plus: (props: any) => <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>,
+  Edit: (props: any) => <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>,
+  Trash: (props: any) => <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>,
+  Save: (props: any) => <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg>,
+  Settings: (props: any) => <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>,
+  LogOut: (props: any) => <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>,
+  Eye: (props: any) => <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>,
+  EyeOff: (props: any) => <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line></svg>,
+  Moon: (props: any) => <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>,
+  Sun: (props: any) => <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>,
+  Grip: (props: any) => <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><circle cx="9" cy="12" r="1"></circle><circle cx="9" cy="5" r="1"></circle><circle cx="9" cy="19" r="1"></circle><circle cx="15" cy="12" r="1"></circle><circle cx="15" cy="5" r="1"></circle><circle cx="15" cy="19" r="1"></circle></svg>,
+  ChevronDown: (props: any) => <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><polyline points="6 9 12 15 18 9"></polyline></svg>,
+  ChevronLeft: (props: any) => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><polyline points="15 18 9 12 15 6"></polyline></svg>,
+  ChevronRight: (props: any) => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><polyline points="9 18 15 12 9 6"></polyline></svg>
+};
+
 // --- SUBCOMPONENTS ---
 
 // Map click listener
@@ -137,7 +154,10 @@ const SortableTripCard = ({
     transition: transition 
       ? `${transition}, background-color 0.3s ease-in-out, border-color 0.3s ease-in-out, box-shadow 0.3s ease-in-out` 
       : 'background-color 0.3s ease-in-out, border-color 0.3s ease-in-out, box-shadow 0.3s ease-in-out',
-      
+    
+    animation: isDragging ? 'none' : `cascadeFade 0.4s cubic-bezier(0.2, 0.8, 0.2, 1) both`,
+    animationDelay: `${index * 0.05}s`,
+     
     position: 'relative' as const,
     zIndex: isDragging ? 999 : 1,
     opacity: isDragging ? 0.8 : 1,
@@ -145,7 +165,8 @@ const SortableTripCard = ({
   };
 
   return (
-    <div 
+    <div
+      id={`trip-card-${pin.id}`}
       ref={setNodeRef} 
       className={`trip-card ${isSelected ? 'selected-card' : ''}`}
       style={{
@@ -165,12 +186,12 @@ const SortableTripCard = ({
         <div 
           {...attributes} {...listeners} className="desktop-drag" 
           style={{ 
-            padding: '20px', 
-            marginLeft: '-20px', 
-            fontSize: '20px',
-            display: 'flex', justifyContent: 'center', cursor: 'grab', touchAction: 'none', color: 'var(--text-muted)' }}
+            padding: '10px', marginLeft: '-10px', marginRight: '5px',
+            display: 'flex', alignItems: 'center', justifyContent: 'center', 
+            cursor: 'grab', touchAction: 'none', color: 'var(--text-muted)' 
+          }}
         >
-          ☰
+          <Icons.Grip />
         </div>
 
         {pin.photoUrls && pin.photoUrls.length > 0 && (
@@ -201,24 +222,23 @@ const SortableTripCard = ({
         }}
       >
         <div style={{ overflow: 'hidden' }}>
-          <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px', marginTop: '10px', paddingTop: '8px', borderTop: '1px solid var(--border-light)' }}>
+          <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px', marginTop: '10px', paddingTop: '10px', borderTop: '1px solid var(--border-light)' }}>
             <button
               onClick={(e) => { e.stopPropagation(); startEditing(pin); }}
-              style={{ background: 'var(--bg-sidebar)', border: '1px solid var(--border-input)', borderRadius: '6px', color: 'var(--accent-blue)', fontSize: '14px', fontWeight: 'bold', cursor: 'pointer', padding: '6px 12px', display: 'flex', alignItems: 'center', gap: '6px' }}
+              className="action-btn action-btn-edit"
             >
-              ✏️ Edit
+              <Icons.Edit style={{ display: 'block' }} /> <span>Edit</span>
             </button>
             <button
               onClick={(e) => {
                 e.stopPropagation(); 
                 if (window.confirm(`Are you sure you want to delete ${pin.name}?`)) deletePin(pin.id);
               }}
-              style={{ background: 'var(--accent-red-dim)', border: '1px solid transparent', borderRadius: '6px', color: 'var(--accent-red)', fontSize: '14px', fontWeight: 'bold', cursor: 'pointer', padding: '6px 12px', display: 'flex', alignItems: 'center', gap: '6px' }}
+              className="action-btn action-btn-delete"
             >
-              🗑️ Delete
+              <Icons.Trash style={{ display: 'block' }} /> <span>Delete</span>
             </button>
           </div>
-          
         </div>
       </div>
       
@@ -274,6 +294,7 @@ const TravelMap = () => {
   //>>>MOBILE MENU
   const [isMobileScreen, setIsMobileScreen] = useState(window.innerWidth <= 768);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [activeDragId, setActiveDragId] = useState<number | null>(null);
 
   // STATE: Dark Mode
@@ -295,6 +316,8 @@ const TravelMap = () => {
   const [touchStart, setTouchStart] = useState<{x: number, y: number} | null>(null);
   const [touchEnd, setTouchEnd] = useState<{x: number, y: number} | null>(null);
   const minSwipeDistance = 50;
+  const [swipeOffset, setSwipeOffset] = useState(0);
+  const [isSwiping, setIsSwiping] = useState(false);
 
   // REFS
   const dragItem = useRef<number | null>(null);
@@ -391,6 +414,21 @@ const TravelMap = () => {
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
   }, []);
+
+  // selected card scroll listener
+  useEffect(() => {
+    if (selectedCardId !== null && !uiHidden) {
+      setTimeout(() => {
+        const cardElement = document.getElementById(`trip-card-${selectedCardId}`);
+        if (cardElement) {
+          cardElement.scrollIntoView({ 
+            behavior: 'smooth', 
+            block: 'center'
+          });
+        }
+      }, 100);
+    }
+  }, [selectedCardId, uiHidden]);
 
   // --- EFFECTS ---
   // toggle dark mode
@@ -513,7 +551,12 @@ const TravelMap = () => {
 
   const handleSavePin = (e?: React.FormEvent | React.MouseEvent) => {
     if (e) e.preventDefault();
+    let targetPin: any = null;
+
     if (editingPinId) {
+      const existingPin = tripPins.find(p => p.id === editingPinId);
+      targetPin = { ...existingPin, name: formName, blurb: formBlurb, photoUrls: formPhotos };
+
       updateActiveTripPins(tripPins.map(pin => 
         pin.id === editingPinId ? { ...pin, name: formName, blurb: formBlurb, photoUrls: formPhotos } : pin
       ));
@@ -528,13 +571,18 @@ const TravelMap = () => {
     setFormName('');
     setFormBlurb('');
     setFormPhotos([]);
-
+    
     animateSheet(true, false);
+
+    if (targetPin) {
+      setTimeout(() => handleCardClick(targetPin, false), 50);
+    }
   };
 
   const deletePin = (id: number) => {
     if (window.confirm(`Are you sure you want to delete ${tripPins.find(p => p.id === id)?.name}?`)) {
       popupCount.current = 0;
+      setSelectedCardId(null);
       updateActiveTripPins(tripPins.filter(pin => pin.id !== id));
       if (editingPinId === id) {
         setEditingPinId(null);
@@ -547,6 +595,7 @@ const TravelMap = () => {
 
   const startEditing = (pin: any) => {
     popupCount.current = 0;
+    setSelectedCardId(null);
     
     WORLD_OFFSETS.forEach(offset => {
       if (markerRefs.current[`${pin.id}-${offset}`]) {
@@ -573,10 +622,19 @@ const TravelMap = () => {
   };
 
   const cancelForm = () => {
-    if (editingPinId && originalPinCoords) {
-      updateActiveTripPins(tripPins.map(p => 
-        p.id === editingPinId ? { ...p, lat: originalPinCoords.lat, lng: originalPinCoords.lng } : p
-      ));
+    let targetPin: any = null;
+
+    if (editingPinId) {
+      const existingPin = tripPins.find(p => p.id === editingPinId);
+      
+      if (originalPinCoords) {
+        targetPin = { ...existingPin, lat: originalPinCoords.lat, lng: originalPinCoords.lng };
+        updateActiveTripPins(tripPins.map(p => 
+          p.id === editingPinId ? targetPin : p
+        ));
+      } else {
+        targetPin = existingPin;
+      }
     }
     setDraftPin(null);
     setEditingPinId(null);
@@ -584,6 +642,10 @@ const TravelMap = () => {
     setFormPhotos([]);
 
     animateSheet(true, false);
+
+    if (targetPin) {
+      setTimeout(() => handleCardClick(targetPin, false), 50);
+    }
   };
 
   const handleSort = () => {
@@ -598,61 +660,73 @@ const TravelMap = () => {
   };
 
   const animateSheet = (targetOpen: boolean, targetExpanded: boolean) => {
-    if (!sidebarRef.current) {
+    const isMobile = window.innerWidth <= 768;
+    if (!sidebarRef.current || !isMobile) {
       setIsSidebarOpen(targetOpen);
       setIsSheetExpanded(targetExpanded);
       return;
     }
 
-    if (swipeTimeout.current) clearTimeout(swipeTimeout.current);
-
-    sidebarRef.current.style.height = '100%'; 
-
+    if (swipeTimeout.current) clearTimeout(swipeTimeout.current)
+    
     const currentHeight = sidebarRef.current.getBoundingClientRect().height;
+
     sidebarRef.current.style.maxHeight = `${currentHeight}px`;
-    sidebarRef.current.style.transition = 'none';
+    sidebarRef.current.style.height = '100%'; 
+    sidebarRef.current.style.transition = 'none'
 
     void sidebarRef.current.offsetHeight; 
 
-    let targetHeight = '';
-    if (!targetOpen) {
-      const header = sidebarRef.current.querySelector('.sheet-header') as HTMLElement;
-      const footer = sidebarRef.current.querySelector('.action-footer') as HTMLElement;
-      targetHeight = `${(header ? header.offsetHeight : 60) + (footer ? footer.offsetHeight : 0) + 15}px`; 
-    } else if (targetExpanded) {
-      targetHeight = `${window.innerHeight * 0.9}px`;
-    } else {
-      targetHeight = `${window.innerHeight * 0.5}px`;
-    }
+    setIsSidebarOpen(targetOpen);
+    setIsSheetExpanded(targetExpanded);
 
-    sidebarRef.current.style.transition = 'max-height 0.4s cubic-bezier(0.1, 1, 0.2, 1)';
-    sidebarRef.current.style.maxHeight = targetHeight;
+    setTimeout(() => {
+      if (!sidebarRef.current) return;
 
-    if (!targetOpen) sidebarRef.current.classList.add('closed');
-    else sidebarRef.current.classList.remove('closed');
-
-    if (targetExpanded) sidebarRef.current.classList.add('expanded');
-    else sidebarRef.current.classList.remove('expanded');
-
-    swipeTimeout.current = setTimeout(() => {
-      if (sidebarRef.current) {
-        sidebarRef.current.style.height = ''; 
-        sidebarRef.current.style.transition = ''; 
-        sidebarRef.current.style.maxHeight = '';  
+      let targetHeight = '';
+      if (!targetOpen) {
+        const header = sidebarRef.current.querySelector('.sheet-header') as HTMLElement;
+        const footer = sidebarRef.current.querySelector('.action-footer') as HTMLElement;
+        targetHeight = `${(header ? header.offsetHeight : 60) + (footer ? footer.offsetHeight : 0) + 15}px`; 
+      } else if (targetExpanded) {
+        targetHeight = `${window.innerHeight * 0.9}px`;
+      } else {
+        targetHeight = `${window.innerHeight * 0.5}px`;
       }
-      
-      setIsSidebarOpen(targetOpen);
-      setIsSheetExpanded(targetExpanded);
-      swipeTimeout.current = undefined; 
-    }, 400);
+
+      sidebarRef.current.style.transition = 'max-height 0.4s cubic-bezier(0.1, 1, 0.2, 1)';
+      sidebarRef.current.style.maxHeight = targetHeight;
+
+      if (!targetOpen) sidebarRef.current.classList.add('closed');
+      else sidebarRef.current.classList.remove('closed');
+
+      if (targetExpanded) sidebarRef.current.classList.add('expanded');
+      else sidebarRef.current.classList.remove('expanded');
+
+      swipeTimeout.current = setTimeout(() => {
+        if (sidebarRef.current) {
+          sidebarRef.current.style.height = ''; 
+          sidebarRef.current.style.transition = ''; 
+          sidebarRef.current.style.maxHeight = '';  
+        }
+        swipeTimeout.current = undefined; 
+      }, 400);
+
+    }, 30);
   };
 
-  const handleCardClick = (pin: any) => {
-    const closest = getClosestLng(pin.lng);
-    setCameraTarget({ lat: pin.lat, lng: closest.lng, triggerId: Date.now() });
+  const handleCardClick = (pin: any, shouldPan: boolean = true) => {
+    setSelectedCardId(pin.id);
     
-    if (markerRefs.current[`${pin.id}-${closest.offset}`]) {
-      markerRefs.current[`${pin.id}-${closest.offset}`].openPopup();
+    const closest = getClosestLng(pin.lng);
+    
+    if (shouldPan) {
+      setCameraTarget({ lat: pin.lat, lng: closest.lng, triggerId: Date.now() });
+    }
+
+    const refKey = `${pin.id}-${closest.offset}`;
+    if (markerRefs.current[refKey]) {
+      markerRefs.current[refKey].openPopup();
     }
   };
 
@@ -667,8 +741,10 @@ const TravelMap = () => {
     setEditingPinId(null);
     setFormName('');
     setFormBlurb('');
-    setFormPhotos([]); 
+    setFormPhotos([]);
+
     popupCount.current = 0;
+    setSelectedCardId(null);
 
     const newTripData = trips.find(t => t.id === newTripId);
     
@@ -780,27 +856,47 @@ const TravelMap = () => {
 
   const renderPhotoPreview = (photos: string[] | undefined) => {
     if (!photos || photos.length === 0) return null;
-
     const count = photos.length;
 
-    // 1, 2, or 3 images is a line
-    if (count <= 3) {
+    if (count === 1) {
       return (
-        <div style={{ display: 'flex', gap: '5px', margin: '8px 0', width: '100%' }}>
+        <div onClick={(e) => { e.preventDefault(); e.stopPropagation(); setGallery({ isOpen: true, photos, currentIndex: 0 }); }}
+             style={{ width: '100%', aspectRatio: '16/9', margin: '8px 0', cursor: 'pointer', borderRadius: '8px', overflow: 'hidden', border: '1px solid var(--border-light)' }}>
+          <img src={photos[0]} alt="Thumbnail" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+        </div>
+      );
+    }
+
+    if (count === 2) {
+      return (
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '5px', margin: '8px 0', width: '100%', aspectRatio: '2/1' }}>
           {photos.map((photo, idx) => (
-            <div 
-              key={idx} 
-              onClick={(e) => { e.preventDefault(); e.stopPropagation(); setGallery({ isOpen: true, photos, currentIndex: idx }); }}
-              style={{ width: '120px', height: '90px', cursor: 'pointer', borderRadius: '6px', overflow: 'hidden', flexShrink: 0, border: '1px solid var(--border-light)' }}
-            >
-              <img src={photo} alt={`Thumbnail`} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+            <div key={idx} onClick={(e) => { e.preventDefault(); e.stopPropagation(); setGallery({ isOpen: true, photos, currentIndex: idx }); }}
+                 style={{ width: '100%', height: '100%', cursor: 'pointer', borderRadius: '8px', overflow: 'hidden', border: '1px solid var(--border-light)' }}>
+              <img src={photo} alt="Thumbnail" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
             </div>
           ))}
         </div>
       );
     }
 
-    // 4+ images turns into square
+    if (count === 3) {
+      return (
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gridTemplateRows: '2fr 1fr', gap: '5px', margin: '8px 0', width: '100%', aspectRatio: '4/3' }}>
+          <div onClick={(e) => { e.preventDefault(); e.stopPropagation(); setGallery({ isOpen: true, photos, currentIndex: 0 }); }}
+               style={{ gridColumn: '1 / span 2', cursor: 'pointer', borderRadius: '8px', overflow: 'hidden', border: '1px solid var(--border-light)' }}>
+            <img src={photos[0]} alt="Thumbnail" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+          </div>
+          {photos.slice(1).map((photo, idx) => (
+            <div key={idx+1} onClick={(e) => { e.preventDefault(); e.stopPropagation(); setGallery({ isOpen: true, photos, currentIndex: idx + 1 }); }}
+                 style={{ cursor: 'pointer', borderRadius: '8px', overflow: 'hidden', border: '1px solid var(--border-light)' }}>
+              <img src={photo} alt="Thumbnail" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+            </div>
+          ))}
+        </div>
+      );
+    }
+
     const visiblePhotos = photos.slice(0, 4);
     const extraCount = count - 3; 
 
@@ -808,18 +904,14 @@ const TravelMap = () => {
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '5px', margin: '8px 0', width: '100%' }}>
         {visiblePhotos.map((photo, idx) => {
           const isLast = idx === 3;
-          const showOverlay = isLast && count > 4;
+          const showOverlay = isLast && extraCount > 0;
 
           return (
-            <div 
-              key={idx} 
-              onClick={(e) => { e.preventDefault(); e.stopPropagation(); setGallery({ isOpen: true, photos, currentIndex: idx }); }}
-              style={{ position: 'relative', width: '100%', aspectRatio: '4/3', cursor: 'pointer', borderRadius: '6px', overflow: 'hidden', border: '1px solid var(--border-light)' }}
-            >
-              <img src={photo} alt={`Thumbnail`} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-              
+            <div key={idx} onClick={(e) => { e.preventDefault(); e.stopPropagation(); setGallery({ isOpen: true, photos, currentIndex: idx }); }}
+                 style={{ position: 'relative', width: '100%', aspectRatio: '4/3', cursor: 'pointer', borderRadius: '8px', overflow: 'hidden', border: '1px solid var(--border-light)' }}>
+              <img src={photo} alt="Thumbnail" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
               {showOverlay && (
-                <div style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', backgroundColor: 'rgba(0,0,0,0.6)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontWeight: 'bold', fontSize: '20px' }}>
+                <div style={{ position: 'absolute', inset: 0, backgroundColor: 'rgba(0,0,0,0.6)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontWeight: 'bold', fontSize: '20px' }}>
                   +{extraCount}
                 </div>
               )}
@@ -889,22 +981,29 @@ const TravelMap = () => {
         <div
           style={{
             position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh',
-            backgroundColor: 'rgba(0,0,0,0.92)', zIndex: 10000, 
-            display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center'
+            backgroundColor: 'rgba(0,0,0,0.6)', 
+            backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)',
+            zIndex: 10000, display: 'flex', flexDirection: 'column', 
+            justifyContent: 'center', alignItems: 'center', overflow: 'hidden'
           }}
           onTouchStart={(e) => {
+            setIsSwiping(true);
             touchCoords.current = { x: e.targetTouches[0].clientX, y: e.targetTouches[0].clientY };
           }}
-          onTouchEnd={(e) => {
+          onTouchMove={(e) => {
             if (!touchCoords.current) return;
-            const distanceX = touchCoords.current.x - e.changedTouches[0].clientX;
-
-            if (distanceX > 50 && gallery.photos.length > 1) {
-              setGallery({ ...gallery, currentIndex: (gallery.currentIndex + 1) % gallery.photos.length });
+            setSwipeOffset(e.targetTouches[0].clientX - touchCoords.current.x);
+          }}
+          onTouchEnd={(e) => {
+            setIsSwiping(false);
+            if (!touchCoords.current) return;
+            if (swipeOffset > 75) {
+              if (gallery.currentIndex > 0) setGallery({ ...gallery, currentIndex: gallery.currentIndex - 1 });
+            } else if (swipeOffset < -75) {
+              if (gallery.currentIndex < gallery.photos.length - 1) setGallery({ ...gallery, currentIndex: gallery.currentIndex + 1 });
             }
-            if (distanceX < -50 && gallery.photos.length > 1) {
-              setGallery({ ...gallery, currentIndex: (gallery.currentIndex - 1 + gallery.photos.length) % gallery.photos.length });
-            }
+            
+            setSwipeOffset(0);
             touchCoords.current = null;
           }}
         >
@@ -916,27 +1015,48 @@ const TravelMap = () => {
             ✖
           </button>
 
-          {gallery.photos.length > 1 && (
+          {gallery.photos.length > 1 && !isMobileScreen && (
             <button
               aria-label="Previous Photo"
-              onClick={(e) => { e.stopPropagation(); setGallery({ ...gallery, currentIndex: (gallery.currentIndex - 1 + gallery.photos.length) % gallery.photos.length }); }}
-              style={{ position: 'absolute', left: '20px', top: '50%', transform: 'translateY(-50%)', background: 'rgba(255,255,255,0.1)', border: 'none', color: 'white', fontSize: '40px', cursor: 'pointer', padding: '15px 25px', borderRadius: '12px', zIndex: 10001 }}
+              onClick={(e) => { e.stopPropagation(); if (gallery.currentIndex > 0) setGallery({ ...gallery, currentIndex: gallery.currentIndex - 1 }); }}
+              style={{ position: 'absolute', left: '20px', top: '50%', transform: 'translateY(-50%)', background: 'rgba(255,255,255,0.1)', border: 'none', color: 'white', fontSize: '40px', cursor: 'pointer', padding: '15px 25px', borderRadius: '12px', zIndex: 10001, visibility: gallery.currentIndex > 0 ? 'visible' : 'hidden' }}
             >
-              ◀
+              <Icons.ChevronLeft />
             </button>
           )}
 
-          <div style={{ position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center', width: '80%', height: '80vh' }}>
-            <img src={gallery.photos[gallery.currentIndex]} alt={`Gallery view`} style={{ maxHeight: '100%', maxWidth: '100%', objectFit: 'contain' }} />
+          <div style={{ position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center', width: '100%', height: '80vh' }}>
+            {gallery.photos.map((photo, index) => {
+              const diff = index - gallery.currentIndex;
+              const isCenter = diff === 0;
+              const baseTranslate = diff * 85;
+              const activeTranslate = isSwiping ? swipeOffset : 0;
+              
+              const scale = isCenter ? 1 : 0.85;
+              const opacity = isCenter ? 1 : 0.3;
+              const zIndex = isCenter ? 10 : 1;
+
+              return (
+                <div key={index} style={{
+                  position: 'absolute', width: '85vw', height: '80vh',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  transition: isSwiping ? 'none' : 'transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1), opacity 0.3s ease',
+                  transform: `translateX(calc(${baseTranslate}vw + ${activeTranslate}px)) scale(${scale})`,
+                  opacity, zIndex
+                }}>
+                  <img src={photo} alt={`Gallery view ${index + 1}`} style={{ maxHeight: '100%', maxWidth: '100%', objectFit: 'contain', borderRadius: '12px', boxShadow: isCenter ? '0 10px 30px rgba(0,0,0,0.5)' : 'none' }} />
+                </div>
+              );
+            })}
           </div>
           
-          {gallery.photos.length > 1 && (
+          {gallery.photos.length > 1 && !isMobileScreen && (
             <button
               aria-label="Next Photo"
-              onClick={(e) => { e.stopPropagation(); setGallery({ ...gallery, currentIndex: (gallery.currentIndex + 1) % gallery.photos.length }); }}
-              style={{ position: 'absolute', right: '20px', top: '50%', transform: 'translateY(-50%)', background: 'rgba(255,255,255,0.1)', border: 'none', color: 'white', fontSize: '40px', cursor: 'pointer', padding: '15px 25px', borderRadius: '12px', zIndex: 10001 }}
+              onClick={(e) => { e.stopPropagation(); if (gallery.currentIndex < gallery.photos.length - 1) setGallery({ ...gallery, currentIndex: gallery.currentIndex + 1 }); }}
+              style={{ position: 'absolute', right: '20px', top: '50%', transform: 'translateY(-50%)', background: 'rgba(255,255,255,0.1)', border: 'none', color: 'white', fontSize: '40px', cursor: 'pointer', padding: '15px 25px', borderRadius: '12px', zIndex: 10001, visibility: gallery.currentIndex < gallery.photos.length - 1 ? 'visible' : 'hidden' }}
             >
-              ▶
+              <Icons.ChevronRight />
             </button>
           )}
 
@@ -952,128 +1072,137 @@ const TravelMap = () => {
           onClick={() => setUiHidden(false)}
           className="btn btn-blue"
           aria-label="Show UI"
-          style={{ position: 'absolute', top: '20px', left: '20px', zIndex: 1000, boxShadow: 'var(--shadow-float)' }}>
-          👁️ Show UI
+          style={{ position: 'absolute', top: '20px', left: '20px', zIndex: 1000, boxShadow: 'var(--shadow-float)', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', lineHeight: 1 }}>
+          <Icons.EyeOff style={{ display: 'block' }} /> <span>Show UI</span>
         </button>
       )}
 
       {!uiHidden && (
         <>
-          {/* Floating Panel */}
-          <div className={`floating-panel ${!isMobileMenuOpen ? 'mobile-collapsed' : ''}`}>
+          {/* THE FAB GLASS OVERLAY */}
+         <div
+            className={`fab-overlay ${isMobileMenuOpen || isSettingsOpen ? 'active' : ''}`}
+            onClick={() => { setIsMobileMenuOpen(false); setIsSettingsOpen(false); }}
+          />
 
-            {/* Mobile Menu Header */}
-            <div className="mobile-panel-header" onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}>
-              <strong style={{ fontSize: '16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <span style={{ fontSize: '20px' }}>{isMobileMenuOpen ? '✖' : '☰'}</span> 
-                {!isMobileMenuOpen && 'Menu'}
-              </strong>
+          {/* 1. THE DYNAMIC ISLAND (Trips) */}
+          <div 
+            className={`dynamic-island ${isMobileMenuOpen ? 'expanded' : 'pill'}`}
+            style={{ 
+              borderColor: isMobileMenuOpen ? 'var(--border-light)' : getDisplayColor(activeTrip?.lineColor || '#3b82f6'),
+              borderWidth: isMobileMenuOpen ? '1px' : '2px',
+              boxShadow: isMobileMenuOpen ? '0 4px 20px rgba(0,0,0,0.15)' : `0 4px 15px ${getDisplayColor(activeTrip?.lineColor || '#3b82f6')}40`
+            }}
+          >
+            <div className="island-header" onClick={() => { setIsMobileMenuOpen(!isMobileMenuOpen); setIsSettingsOpen(false); }}>
+              <div style={{ width: '12px', height: '12px', borderRadius: '50%', backgroundColor: getDisplayColor(activeTrip?.lineColor || '#3b82f6'), marginRight: '8px', flexShrink: 0 }} />
+              <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '120px' }}>
+                {activeTrip?.name || 'Your Trips'}
+              </span>
+              <span style={{ marginLeft: '6px', fontSize: '10px', transition: 'transform 0.3s', transform: isMobileMenuOpen ? 'rotate(180deg)' : 'rotate(0)' }}><Icons.ChevronDown /></span>
             </div>
 
-            {/* Panel Content */}
-            <div className="panel-content">
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '15px', gap: '15px' }}>
-                <h2 style={{ margin: 0, fontSize: '18px' }}>Your Trips</h2>
-                <button onClick={handleCreateNewTrip} className="mini-btn mini-btn-default" style={{ padding: '6px 10px', fontWeight: 'bold', flexShrink: 0 }}>+ New</button>
+            <div className="island-content">
+              <div style={{ display: 'flex', alignItems: 'center', marginBottom: '10px', paddingLeft: '4px' }}>
+                <h3 style={{ margin: 0, fontSize: '12px', textTransform: 'uppercase', letterSpacing: '1px', color: 'var(--text-muted)' }}>Your Trips</h3>
               </div>
 
               {/* Trip List */}
-              <div style={{ maxHeight: '200px', overflowY: 'auto', marginBottom: '15px', display: 'flex', flexDirection: 'column', gap: '6px' }}>
+              <div style={{ maxHeight: '300px', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '8px' }}>
                 {trips.map(trip => {
                   const isActive = trip.id === activeTripId;
                   const displayColor = getDisplayColor((trip as any).lineColor || '#3b82f6');
-                  
                   return (
                     <div 
-                      key={`list-${trip.id}`} 
+                      key={`fab-list-${trip.id}`} 
                       onClick={() => handleSwitchTrip(trip.id)}
                       style={{ 
-                        display: 'flex', alignItems: 'center', justifyContent: 'space-between', 
-                        padding: '10px', borderRadius: '8px', cursor: isActive ? 'default' : 'pointer',
+                        display: 'flex', flexDirection: 'column', gap: '10px', padding: '12px', borderRadius: '10px', cursor: isActive ? 'default' : 'pointer',
                         backgroundColor: isActive ? 'var(--border-light)' : 'transparent',
                         borderLeft: isActive ? `5px solid ${displayColor}` : '5px solid transparent',
-                        color: 'var(--text-main)',
-                        minHeight: '46px',
-                        boxSizing: 'border-box'
                       }}
                     >
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flex: 1 }}>
+                      {/* ROW 1: Checkbox, Dot, and Name */}
+                      <div style={{ display: 'flex', alignItems: 'center' }}>
                         <input 
                           type="checkbox" 
                           aria-label={`Toggle visibility for ${trip.name}`}
                           checked={visibleTripIds.includes(trip.id)} 
                           onChange={() => toggleVisibility(trip.id)}
                           onClick={(e) => e.stopPropagation()} 
-                          style={{ cursor: 'pointer', transform: 'scale(1.2)' }}
+                          style={{ cursor: 'pointer', transform: 'scale(1.3)', marginRight: '15px', flexShrink: 0 }}
                         />
-
-                        <div style={{ 
-                          width: '14px', height: '14px', borderRadius: '50%', 
-                          backgroundColor: displayColor, flexShrink: 0, 
-                          boxShadow: '0 1px 3px rgba(0,0,0,0.2)' 
-                        }} />
-
-                        <strong style={{ fontSize: '15px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: isActive ? '120px' : '180px' }}>
-                          {trip.name}
-                        </strong>
+                        <div style={{ width: '14px', height: '14px', borderRadius: '50%', backgroundColor: displayColor, marginRight: '10px', flexShrink: 0 }} />
+                        <strong style={{ fontSize: '15px', flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{trip.name}</strong>
                       </div>
-
-                      {isActive && (
-                        <div style={{ display: 'flex', gap: '5px' }}>
-                          <button onClick={(e) => { e.stopPropagation(); handleRenameTrip(); }} aria-label={`Edit ${trip.name}`} style={{ background: 'var(--bg-panel)', border: '1px solid var(--border-input)', color: 'var(--text-main)', cursor: 'pointer', borderRadius: '4px', padding: '4px 6px', fontSize: '12px' }}>✏️</button>
-                          <button onClick={(e) => { e.stopPropagation(); handleDeleteTrip(); }} aria-label={`Delete ${trip.name}`} style={{ background: 'var(--bg-panel)', border: '1px solid var(--border-input)', color: 'var(--text-main)', cursor: 'pointer', borderRadius: '4px', padding: '4px 6px', fontSize: '12px' }}>🗑️</button>
-                        </div>
-                      )}
+                      
+                      {/* ROW 2: The Action Buttons */}
+                      <div className={`trip-actions-slider ${isActive ? 'open' : ''}`}>
+                        <button onClick={(e) => { e.stopPropagation(); handleRenameTrip(); }} className="action-btn action-btn-edit" aria-label={`Edit ${trip.name}`}>
+                          <Icons.Edit style={{ display: 'block' }} /> <span>Edit</span>
+                        </button>
+                        <button onClick={(e) => { e.stopPropagation(); handleDeleteTrip(); }} className="action-btn action-btn-delete" aria-label={`Delete ${trip.name}`}>
+                          <Icons.Trash style={{ display: 'block' }} /> <span>Delete</span>
+                        </button>
+                      </div>
                     </div>
                   );
                 })}
-              </div>
-
-              <hr style={{ border: 'none', borderTop: '1px solid var(--border-light)', marginBottom: '15px' }} />
-              
-              {/*
-              <label style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '14px', cursor: 'pointer', marginBottom: '10px' }}>
-                <input type="checkbox" checked={pinsUnlocked} onChange={(e) => setPinsUnlocked(e.target.checked)} />
-                Unlock active pins
-              </label>
-              */}
-              
-              <div style={{ display: 'flex', gap: '5px', alignItems: 'center', minWidth: '220px' }}>
-                {/* Dark Mode Toggle Switch */}
-                <div
-                  style={{ display: 'flex', alignItems: 'center', gap: '6px', flex: 1, padding: '5px 8px', borderRadius: '4px', background: 'var(--border-light)', cursor: 'pointer' }}
-                  aria-label="Toggle Dark Mode"
-                  onClick={() => setDarkMode(d => !d)}
+                
+                <button 
+                  onClick={(e) => { e.stopPropagation(); setIsMobileMenuOpen(false); handleCreateNewTrip(); }} 
+                  className="create-trip-btn"
                 >
-                  <span style={{ fontSize: '12px', color: 'var(--text-main)', userSelect: 'none' }}>
-                    {darkMode ? '🌙' : '☀️'}
-                  </span>
-                  <div style={{
-                    width: '32px', height: '18px', borderRadius: '9px',
-                    background: darkMode ? 'var(--accent-blue)' : '#cbd5e1',
-                    position: 'relative', transition: 'background 0.2s', flexShrink: 0,
-                  }}>
-                    <div style={{
-                      position: 'absolute', top: '2px',
-                      left: darkMode ? '16px' : '2px',
-                      width: '14px', height: '14px', borderRadius: '50%',
-                      background: 'white', transition: 'left 0.2s',
-                      boxShadow: '0 1px 3px rgba(0,0,0,0.3)',
-                    }} />
-                  </div>
-                </div>
-                <button
-                  onClick={() => setUiHidden(true)}
-                  aria-label="Enter Zen Mode"
-                  className="mini-btn mini-btn-default" style={{ flex: 1 }}>👁️</button>
+                  <Icons.Plus style={{ display: 'block' }} /> <span>Create New Trip</span>
+                </button>
               </div>
-              <button disabled={!isDirty || isSaving} onClick={handleSaveTrips} className="btn" style={{ background: 'none', border: '1px solid var(--accent-blue)', color: 'var(--accent-blue)', padding: '6px 10px', fontSize: '14px', width: '100%', marginTop: '10px', fontWeight: 'bold', opacity: (!isDirty || isSaving) ? 0.6 : 1, cursor: (!isDirty || isSaving) ? 'not-allowed' : 'pointer' }}>
-                {isSaving ? 'Saving...' : (isDirty ? 'Save Changes' : 'Saved')}
-              </button>
-              <button onClick={handleLogout} className="btn" style={{ background: 'none', border: '1px solid var(--accent-red)', color: 'var(--accent-red)', padding: '6px 10px', fontSize: '14px', width: '100%', marginTop: '10px', fontWeight: 'bold' }}>
-                Sign Out
-              </button>
             </div>
+          </div>
+
+          {/* THE DIRTY SAVE BUTTON */}
+          <div className={`floating-save-wrapper ${isDirty ? 'visible' : ''}`}>
+            <button
+              onClick={handleSaveTrips}
+              disabled={isSaving}
+              className="floating-save-btn"
+              style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', lineHeight: 1 }}
+            >
+              <Icons.Save style={{ display: 'block' }} /> <span>{isSaving ? 'Saving...' : 'Save Changes'}</span>
+            </button>
+          </div>
+
+          {/* SETTINGS GEAR */}
+          <div
+            className="floating-circle-btn"
+            style={{ top: '15px' }}
+            onClick={() => { setIsSettingsOpen(!isSettingsOpen); setIsMobileMenuOpen(false); }}
+          >
+            <Icons.Settings />
+          </div>
+
+          {/* SETTINGS DROPDOWN */}
+          <div className={`settings-dropdown ${isSettingsOpen ? 'active' : ''}`}>
+            <div onClick={() => setDarkMode(d => !d)} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '10px', borderRadius: '6px', cursor: 'pointer', gap: '15px' }}>
+              <span style={{ fontSize: '14px', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '8px', lineHeight: 1 }}>
+                {darkMode ? <Icons.Moon style={{ display: 'block' }} /> : <Icons.Sun style={{ display: 'block' }} />} <span>Dark Mode</span>
+              </span>
+              <div style={{ width: '36px', height: '20px', borderRadius: '10px', background: darkMode ? 'var(--accent-blue)' : '#cbd5e1', position: 'relative', transition: 'background 0.2s', flexShrink: 0 }}>
+                <div style={{ position: 'absolute', top: '2px', left: darkMode ? '18px' : '2px', width: '16px', height: '16px', borderRadius: '50%', background: 'white', transition: 'left 0.2s' }} />
+              </div>
+            </div>
+            <hr style={{ border: 'none', borderTop: '1px solid var(--border-light)', margin: '4px 0' }} />
+            <div onClick={handleLogout} style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '10px', borderRadius: '6px', cursor: 'pointer', color: 'var(--accent-red)', fontWeight: 'bold', fontSize: '14px', lineHeight: 1 }}>
+              <Icons.LogOut style={{ display: 'block' }} /> <span>Sign Out</span>
+            </div>
+          </div>
+
+          {/* HIDE UI BUTTON */}
+          <div
+            className="floating-circle-btn"
+            onClick={() => setUiHidden(true)}
+            style={{ top: isSettingsOpen ? '190px' : '70px', fontSize: '16px' }} 
+          >
+            <Icons.Eye />
           </div>
           
           <button
@@ -1098,14 +1227,13 @@ const TravelMap = () => {
               transition: 'transform 0.3s ease-in-out, background-color 0.3s ease-in-out, border-color 0.3s ease-in-out, color 0.3s ease-in-out'
             }}
           >
-            {isSidebarOpen ? '▶' : '◀'}
+            {isSidebarOpen ? <Icons.ChevronRight /> : <Icons.ChevronLeft />}
           </button>
 
           {/* Right Sidebar */}
           <div
             ref={sidebarRef}
             className={`sidebar ${!isSidebarOpen ? 'closed' : ''} ${isSheetExpanded ? 'expanded' : ''}`}
-            style={{ display: 'flex', flexDirection: 'column' }}
             onClick={(e) => {
               const target = e.target as HTMLElement;
               if (
@@ -1540,7 +1668,6 @@ const TravelMap = () => {
         doubleClickZoom={false}
         style={{ height: '100%', width: '100%' }}
       >
-        <ZoomControl position={isMobileScreen ? "topright" : "bottomleft"} />
         <TileLayer
           url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png"
         />
@@ -1607,11 +1734,7 @@ const TravelMap = () => {
                       alt={`Map pin for ${pin.name}`}
                       draggable={!uiHidden && ((pinsUnlocked && trip.id === activeTripId) || pin.id === editingPinId)}
                       icon={getPinIcon(displayColor)}
-                      eventHandlers={{ 
-                        mousedown: (e) => {
-                            isDraggingMapPin.current = true;
-                            e.target.closePopup(); 
-                          },
+                      eventHandlers={{
                         dragstart: (e) => {
                           isDraggingMapPin.current = true;
                           e.target.closePopup();
@@ -1621,7 +1744,7 @@ const TravelMap = () => {
                             const baseLng = liveLatLng.lng - offset; 
                             const draftPinsForMath = tripPins.map(p => 
                               p.id === pin.id 
-                                ? { ...p, lat: liveLatLng.lat, lng: baseLng } 
+                                ? { ...p, lat: liveLatLng.lat, lng: baseLng }
                                 : p
                             );
                             const newBaseRoute = calculateWrappedRoute(draftPinsForMath);
@@ -1632,7 +1755,7 @@ const TravelMap = () => {
                                 polyRef.setLatLngs(shiftedRoute);
                               }
                             });
-                            if (selectedCardId === pin.id) {
+                            if (selectedCardId === pin.id || editingPinId === pin.id) {
                               WORLD_OFFSETS.forEach(worldOffset => {
                                 const circleRef = highlightCirclesRef.current[worldOffset];
                                 if (circleRef) {
@@ -1696,7 +1819,7 @@ const TravelMap = () => {
                                 onClick={(e) => { e.preventDefault(); e.stopPropagation(); if (index > 0) handleCardClick(trip.pins[index - 1]); }}
                                 style={{ visibility: index > 0 ? 'visible' : 'hidden', background: 'none', border: 'none', color: 'var(--text-main)', cursor: 'pointer', fontSize: '16px', padding: '0 5px' }}
                               >
-                                ◀
+                                <Icons.ChevronLeft />
                               </button>
 
                               <div style={{ display: 'flex', gap: '5px' }}>
@@ -1709,7 +1832,7 @@ const TravelMap = () => {
                                 onClick={(e) => { e.preventDefault(); e.stopPropagation(); if (index < trip.pins.length - 1) handleCardClick(trip.pins[index + 1]); }}
                                 style={{ visibility: index < trip.pins.length - 1 ? 'visible' : 'hidden', background: 'none', border: 'none', color: 'var(--text-main)', cursor: 'pointer', fontSize: '16px', padding: '0 5px' }}
                               >
-                                ▶
+                                <Icons.ChevronRight />
                               </button>
                               
                             </div>
