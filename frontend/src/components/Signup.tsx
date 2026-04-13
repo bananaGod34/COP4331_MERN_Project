@@ -39,7 +39,7 @@ const Signup = () => {
       } else {
         const user = { firstName: firstName, lastName: lastName, id: res.id };
         localStorage.setItem('user_data', JSON.stringify(user));
-        navigate('/map'); 
+        navigate('/verify-email'); 
       }
     } catch (error: any) {
       setMessage('Could not connect to the server.');
