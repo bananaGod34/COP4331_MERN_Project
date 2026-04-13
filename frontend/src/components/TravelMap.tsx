@@ -311,6 +311,7 @@ const TravelMap = () => {
   const [formName, setFormName] = useState('');
   const [formBlurb, setFormBlurb] = useState('');
   const [formPhotos, setFormPhotos] = useState<string[]>([]);
+  const [isUploading, setIsUploading] = useState(false);
 
   // STATE: Touch Gestures
   const [touchStart, setTouchStart] = useState<{x: number, y: number} | null>(null);
@@ -515,16 +516,42 @@ const TravelMap = () => {
     }
   };
 
-  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = Array.from(e.target.files || []);
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
+
+    setIsUploading(true);
     
-    files.forEach(file => {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setFormPhotos(prev => [...prev, reader.result as string]);
-      };
-      reader.readAsDataURL(file);
-    });
+    const CLOUD_NAME = 'do5rlbjxk'; 
+    const UPLOAD_PRESET = 'travel_map_folder';
+
+    try {
+      const uploadPromises = Array.from(files).map(async (file) => {
+        const formData = new FormData();
+        formData.append('file', file);
+        formData.append('upload_preset', UPLOAD_PRESET);
+
+        const response = await fetch(`https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`, {
+          method: 'POST',
+          body: formData,
+        });
+        
+        const data = await response.json();
+        return data.secure_url;
+      });
+
+      const uploadedUrls = await Promise.all(uploadPromises);
+
+      const validUrls = uploadedUrls.filter(url => url != null);
+      setFormPhotos(prev => [...prev, ...validUrls]);
+
+    } catch (error) {
+      console.error("Error uploading image:", error);
+      alert("Failed to upload image. Please try again.");
+    } finally {
+      setIsUploading(false);
+      e.target.value = '';
+    }
   };
 
   const handleMapClick = (latlng: any) => {
@@ -1506,19 +1533,17 @@ const TravelMap = () => {
                         ))}
                         
                         <div style={{ minWidth: '150px', height: '150px', border: '2px dashed var(--border-input)', borderRadius: '6px' }}>
-                          <label style={{ 
-                            display: 'flex', alignItems: 'center', justifyContent: 'center', 
-                            width: '100%', height: '100%', cursor: 'pointer', 
-                            color: 'var(--accent-blue)', fontWeight: 'bold', fontSize: '24px' 
-                          }}>
-                            +
-                            <input
-                              type="file"
-                              accept="image/*"
-                              aria-label="Upload Photos"
-                              multiple onChange={handleImageUpload} style={{ display: 'none' }} />
-                          </label>
-                          
+                          {isUploading ? (
+                            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', width: '100%', height: '100%', color: 'var(--accent-blue)', fontWeight: 'bold' }}>
+                              <Icons.Save className="animate-spin" style={{ marginBottom: '8px' }} />
+                              <span style={{ fontSize: '12px' }}>Uploading...</span>
+                            </div>
+                          ) : (
+                            <label style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '100%', height: '100%', cursor: 'pointer', color: 'var(--accent-blue)', fontWeight: 'bold', fontSize: '24px' }}>
+                              +
+                              <input type="file" accept="image/*" multiple onChange={handleImageUpload} style={{ display: 'none' }} disabled={isUploading} />
+                            </label>
+                          )}
                         </div>
                       </div>
                     </div>
