@@ -490,22 +490,25 @@ const TravelMap = () => {
       isFirstRender.current = false;
       return;
     }
-
-    document.documentElement.classList.add('theme-transitioning');
-    document.documentElement.classList.toggle('dark-mode', darkMode);
     
-    if (mapRef.current?.getContainer()) {
-      mapRef.current.getContainer().classList.toggle('dark-mode', darkMode);
-    }
-    
-    localStorage.setItem('travelmap_theme', darkMode ? 'dark' : 'light');
+    window.requestAnimationFrame(() => {
+      document.documentElement.classList.add('theme-transitioning');
 
-    const timer = setTimeout(() => {
-      document.documentElement.classList.remove('theme-transitioning');
-    }, 350);
+      document.documentElement.classList.toggle('dark-mode', darkMode);
+      
+      if (mapRef.current?.getContainer()) {
+        mapRef.current.getContainer().classList.toggle('dark-mode', darkMode);
+      }
+      
+      localStorage.setItem('travelmap_theme', darkMode ? 'dark' : 'light');
 
-    return () => clearTimeout(timer);
-  }, [darkMode]); 
+      const timer = setTimeout(() => {
+        document.documentElement.classList.remove('theme-transitioning');
+      }, 400);
+
+      return () => clearTimeout(timer);
+    });
+  }, [darkMode]);
 
   // dark mode display helper
   const getDisplayColor = (hex: string) => {
