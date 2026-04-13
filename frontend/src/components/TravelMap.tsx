@@ -1266,8 +1266,9 @@ const TravelMap = () => {
               <span style={{ fontSize: '14px', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '8px', lineHeight: 1 }}>
                 {darkMode ? <Icons.Moon style={{ display: 'block' }} /> : <Icons.Sun style={{ display: 'block' }} />} <span>Dark Mode</span>
               </span>
+              
               <div style={{ width: '36px', height: '20px', borderRadius: '10px', background: darkMode ? 'var(--accent-blue)' : '#cbd5e1', position: 'relative', transition: 'background 0.2s', flexShrink: 0 }}>
-                <div style={{ position: 'absolute', top: '2px', left: darkMode ? '18px' : '2px', width: '16px', height: '16px', borderRadius: '50%', background: 'white', transition: 'left 0.2s' }} />
+                <div className="theme-toggle-thumb" />
               </div>
             </div>
             <hr style={{ border: 'none', borderTop: '1px solid var(--border-light)', margin: '4px 0' }} />
