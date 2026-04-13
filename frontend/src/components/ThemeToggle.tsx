@@ -1,11 +1,11 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useLayoutEffect } from 'react';
 
 const ThemeToggle = () => {
   const [isDark, setIsDark] = useState(() => {
     return localStorage.getItem('travelmap_theme') === 'dark';
   });
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     document.body.classList.toggle('dark-mode', isDark);
     localStorage.setItem('travelmap_theme', isDark ? 'dark' : 'light');
   }, [isDark]);

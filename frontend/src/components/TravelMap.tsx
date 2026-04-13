@@ -962,10 +962,11 @@ const TravelMap = () => {
           <svg className="bouncing-pin-icon" xmlns="http://www.w3.org/2000/svg" viewBox="-4 -2 36 46">
             <path d="M14 0 C6.27 0 0 6.27 0 14 C0 24.5 14 38 14 38 C14 38 28 24.5 28 14 C28 6.27 21.73 0 14 0 Z M 14 9 A 5 5 0 1 0 14 19 A 5 5 0 1 0 14 9 Z" fill="currentColor" fillRule="evenodd" />
           </svg>
+          <div className="isometric-paper-map" />
           <div className="bouncing-pin-shadow" />
         </div>
         <div style={{ textAlign: 'center' }}>
-          <h2 style={{ margin: '0 0 5px 0', fontSize: '20px' }}>Packing your bags...</h2>
+          <h2 style={{ margin: '0 0 5px 0', fontSize: '20px' }}>Getting ready...</h2>
           <p style={{ margin: 0, color: 'var(--text-muted)', fontSize: '14px', fontWeight: 'bold' }}>Unrolling your map</p>
         </div>
       </div>

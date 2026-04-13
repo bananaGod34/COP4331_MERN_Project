@@ -48,6 +48,10 @@ const Signup = () => {
       return setMessage('Passwords do not match');
     }
 
+    if (strengthScore < 3) {
+      return setMessage('Please choose a stronger password.');
+    }
+
     setIsLoading(true); // START LOADER
 
     try {
@@ -96,7 +100,17 @@ const Signup = () => {
             Create an account to start mapping.
           </p>
 
-          {message && <div style={{ background: 'var(--accent-red-dim, #fee2e2)', color: '#dc2626', padding: '12px', borderRadius: '6px', marginBottom: '20px', fontSize: '14px', fontWeight: 'bold' }}>{message}</div>}
+          <div style={{ 
+            maxHeight: message ? '24px' : '0', 
+            opacity: message ? 1 : 0, 
+            overflow: 'hidden',
+            marginBottom: message ? '15px' : '0',
+            transition: 'all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1)' 
+          }}>
+            <div style={{ color: 'var(--accent-red)', fontSize: '14px', fontWeight: 'bold', display: 'flex', alignItems: 'center' }}>
+              {message}
+            </div>
+          </div>
 
           <form onSubmit={doSignup} style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
             <div style={{ display: 'flex', gap: '10px' }}>
@@ -141,8 +155,8 @@ const Signup = () => {
                 </div>
                 
                 <div style={{ 
-                  marginTop: loginPassword.length > 0 ? '8px' : '0',
                   maxHeight: loginPassword.length > 0 ? '30px' : '0', 
+                  marginTop: loginPassword.length > 0 ? '8px' : '0',
                   opacity: loginPassword.length > 0 ? 1 : 0,
                   overflow: 'hidden',
                   transition: 'all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1)' 
@@ -192,7 +206,7 @@ const Signup = () => {
           </form>
 
           <div style={{ marginTop: '30px', fontSize: '14px', color: 'var(--text-muted)', textAlign: 'center' }}>
-            Already an explorer? <Link to="/login" className="auth-link">Log in</Link>
+            Already have an account? <Link to="/login" className="auth-link">Log in</Link>
           </div>
         </div>
       </div>

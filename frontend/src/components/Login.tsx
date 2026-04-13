@@ -74,7 +74,17 @@ const Login = () => {
             Where will your journey take you next?
           </p>
 
-          {message && <div style={{ background: 'var(--accent-red-dim, #fee2e2)', color: '#dc2626', padding: '12px', borderRadius: '6px', marginBottom: '20px', fontSize: '14px', fontWeight: 'bold' }}>{message}</div>}
+          <div style={{ 
+            maxHeight: message ? '24px' : '0', 
+            opacity: message ? 1 : 0, 
+            overflow: 'hidden',
+            marginBottom: message ? '15px' : '0',
+            transition: 'all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1)' 
+          }}>
+            <div style={{ color: 'var(--accent-red)', fontSize: '14px', fontWeight: 'bold', display: 'flex', alignItems: 'center' }}>
+              {message}
+            </div>
+          </div>
 
           <form onSubmit={doLogin} style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
             <div>
