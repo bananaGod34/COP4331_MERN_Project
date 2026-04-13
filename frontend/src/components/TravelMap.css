@@ -29,6 +29,67 @@ body, html {
   --info-text: #bfdbfe;
 }
 
+.auth-page {
+  display: flex;
+  min-height: 100dvh;
+  width: 100vw;
+  background-color: var(--bg-panel);
+  color: var(--text-main);
+}
+
+.auth-hero {
+    flex: 1;
+    display: none;
+    background-color: #cbd5e1; 
+    background-image: url("https://picsum.photos/id/28/1500/1000") !important;
+    background-size: cover;
+    background-position: center;
+    position: relative;
+  }
+
+.auth-hero::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to right, rgba(0,0,0,0.1), rgba(0,0,0,0.4));
+}
+
+.auth-form-side {
+  width: 100%;
+  max-width: 480px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 40px;
+  background: var(--bg-panel);
+  z-index: 10;
+}
+.auth-form-side .auth-card {
+  background: transparent;
+  box-shadow: none;
+  border: none;
+  padding: 0;
+  margin: 0 auto;
+  width: 100%;
+  max-width: 380px;
+}
+
+.auth-card {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.auth-link {
+  color: var(--accent-blue);
+  font-weight: bold;
+  text-decoration: none;
+  transition: opacity 0.2s;
+}
+.auth-link:hover {
+  opacity: 0.8;
+}
+
 .map-wrapper {
   position: fixed;
   top: 0;
@@ -355,6 +416,13 @@ body, html {
 }
 
 @media (min-width: 769px) {
+  .auth-hero {
+    display: block;
+  }
+  .auth-form-side {
+    padding: 60px;
+    box-shadow: -10px 0 30px rgba(0,0,0,0.05);
+  }
   .mobile-only {
     display: none !important;
   }
