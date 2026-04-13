@@ -407,7 +407,7 @@ const TravelMap = () => {
     return () => window.removeEventListener('beforeunload', handleBeforeUnload);
   }, [isDirty]);
 
-  // escape key listener
+  // hotkey listener
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
@@ -415,6 +415,28 @@ const TravelMap = () => {
         else if (tripModal.isOpen) setTripModal(prev => ({ ...prev, isOpen: false }));
         else if (editingPinId) cancelForm();
         else if (uiHidden) setUiHidden(false);
+      }
+      
+      // Global Save (Ctrl+S / Cmd+S)
+      if ((e.metaKey || e.ctrlKey) && e.key === 's') {
+        e.preventDefault(); 
+        document.getElementById('global-save-btn')?.click(); 
+      }
+
+      // Enter to Save Pin
+      if (e.key === 'Enter') {
+        const activeTag = document.activeElement?.tagName.toLowerCase();
+
+        if (activeTag === 'textarea') return;
+        if (activeTag === 'input') return; 
+
+        if (!tripModal.isOpen && !gallery.isOpen) {
+          const savePinBtn = document.getElementById('save-pin-btn');
+          if (savePinBtn) {
+            e.preventDefault();
+            savePinBtn.click();
+          }
+        }
       }
     };
 
@@ -431,18 +453,18 @@ const TravelMap = () => {
 
   // selected card scroll listener
   useEffect(() => {
-    if (selectedCardId !== null && !uiHidden) {
+    if (selectedCardId !== null && !uiHidden && isSidebarOpen) {
       setTimeout(() => {
         const cardElement = document.getElementById(`trip-card-${selectedCardId}`);
         if (cardElement) {
           cardElement.scrollIntoView({ 
             behavior: 'smooth', 
-            block: 'center'
+            block: 'nearest'
           });
         }
-      }, 100);
+      }, 400);
     }
-  }, [selectedCardId, uiHidden]);
+  }, [selectedCardId, uiHidden, isSidebarOpen]);
 
   // trip switch listener
   useEffect(() => {
@@ -1165,7 +1187,7 @@ const TravelMap = () => {
               </div>
 
               {/* Trip List */}
-              <div style={{ maxHeight: '300px', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+              <div className="no-scrollbar" style={{ maxHeight: '300px', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '8px' }}>
                 {trips.map(trip => {
                   const isActive = trip.id === activeTripId;
                   const displayColor = getDisplayColor((trip as any).lineColor || '#3b82f6');
@@ -1219,6 +1241,7 @@ const TravelMap = () => {
           {/* THE DIRTY SAVE BUTTON */}
           <div className={`floating-save-wrapper ${isDirty ? 'visible' : ''}`}>
             <button
+              id="global-save-btn"
               onClick={handleSaveTrips}
               disabled={isSaving}
               className="floating-save-btn"
@@ -1547,7 +1570,7 @@ const TravelMap = () => {
                     {/* Multiple Photo Upload */}
                     <div>
                       <label style={{ fontSize: '14px', fontWeight: 'bold' }}>Photos</label>
-                      <div style={{ display: 'flex', gap: '10px', overflowX: 'auto', paddingBottom: '10px', marginTop: '5px' }}>
+                      <div className="no-scrollbar" style={{ display: 'flex', gap: '10px', overflowX: 'auto', paddingBottom: '10px', marginTop: '5px' }}>
                         {formPhotos.map((photo, idx) => (
                           <div key={idx} style={{ position: 'relative', minWidth: '150px' }}>
                             <img src={photo} alt={`Preview ${idx}`} style={{ width: '150px', height: '150px', objectFit: 'cover', borderRadius: '6px', border: '1px solid var(--border-light)' }} />
@@ -1702,10 +1725,10 @@ const TravelMap = () => {
             {/* ZONE 3 */}
             {(draftPin || editingPinId) && (
               <div className="action-footer">
-                <button type="button" onClick={handleSavePin} className="btn btn-blue" style={{ flex: 1, padding: '12px' }}>
+                <button id="save-pin-btn" type="button" onClick={handleSavePin} className="btn btn-blue" style={{ flex: 1, padding: '12px' }}>
                   {editingPinId ? "Update Pin" : "Save Pin"}
                 </button>
-                <button type="button" onClick={cancelForm} className="btn btn-red" style={{ flex: 1, padding: '12px' }}>
+                <button id="cancel-form-btn" type="button" onClick={cancelForm} className="btn btn-red" style={{ flex: 1, padding: '12px' }}>
                   Cancel
                 </button>
               </div>
@@ -1781,6 +1804,7 @@ const TravelMap = () => {
               <React.Fragment key={`trip-group-${trip.id}`}>
                 {[...trip.pins].sort((a, b) => a.id.toString().localeCompare(b.id.toString())).map((pin: any, index: number) => {
                   const displayColor = getDisplayColor((trip as any).lineColor || '#3b82f6');
+                  const trueIndex = trip.pins.findIndex((p: any) => p.id === pin.id);
 
                   return (
                     <Marker 
@@ -1872,8 +1896,8 @@ const TravelMap = () => {
                               
                               <button 
                                 aria-label="Previous Stop"
-                                onClick={(e) => { e.preventDefault(); e.stopPropagation(); if (index > 0) handleCardClick(trip.pins[index - 1]); }}
-                                style={{ visibility: index > 0 ? 'visible' : 'hidden', background: 'none', border: 'none', color: 'var(--text-main)', cursor: 'pointer', fontSize: '16px', padding: '0 5px' }}
+                                onClick={(e) => { e.preventDefault(); e.stopPropagation(); if (trueIndex > 0) handleCardClick(trip.pins[trueIndex - 1]); }}
+                                style={{ visibility: trueIndex > 0 ? 'visible' : 'hidden', background: 'none', border: 'none', color: 'var(--text-main)', cursor: 'pointer', fontSize: '16px', padding: '0 5px' }}
                               >
                                 <Icons.ChevronLeft />
                               </button>
@@ -1885,8 +1909,8 @@ const TravelMap = () => {
 
                               <button
                                 aria-label="Next Stop"
-                                onClick={(e) => { e.preventDefault(); e.stopPropagation(); if (index < trip.pins.length - 1) handleCardClick(trip.pins[index + 1]); }}
-                                style={{ visibility: index < trip.pins.length - 1 ? 'visible' : 'hidden', background: 'none', border: 'none', color: 'var(--text-main)', cursor: 'pointer', fontSize: '16px', padding: '0 5px' }}
+                                onClick={(e) => { e.preventDefault(); e.stopPropagation(); if (trueIndex < trip.pins.length - 1) handleCardClick(trip.pins[trueIndex + 1]); }}
+                                style={{ visibility: trueIndex < trip.pins.length - 1 ? 'visible' : 'hidden', background: 'none', border: 'none', color: 'var(--text-main)', cursor: 'pointer', fontSize: '16px', padding: '0 5px' }}
                               >
                                 <Icons.ChevronRight />
                               </button>
