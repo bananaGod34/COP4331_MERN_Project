@@ -142,34 +142,34 @@ const SortableTripCard = ({
   startEditing, 
   deletePin,
   getDisplayColor,
-  setGallery
+  setGallery,
+  isDndReady
 }: any) => {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: pin.id });
-  const longPressTimer = React.useRef<NodeJS.Timeout>();
-
+  const [hasAnimated, setHasAnimated] = useState(false);
+  const longPressTimer = useRef<any>(null);
   const isSelected = selectedCardId === pin.id;
-  const lockedTransform = transform ? { ...transform, x: 0 } : null;
+
+  useEffect(() => {
+    const timer = setTimeout(() => setHasAnimated(true), 1000);
+    return () => clearTimeout(timer);
+  }, []);
 
   const style = {
-    transform: CSS.Translate.toString(lockedTransform),
-    transition: transition 
-      ? `${transition}, background-color 0.3s ease-in-out, border-color 0.3s ease-in-out, box-shadow 0.3s ease-in-out` 
-      : 'background-color 0.3s ease-in-out, border-color 0.3s ease-in-out, box-shadow 0.3s ease-in-out',
-    
-    animation: isDragging ? 'none' : `cascadeFade 0.4s cubic-bezier(0.2, 0.8, 0.2, 1) both`,
+    transform: CSS.Translate.toString(transform ? { ...transform, x: 0 } : null),
+    transition: transition || undefined,
+    animation: (hasAnimated || isDragging) ? 'none' : `cascadeFade 0.4s cubic-bezier(0.2, 0.8, 0.2, 1) both`,
     animationDelay: `${index * 0.05}s`,
      
-    position: 'relative' as const,
+    opacity: isDragging ? 0.8 : (hasAnimated ? 1 : 0), 
     zIndex: isDragging ? 999 : 1,
-    opacity: isDragging ? 0.8 : 1,
-    boxShadow: isDragging ? '0 10px 25px rgba(0,0,0,0.2)' : undefined,
   };
 
   return (
     <div
       id={`trip-card-${pin.id}`}
       ref={setNodeRef} 
-      className={`trip-card ${isSelected ? 'selected-card' : ''}`}
+      className={`trip-card ${hasAnimated ? 'dnd-ready' : ''}`}
       style={{
         ...style,
         borderColor: isSelected ? getDisplayColor((activeTrip as any)?.lineColor || '#3b82f6') : undefined,
@@ -324,6 +324,9 @@ const TravelMap = () => {
   const [swipeOffset, setSwipeOffset] = useState(0);
   const [isSwiping, setIsSwiping] = useState(false);
 
+  // STATE: Animation
+  const [isDndReady, setIsDndReady] = useState(false);
+
   // REFS
   const dragItem = useRef<number | null>(null);
   const dragOverItem = useRef<number | null>(null);
@@ -440,6 +443,13 @@ const TravelMap = () => {
       }, 100);
     }
   }, [selectedCardId, uiHidden]);
+
+  // trip switch listener
+  useEffect(() => {
+    setIsDndReady(false);
+    const timer = setTimeout(() => setIsDndReady(true), 1500);
+    return () => clearTimeout(timer);
+  }, [activeTripId]);
 
   // --- EFFECTS ---
   // toggle dark mode
@@ -1677,7 +1687,8 @@ const TravelMap = () => {
                             setGallery={setGallery}
                             handleCardClick={handleCardClick} 
                             startEditing={startEditing} 
-                            deletePin={deletePin} 
+                            deletePin={deletePin}
+                            isDndReady={isDndReady}
                           />
                         ))}
                         

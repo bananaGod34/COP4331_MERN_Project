@@ -6,7 +6,7 @@ const ThemeToggle = () => {
   });
 
   useLayoutEffect(() => {
-    document.body.classList.toggle('dark-mode', isDark);
+    document.documentElement.classList.toggle('dark-mode', isDark);
     localStorage.setItem('travelmap_theme', isDark ? 'dark' : 'light');
   }, [isDark]);
 

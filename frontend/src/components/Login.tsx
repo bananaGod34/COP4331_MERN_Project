@@ -1,7 +1,5 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import authBg from '../assets/auth-bg.jpg';
-import ThemeToggle from './ThemeToggle';
 
 // MINI ICON SUITE
 const Icons = {
@@ -50,95 +48,83 @@ const Login = () => {
   };
 
   return (
-    <main className="auth-page">
-      <ThemeToggle />
-      <div className="auth-bg-wrapper">
-        <img src={authBg} alt="Travel Background" />
-        <div className="auth-bg-overlay" />
-      </div>
+    <div className="auth-card">
       
-      <div className="auth-hero-spacer" />
+      <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '30px' }}>
+        <svg xmlns="http://www.w3.org/2000/svg" width="32" height="40" viewBox="-4 -2 36 46">
+          <path d="M14 0 C6.27 0 0 6.27 0 14 C0 24.5 14 38 14 38 C14 38 28 24.5 28 14 C28 6.27 21.73 0 14 0 Z M 14 9 A 5 5 0 1 0 14 19 A 5 5 0 1 0 14 9 Z" fill="var(--accent-blue)" fillRule="evenodd" />
+        </svg>
+        <h2 style={{ margin: 0, fontSize: '28px', letterSpacing: '-0.5px' }}>Landmark</h2>
+      </div>
 
-      <div className="auth-form-side">
-        <div className="auth-card">
-          
-          <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '30px' }}>
-            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="40" viewBox="-4 -2 36 46">
-              <path d="M14 0 C6.27 0 0 6.27 0 14 C0 24.5 14 38 14 38 C14 38 28 24.5 28 14 C28 6.27 21.73 0 14 0 Z M 14 9 A 5 5 0 1 0 14 19 A 5 5 0 1 0 14 9 Z" fill="var(--accent-blue)" fillRule="evenodd" />
-            </svg>
-            <h2 style={{ margin: 0, fontSize: '28px', letterSpacing: '-0.5px' }}>Landmark</h2>
-          </div>
+      <h3 style={{ margin: '0 0 8px 0', fontSize: '24px' }}>Welcome back</h3>
+      <p style={{ color: 'var(--text-muted)', marginBottom: '30px', fontSize: '15px' }}>
+        Where will your journey take you next?
+      </p>
 
-          <h3 style={{ margin: '0 0 8px 0', fontSize: '24px' }}>Welcome back</h3>
-          <p style={{ color: 'var(--text-muted)', marginBottom: '30px', fontSize: '15px' }}>
-            Where will your journey take you next?
-          </p>
-
-          <div style={{ 
-            maxHeight: message ? '24px' : '0', 
-            opacity: message ? 1 : 0, 
-            overflow: 'hidden',
-            marginBottom: message ? '15px' : '0',
-            transition: 'all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1)' 
-          }}>
-            <div style={{ color: 'var(--accent-red)', fontSize: '14px', fontWeight: 'bold', display: 'flex', alignItems: 'center' }}>
-              {message}
-            </div>
-          </div>
-
-          <form onSubmit={doLogin} style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
-            <div>
-              <label style={{ display: 'block', fontSize: '13px', fontWeight: 'bold', marginBottom: '6px', color: 'var(--text-main)' }}>Username</label>
-              <input 
-                className="form-input" type="text" placeholder="Enter your username" 
-                value={loginName} onChange={(e) => setLoginName(e.target.value)} 
-                autoFocus
-              />
-            </div>
-            
-            <div>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
-                <label style={{ fontSize: '13px', fontWeight: 'bold', color: 'var(--text-main)' }}>Password</label>
-                <Link to="/forgot-password" style={{ fontSize: '12px', color: 'var(--text-muted)', textDecoration: 'none' }}>Forgot password?</Link>
-              </div>
-
-              <div style={{ position: 'relative' }}>
-                <input 
-                  className="form-input" 
-                  type={showPassword ? "text" : "password"} 
-                  placeholder="••••••••" 
-                  value={loginPassword} 
-                  onChange={(e) => setPassword(e.target.value)} 
-                  style={{ paddingRight: '40px' }}
-                />
-                <button 
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  style={{ position: 'absolute', right: '10px', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', display: 'flex', padding: '4px' }}
-                  aria-label={showPassword ? "Hide password" : "Show password"}
-                >
-                  {showPassword ? <Icons.EyeOff /> : <Icons.Eye />}
-                </button>
-              </div>
-            </div>
-
-            <button 
-              className="btn btn-blue" 
-              type="submit" 
-              disabled={isLoading}
-              style={{ marginTop: '10px', padding: '14px', fontSize: '16px', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '8px', opacity: isLoading ? 0.7 : 1 }}
-            >
-              {isLoading && <Icons.Loader />}
-              <span>{isLoading ? "Signing In..." : "Sign In"}</span>
-            </button>
-          </form>
-
-          <div style={{ marginTop: '30px', fontSize: '14px', color: 'var(--text-muted)', textAlign: 'center' }}>
-            Don't have an account? <Link to="/signup" className="auth-link" style={{ color: 'var(--accent-green)' }}>Sign up</Link>
-          </div>
+      <div style={{ 
+        maxHeight: message ? '24px' : '0', 
+        opacity: message ? 1 : 0, 
+        overflow: 'hidden',
+        marginBottom: message ? '15px' : '0',
+        transition: 'all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1)' 
+      }}>
+        <div style={{ color: 'var(--accent-red)', fontSize: '14px', fontWeight: 'bold', display: 'flex', alignItems: 'center' }}>
+          {message}
         </div>
       </div>
-    </main>
+
+      <form onSubmit={doLogin} style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
+        <div>
+          <label style={{ display: 'block', fontSize: '13px', fontWeight: 'bold', marginBottom: '6px', color: 'var(--text-main)' }}>Username</label>
+          <input 
+            className="form-input" type="text" placeholder="Enter your username" 
+            value={loginName} onChange={(e) => setLoginName(e.target.value)} 
+            autoFocus
+          />
+        </div>
+        
+        <div>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
+            <label style={{ fontSize: '13px', fontWeight: 'bold', color: 'var(--text-main)' }}>Password</label>
+            <Link to="/forgot-password" style={{ fontSize: '12px', color: 'var(--text-muted)', textDecoration: 'none' }}>Forgot password?</Link>
+          </div>
+
+          <div style={{ position: 'relative' }}>
+            <input 
+              className="form-input" 
+              type={showPassword ? "text" : "password"} 
+              placeholder="••••••••" 
+              value={loginPassword} 
+              onChange={(e) => setPassword(e.target.value)} 
+              style={{ paddingRight: '40px' }}
+            />
+            <button 
+              type="button"
+              onClick={() => setShowPassword(!showPassword)}
+              style={{ position: 'absolute', right: '10px', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', display: 'flex', padding: '4px' }}
+              aria-label={showPassword ? "Hide password" : "Show password"}
+            >
+              {showPassword ? <Icons.EyeOff /> : <Icons.Eye />}
+            </button>
+          </div>
+        </div>
+
+        <button 
+          className="btn btn-blue" 
+          type="submit" 
+          disabled={isLoading}
+          style={{ marginTop: '10px', padding: '14px', fontSize: '16px', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '8px', opacity: isLoading ? 0.7 : 1 }}
+        >
+          {isLoading && <Icons.Loader />}
+          <span>{isLoading ? "Signing In..." : "Sign In"}</span>
+        </button>
+      </form>
+
+      <div style={{ marginTop: '30px', fontSize: '14px', color: 'var(--text-muted)', textAlign: 'center' }}>
+        Don't have an account? <Link to="/signup" className="auth-link" style={{ color: 'var(--accent-green)' }}>Sign up</Link>
+      </div>
+    </div>
   );
 };
 

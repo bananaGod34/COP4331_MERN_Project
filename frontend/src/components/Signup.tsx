@@ -1,7 +1,5 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import authBg from '../assets/auth-bg.jpg';
-import ThemeToggle from './ThemeToggle';
 
 // MINI ICON SUITE
 const Icons = {
@@ -37,7 +35,7 @@ const Signup = () => {
   };
 
   const strengthScore = calculateStrength(loginPassword);
-  const strengthColors = ['var(--border-light)', 'var(--accent-red)', '#f59e0b', 'var(--accent-blue)', 'var(--accent-green)'];
+  const strengthColors = ['var(--border-input)', 'var(--accent-red)', '#f59e0b', 'var(--accent-blue)', 'var(--accent-green)'];
   const strengthLabels = ['', 'Weak', 'Fair', 'Good', 'Strong!'];
 
   const doSignup = async (event: any): Promise<void> => {
@@ -76,141 +74,129 @@ const Signup = () => {
   };
 
   return (
-    <main className="auth-page">
-      <ThemeToggle />
-      <div className="auth-bg-wrapper">
-        <img src={authBg} alt="Travel Background" />
-        <div className="auth-bg-overlay" />
-      </div>
+    <div className="auth-card">
       
-      <div className="auth-hero-spacer" />
+      <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '30px' }}>
+        <svg xmlns="http://www.w3.org/2000/svg" width="32" height="40" viewBox="-4 -2 36 46">
+          <path d="M14 0 C6.27 0 0 6.27 0 14 C0 24.5 14 38 14 38 C14 38 28 24.5 28 14 C28 6.27 21.73 0 14 0 Z M 14 9 A 5 5 0 1 0 14 19 A 5 5 0 1 0 14 9 Z" fill="var(--accent-green)" fillRule="evenodd" />
+        </svg>
+        <h2 style={{ margin: 0, fontSize: '28px', letterSpacing: '-0.5px' }}>Landmark</h2>
+      </div>
 
-      <div className="auth-form-side">
-        <div className="auth-card">
-          
-          <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '30px' }}>
-            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="40" viewBox="-4 -2 36 46">
-              <path d="M14 0 C6.27 0 0 6.27 0 14 C0 24.5 14 38 14 38 C14 38 28 24.5 28 14 C28 6.27 21.73 0 14 0 Z M 14 9 A 5 5 0 1 0 14 19 A 5 5 0 1 0 14 9 Z" fill="var(--accent-green)" fillRule="evenodd" />
-            </svg>
-            <h2 style={{ margin: 0, fontSize: '28px', letterSpacing: '-0.5px' }}>Landmark</h2>
-          </div>
+      <h3 style={{ margin: '0 0 8px 0', fontSize: '24px' }}>Start your journey</h3>
+      <p style={{ color: 'var(--text-muted)', marginBottom: '30px', fontSize: '15px' }}>
+        Create an account to start mapping.
+      </p>
 
-          <h3 style={{ margin: '0 0 8px 0', fontSize: '24px' }}>Start your journey</h3>
-          <p style={{ color: 'var(--text-muted)', marginBottom: '30px', fontSize: '15px' }}>
-            Create an account to start mapping.
-          </p>
-
-          <div style={{ 
-            maxHeight: message ? '24px' : '0', 
-            opacity: message ? 1 : 0, 
-            overflow: 'hidden',
-            marginBottom: message ? '15px' : '0',
-            transition: 'all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1)' 
-          }}>
-            <div style={{ color: 'var(--accent-red)', fontSize: '14px', fontWeight: 'bold', display: 'flex', alignItems: 'center' }}>
-              {message}
-            </div>
-          </div>
-
-          <form onSubmit={doSignup} style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
-            <div style={{ display: 'flex', gap: '10px' }}>
-              <div style={{ flex: 1 }}>
-                <label style={{ display: 'block', fontSize: '13px', fontWeight: 'bold', marginBottom: '6px', color: 'var(--text-main)' }}>First Name</label>
-                <input autoFocus className="form-input" type="text" placeholder="Jane" required value={firstName} onChange={(e) => setFirstName(e.target.value)} />
-              </div>
-              <div style={{ flex: 1 }}>
-                <label style={{ display: 'block', fontSize: '13px', fontWeight: 'bold', marginBottom: '6px', color: 'var(--text-main)' }}>Last Name</label>
-                <input className="form-input" type="text" placeholder="Doe" required value={lastName} onChange={(e) => setLastName(e.target.value)} />
-              </div>
-            </div>
-
-            <div>
-              <label style={{ display: 'block', fontSize: '13px', fontWeight: 'bold', marginBottom: '6px', color: 'var(--text-main)' }}>Email</label>
-              <input className="form-input" type="email" placeholder="jane@example.com" required value={email} onChange={(e) => setEmail(e.target.value)} />
-            </div>
-
-            <div>
-              <label style={{ display: 'block', fontSize: '13px', fontWeight: 'bold', marginBottom: '6px', color: 'var(--text-main)' }}>Username</label>
-              <input className="form-input" type="text" placeholder="Choose a username" required value={loginName} onChange={(e) => setLoginName(e.target.value)} />
-            </div>
-
-            <div style={{ display: 'flex', gap: '10px' }}>
-              <div style={{ flex: 1 }}>
-                <label style={{ display: 'block', fontSize: '13px', fontWeight: 'bold', marginBottom: '6px', color: 'var(--text-main)' }}>Password</label>
-                <div style={{ position: 'relative' }}>
-                  <input 
-                    className="form-input" 
-                    type={showPassword ? "text" : "password"} 
-                    placeholder="••••••••" required 
-                    value={loginPassword} 
-                    onChange={(e) => setPassword(e.target.value)} 
-                    style={{ paddingRight: '40px' }}
-                  />
-                  <button 
-                    type="button" onClick={() => setShowPassword(!showPassword)}
-                    style={{ position: 'absolute', right: '10px', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', padding: '4px' }}
-                  >
-                    {showPassword ? <Icons.EyeOff /> : <Icons.Eye />}
-                  </button>
-                </div>
-                
-                <div style={{ 
-                  maxHeight: loginPassword.length > 0 ? '30px' : '0', 
-                  marginTop: loginPassword.length > 0 ? '8px' : '0',
-                  opacity: loginPassword.length > 0 ? 1 : 0,
-                  overflow: 'hidden',
-                  transition: 'all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1)' 
-                }}>
-                  <div style={{ display: 'flex', gap: '4px', height: '4px' }}>
-                    {[1, 2, 3, 4].map(level => (
-                      <div 
-                        key={level} 
-                        style={{ 
-                          flex: 1, borderRadius: '2px', 
-                          background: strengthScore >= level ? strengthColors[strengthScore] : 'var(--border-light)',
-                          transition: 'background 0.3s ease'
-                        }} 
-                      />
-                    ))}
-                  </div>
-                  <div style={{ fontSize: '11px', color: strengthColors[strengthScore], marginTop: '4px', fontWeight: 'bold', textAlign: 'right' }}>
-                    {strengthLabels[strengthScore]}
-                  </div>
-                </div>
-
-              </div>
-              <div style={{ flex: 1 }}>
-                <label style={{ display: 'block', fontSize: '13px', fontWeight: 'bold', marginBottom: '6px', color: 'var(--text-main)' }}>Confirm</label>
-                <div style={{ position: 'relative' }}>
-                  <input 
-                    className="form-input" 
-                    type={showPassword ? "text" : "password"} 
-                    placeholder="••••••••" required 
-                    value={confirmPassword} 
-                    onChange={(e) => setConfirmPassword(e.target.value)} 
-                    style={{ paddingRight: '40px' }}
-                  />
-                </div>
-              </div>
-            </div>
-
-            <button 
-              className="btn btn-green" 
-              type="submit" 
-              disabled={isLoading}
-              style={{ marginTop: '10px', padding: '14px', fontSize: '16px', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '8px', opacity: isLoading ? 0.7 : 1 }}
-            >
-              {isLoading && <Icons.Loader />}
-              <span>{isLoading ? "Creating Account..." : "Create Account"}</span>
-            </button>
-          </form>
-
-          <div style={{ marginTop: '30px', fontSize: '14px', color: 'var(--text-muted)', textAlign: 'center' }}>
-            Already have an account? <Link to="/login" className="auth-link">Log in</Link>
-          </div>
+      <div style={{ 
+        maxHeight: message ? '24px' : '0', 
+        opacity: message ? 1 : 0, 
+        overflow: 'hidden',
+        marginBottom: message ? '15px' : '0',
+        transition: 'all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1)' 
+      }}>
+        <div style={{ color: 'var(--accent-red)', fontSize: '14px', fontWeight: 'bold', display: 'flex', alignItems: 'center' }}>
+          {message}
         </div>
       </div>
-    </main>
+
+      <form onSubmit={doSignup} style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
+        <div style={{ display: 'flex', gap: '10px' }}>
+          <div style={{ flex: 1 }}>
+            <label style={{ display: 'block', fontSize: '13px', fontWeight: 'bold', marginBottom: '6px', color: 'var(--text-main)' }}>First Name</label>
+            <input autoFocus className="form-input" type="text" placeholder="Jane" required value={firstName} onChange={(e) => setFirstName(e.target.value)} />
+          </div>
+          <div style={{ flex: 1 }}>
+            <label style={{ display: 'block', fontSize: '13px', fontWeight: 'bold', marginBottom: '6px', color: 'var(--text-main)' }}>Last Name</label>
+            <input className="form-input" type="text" placeholder="Doe" required value={lastName} onChange={(e) => setLastName(e.target.value)} />
+          </div>
+        </div>
+
+        <div>
+          <label style={{ display: 'block', fontSize: '13px', fontWeight: 'bold', marginBottom: '6px', color: 'var(--text-main)' }}>Email</label>
+          <input className="form-input" type="email" placeholder="jane@example.com" required value={email} onChange={(e) => setEmail(e.target.value)} />
+        </div>
+
+        <div>
+          <label style={{ display: 'block', fontSize: '13px', fontWeight: 'bold', marginBottom: '6px', color: 'var(--text-main)' }}>Username</label>
+          <input className="form-input" type="text" placeholder="Choose a username" required value={loginName} onChange={(e) => setLoginName(e.target.value)} />
+        </div>
+
+        <div style={{ display: 'flex', gap: '10px' }}>
+          <div style={{ flex: 1 }}>
+            <label style={{ display: 'block', fontSize: '13px', fontWeight: 'bold', marginBottom: '6px', color: 'var(--text-main)' }}>Password</label>
+            <div style={{ position: 'relative' }}>
+              <input 
+                className="form-input" 
+                type={showPassword ? "text" : "password"} 
+                placeholder="••••••••" required 
+                value={loginPassword} 
+                onChange={(e) => setPassword(e.target.value)} 
+                style={{ paddingRight: '40px' }}
+              />
+              <button 
+                type="button" onClick={() => setShowPassword(!showPassword)}
+                style={{ position: 'absolute', right: '10px', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', padding: '4px' }}
+              >
+                {showPassword ? <Icons.EyeOff /> : <Icons.Eye />}
+              </button>
+            </div>
+            
+            <div style={{ 
+              maxHeight: loginPassword.length > 0 ? '30px' : '0', 
+              marginTop: loginPassword.length > 0 ? '8px' : '0',
+              opacity: loginPassword.length > 0 ? 1 : 0,
+              overflow: 'hidden',
+              transition: 'all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1)' 
+            }}>
+              <div style={{ display: 'flex', gap: '4px', height: '4px' }}>
+                {[1, 2, 3, 4].map(level => (
+                  <div 
+                    key={level} 
+                    style={{ 
+                      flex: 1, borderRadius: '2px', 
+                      background: strengthScore >= level ? strengthColors[strengthScore] : 'var(--border-input)',
+                      transition: 'background 0.3s ease'
+                    }} 
+                  />
+                ))}
+              </div>
+              <div style={{ fontSize: '11px', color: strengthColors[strengthScore], marginTop: '4px', fontWeight: 'bold', textAlign: 'right' }}>
+                {strengthLabels[strengthScore]}
+              </div>
+            </div>
+
+          </div>
+          <div style={{ flex: 1 }}>
+            <label style={{ display: 'block', fontSize: '13px', fontWeight: 'bold', marginBottom: '6px', color: 'var(--text-main)' }}>Confirm</label>
+            <div style={{ position: 'relative' }}>
+              <input 
+                className="form-input" 
+                type={showPassword ? "text" : "password"} 
+                placeholder="••••••••" required 
+                value={confirmPassword} 
+                onChange={(e) => setConfirmPassword(e.target.value)} 
+                style={{ paddingRight: '40px' }}
+              />
+            </div>
+          </div>
+        </div>
+
+        <button 
+          className="btn btn-green" 
+          type="submit" 
+          disabled={isLoading}
+          style={{ marginTop: '10px', padding: '14px', fontSize: '16px', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '8px', opacity: isLoading ? 0.7 : 1 }}
+        >
+          {isLoading && <Icons.Loader />}
+          <span>{isLoading ? "Creating Account..." : "Create Account"}</span>
+        </button>
+      </form>
+
+      <div style={{ marginTop: '30px', fontSize: '14px', color: 'var(--text-muted)', textAlign: 'center' }}>
+        Already have an account? <Link to="/login" className="auth-link">Log in</Link>
+      </div>
+    </div>
   );
 };
 

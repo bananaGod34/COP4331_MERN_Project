@@ -1,6 +1,23 @@
 <!doctype html>
 <html lang="en">
   <head>
+    <style>
+      body, html {
+        margin: 0;
+        padding: 0;
+        background-color: #ffffff !important;
+      }
+      html.dark-mode, html.dark-mode body {
+        background-color: #1f2937 !important; 
+      }
+    </style>
+
+    <script>
+      if (localStorage.getItem('travelmap_theme') === 'dark') {
+        document.documentElement.classList.add('dark-mode');
+      }
+    </script>
+
     <meta charset="UTF-8" />
     <meta name="description" content="Landmark is an interactive travel planner that lets you map your trips, save locations, and track your adventures around the world." />
     <meta name="apple-mobile-web-app-capable" content="yes">
