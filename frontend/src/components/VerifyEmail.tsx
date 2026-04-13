@@ -56,13 +56,12 @@ const VerifyEmail = () => {
 
   return (
     <main className="auth-page">
-      <div className="auth-hero" style={{ position: 'relative', overflow: 'hidden' }}>
-        <img 
-          src={authBg} 
-          alt="Travel Background" 
-          style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', objectFit: 'cover' }} 
-        />
+      <div className="auth-bg-wrapper">
+        <img src={authBg} alt="Travel Background" />
+        <div className="auth-bg-overlay" />
       </div>
+      
+      <div className="auth-hero-spacer" />
 
       <div className="auth-form-side">
         <div className="auth-card" style={{ textAlign: 'center' }}>
