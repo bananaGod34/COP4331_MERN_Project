@@ -1921,23 +1921,38 @@ const TravelMap = () => {
                             <div style={{ color: 'var(--text-main)',display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '15px', paddingTop: '10px', borderTop: '1px solid var(--border-light)' }}>
                               <div
                                 className="floating-circle-btn"
-                                onClick={(e) => { e.preventDefault(); e.stopPropagation(); if (trueIndex > 0) handleCardClick(trip.pins[trueIndex - 1]); }}
-                                style={{ color: 'var(--text-main)' }} 
+                                style={{ color: 'var(--text-main)', top: '15px' }}
+                                onClick={() => { setIsSettingsOpen(!isSettingsOpen); setIsMobileMenuOpen(false); }}
                               >
-                                <Icons.ChevronLeft />
+                                <Icons.Settings />
                               </div>
 
-                              <div style={{ display: 'flex', gap: '5px' }}>
-                                <button onClick={(e) => { e.preventDefault(); e.stopPropagation(); startEditing(pin); }} className="mini-btn mini-btn-default">Edit</button>
-                                <button onClick={(e) => {e.preventDefault(); e.stopPropagation(); deletePin(pin.id); }} className="mini-btn mini-btn-danger">Delete</button>
+                              <div style={{ overflow: 'hidden' }}>
+                                <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px', marginTop: '10px', paddingTop: '10px', borderTop: '1px solid var(--border-light)' }}>
+                                  <button
+                                    onClick={(e) => { e.stopPropagation(); startEditing(pin); }}
+                                    className="action-btn action-btn-edit"
+                                  >
+                                    <Icons.Edit style={{ display: 'block' }} /> Edit
+                                  </button>
+                                  <button
+                                    onClick={(e) => {
+                                      e.stopPropagation(); 
+                                      if (window.confirm(`Are you sure you want to delete ${pin.name}?`)) deletePin(pin.id);
+                                    }}
+                                    className="action-btn action-btn-delete"
+                                  >
+                                    <Icons.Trash style={{ display: 'block' }} /> Delete
+                                  </button>
+                                </div>
                               </div>
 
                               <div
                                 className="floating-circle-btn"
-                                onClick={(e) => { e.preventDefault(); e.stopPropagation(); if (trueIndex < trip.pins.length - 1) handleCardClick(trip.pins[trueIndex + 1]); }}
-                                style={{ color: 'var(--text-main)' }} 
+                                style={{ color: 'var(--text-main)', top: '15px' }}
+                                onClick={() => { setIsSettingsOpen(!isSettingsOpen); setIsMobileMenuOpen(false); }}
                               >
-                                <Icons.ChevronRight />
+                                <Icons.Settings />
                               </div>
                               
                             </div>
