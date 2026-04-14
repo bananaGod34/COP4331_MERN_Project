@@ -1,6 +1,5 @@
 import React, { useRef, useEffect, useState } from 'react';
 import { Outlet, useLocation } from 'react-router-dom';
-import authBg from '../assets/auth-bg.webp';
 import ThemeToggle from './ThemeToggle';
 
 const AuthLayout = () => {
@@ -23,7 +22,9 @@ const AuthLayout = () => {
       <ThemeToggle />
       
       <div className="auth-bg-wrapper">
-        <img src={authBg} alt="Travel Background" fetchPriority="high" />
+        <img 
+          src="/auth-bg.webp"
+          alt="Travel Background" fetchPriority="high" />
         <div className="auth-bg-overlay" />
       </div>
       
