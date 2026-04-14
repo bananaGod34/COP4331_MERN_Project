@@ -61,10 +61,13 @@ body, html {
 .no-scrollbar::-webkit-scrollbar-button,
 .sidebar::-webkit-scrollbar-button,
 .sheet-content::-webkit-scrollbar-button,
-.leaflet-popup-content-wrapper::-webkit-scrollbar-button {
+.leaflet-popup-content-wrapper::-webkit-scrollbar-button,
+.no-scrollbar::-webkit-scrollbar-button:vertical,
+.no-scrollbar::-webkit-scrollbar-button:horizontal {
   display: none !important;
-  width: 0px !important;
-  height: 0px !important;
+  width: 0 !important;
+  height: 0 !important;
+  background: transparent !important;
 }
 
 
@@ -273,29 +276,41 @@ body, html {
 .theme-transitioning div,
 .theme-transitioning span,
 .theme-transitioning p,
-.theme-transitioning input,
-.theme-transitioning textarea,
-.theme-transitioning button {
-  transition: background 0.3s ease, background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease !important;
-}
-
 .theme-transitioning h1,
 .theme-transitioning h2,
+.theme-transitioning h3,
+.theme-transitioning label,
+.theme-transitioning input,
+.theme-transitioning textarea,
+.theme-transitioning button,
+.theme-transitioning a,
+.theme-transitioning hr,
+.theme-transitioning img {
+  transition: background 0.35s ease, background-color 0.35s ease, color 0.35s ease, border-color 0.35s ease, border-top-color 0.35s ease, box-shadow 0.35s ease, opacity 0.35s ease !important;
+}
 .theme-transitioning svg,
 .theme-transitioning path {
-  transition: color 0.3s ease, fill 0.3s ease, stroke 0.3s ease, transform 0.3s ease !important;
-  transform: translateZ(0); 
-  backface-visibility: hidden;
+  transition: color 0.35s ease, fill 0.35s ease, stroke 0.35s ease !important;
+  will-change: color, fill, stroke;
 }
-
 .theme-transitioning .leaflet-container * {
   transition: none !important;
 }
-
-.theme-transitioning .leaflet-container .leaflet-tile-pane {
-  transition: filter 0.4s ease-in-out !important;
+.theme-transitioning .leaflet-popup-content-wrapper,
+.theme-transitioning .leaflet-popup-content-wrapper *,
+.theme-transitioning .leaflet-popup-tip {
+  transition: background-color 0.35s ease, color 0.35s ease, border-color 0.35s ease, border-top-color 0.35s ease !important;
+}
+.theme-transitioning .leaflet-tile-pane {
+  transition: filter 0.45s ease-in-out !important;
   will-change: filter;
   transform: translateZ(0);
+}
+.theme-transitioning ::-webkit-scrollbar-thumb {
+  transition: background-color 0.35s ease !important;
+}
+.theme-transitioning {
+  transition: scrollbar-color 0.35s ease !important;
 }
 
 .theme-toggle-thumb {

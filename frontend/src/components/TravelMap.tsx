@@ -491,22 +491,24 @@ const TravelMap = () => {
       return;
     }
     
+    document.documentElement.classList.add('theme-transitioning');
+
     window.requestAnimationFrame(() => {
-      document.documentElement.classList.add('theme-transitioning');
+      window.requestAnimationFrame(() => {
+        document.documentElement.classList.toggle('dark-mode', darkMode);
+        
+        if (mapRef.current?.getContainer()) {
+          mapRef.current.getContainer().classList.toggle('dark-mode', darkMode);
+        }
+        
+        localStorage.setItem('travelmap_theme', darkMode ? 'dark' : 'light');
 
-      document.documentElement.classList.toggle('dark-mode', darkMode);
-      
-      if (mapRef.current?.getContainer()) {
-        mapRef.current.getContainer().classList.toggle('dark-mode', darkMode);
-      }
-      
-      localStorage.setItem('travelmap_theme', darkMode ? 'dark' : 'light');
+        const timer = setTimeout(() => {
+          document.documentElement.classList.remove('theme-transitioning');
+        }, 450);
 
-      const timer = setTimeout(() => {
-        document.documentElement.classList.remove('theme-transitioning');
-      }, 400);
-
-      return () => clearTimeout(timer);
+        return () => clearTimeout(timer);
+      });
     });
   }, [darkMode]);
 
