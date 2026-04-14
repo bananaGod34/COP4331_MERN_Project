@@ -135,7 +135,7 @@ const Signup = () => {
                 style={{ paddingRight: '40px' }}
               />
               <button 
-                type="button" onClick={() => setShowPassword(!showPassword)}
+                type="button" aria-label={showPassword ? "Hide password" : "Show password"} onClick={() => setShowPassword(!showPassword)}
                 style={{ position: 'absolute', right: '10px', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', padding: '4px' }}
               >
                 {showPassword ? <Icons.EyeOff /> : <Icons.Eye />}
