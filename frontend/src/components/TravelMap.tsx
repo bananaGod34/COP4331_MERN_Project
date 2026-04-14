@@ -1919,28 +1919,28 @@ const TravelMap = () => {
 
                           {trip.id === activeTripId && (
                             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '15px', paddingTop: '10px', borderTop: '1px solid var(--border-light)' }}>
-                              <button
-                                className="floating-circle-btn"
+                              <div
+                                className="action-btn action-btn-edit"
                                 aria-label="Previous Stop"
                                 onClick={(e) => { e.preventDefault(); e.stopPropagation(); if (trueIndex > 0) handleCardClick(trip.pins[trueIndex - 1]); }}
-                                style={{ color: 'var(--text-main)' }}
+                                style={{ color: 'var(--text-main)'}}
                               >
                                 <span style={{ marginLeft: '6px', fontSize: '10px', color: 'var(--text-main)', transition: 'transform 0.3s, var(--theme-trans)', transform: isMobileMenuOpen ? 'rotate(180deg)' : 'rotate(0)' }}><Icons.ChevronLeft /></span>
-                              </button>
+                              </div>
 
                               <div style={{ display: 'flex', gap: '5px' }}>
                                 <button onClick={(e) => { e.preventDefault(); e.stopPropagation(); startEditing(pin); }} className="mini-btn mini-btn-default">Edit</button>
                                 <button onClick={(e) => {e.preventDefault(); e.stopPropagation(); deletePin(pin.id); }} className="mini-btn mini-btn-danger">Delete</button>
                               </div>
 
-                              <button
+                              <div
                                 className="action-btn action-btn-edit"
                                 aria-label="Next Stop"
                                 onClick={(e) => { e.preventDefault(); e.stopPropagation(); if (trueIndex < trip.pins.length - 1) handleCardClick(trip.pins[trueIndex + 1]); }}
-                                style={{ color: 'var(--text-main)' }}
+                                style={{ color: 'var(--text-main)'}}
                               >
                                 <span style={{ marginRight: '6px', fontSize: '10px', color: 'var(--text-main)', transition: 'transform 0.3s, var(--theme-trans)', transform: isMobileMenuOpen ? 'rotate(180deg)' : 'rotate(0)'   }}><Icons.ChevronRight /></span>
-                              </button>
+                              </div>
                               
                             </div>
                           )}
