@@ -70,6 +70,11 @@ const Icons = {
   ChevronRight: (props: any) => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><polyline points="9 18 15 12 9 6"></polyline></svg>
 };
 
+const getOptimizedImage = (url: string, width: number) => {
+  if (!url || !url.includes('cloudinary.com')) return url;
+  return url.replace('/upload/', `/upload/w_${width},f_auto,q_auto,c_limit/`);
+};
+
 // --- SUBCOMPONENTS ---
 
 // Map click listener
@@ -199,7 +204,7 @@ const SortableTripCard = ({
 
         {pin.photoUrls && pin.photoUrls.length > 0 && (
           <img
-            src={pin.photoUrls[0]}
+            src={getOptimizedImage(pin.photoUrls[0], 100)}
             onClick={(e) => { e.preventDefault(); e.stopPropagation(); setGallery({ isOpen: true, photos: pin.photoUrls, currentIndex: 0 }); }}
             alt="Thumbnail"
             style={{ width: '40px', height: '40px', cursor: 'pointer', objectFit: 'cover', borderRadius: '4px', flexShrink: 0, marginRight: '10px' }} 
@@ -949,7 +954,7 @@ const TravelMap = () => {
       return (
         <div onClick={(e) => { e.preventDefault(); e.stopPropagation(); setGallery({ isOpen: true, photos, currentIndex: 0 }); }}
              style={{ width: '100%', aspectRatio: '16/9', margin: '8px 0', cursor: 'pointer', borderRadius: '8px', overflow: 'hidden', border: '1px solid var(--border-light)' }}>
-          <img src={photos[0]} alt="Thumbnail" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+          <img src={getOptimizedImage(photos[0], 400)} alt="Thumbnail" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
         </div>
       );
     }
@@ -960,7 +965,7 @@ const TravelMap = () => {
           {photos.map((photo, idx) => (
             <div key={idx} onClick={(e) => { e.preventDefault(); e.stopPropagation(); setGallery({ isOpen: true, photos, currentIndex: idx }); }}
                  style={{ width: '100%', height: '100%', cursor: 'pointer', borderRadius: '8px', overflow: 'hidden', border: '1px solid var(--border-light)' }}>
-              <img src={photo} alt="Thumbnail" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+              <img src={getOptimizedImage(photo, 400)} alt="Thumbnail" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
             </div>
           ))}
         </div>
@@ -972,12 +977,12 @@ const TravelMap = () => {
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gridTemplateRows: '2fr 1fr', gap: '5px', margin: '8px 0', width: '100%', aspectRatio: '4/3' }}>
           <div onClick={(e) => { e.preventDefault(); e.stopPropagation(); setGallery({ isOpen: true, photos, currentIndex: 0 }); }}
                style={{ gridColumn: '1 / span 2', cursor: 'pointer', borderRadius: '8px', overflow: 'hidden', border: '1px solid var(--border-light)' }}>
-            <img src={photos[0]} alt="Thumbnail" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+            <img src={getOptimizedImage(photos[0], 400)} alt="Thumbnail" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
           </div>
           {photos.slice(1).map((photo, idx) => (
             <div key={idx+1} onClick={(e) => { e.preventDefault(); e.stopPropagation(); setGallery({ isOpen: true, photos, currentIndex: idx + 1 }); }}
                  style={{ cursor: 'pointer', borderRadius: '8px', overflow: 'hidden', border: '1px solid var(--border-light)' }}>
-              <img src={photo} alt="Thumbnail" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+              <img src={getOptimizedImage(photo, 400)} alt="Thumbnail" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
             </div>
           ))}
         </div>
@@ -996,7 +1001,7 @@ const TravelMap = () => {
           return (
             <div key={idx} onClick={(e) => { e.preventDefault(); e.stopPropagation(); setGallery({ isOpen: true, photos, currentIndex: idx }); }}
                  style={{ position: 'relative', width: '100%', aspectRatio: '4/3', cursor: 'pointer', borderRadius: '8px', overflow: 'hidden', border: '1px solid var(--border-light)' }}>
-              <img src={photo} alt="Thumbnail" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+              <img src={getOptimizedImage(photo, 400)} alt="Thumbnail" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
               {showOverlay && (
                 <div style={{ position: 'absolute', inset: 0, backgroundColor: 'rgba(0,0,0,0.6)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontWeight: 'bold', fontSize: '20px' }}>
                   +{extraCount}
@@ -1147,7 +1152,7 @@ const TravelMap = () => {
                   transform: `translateX(calc(${baseTranslate}vw + ${activeTranslate}px)) scale(${scale})`,
                   opacity, zIndex
                 }}>
-                  <img src={photo} alt={`Gallery view ${index + 1}`} style={{ maxHeight: '100%', maxWidth: '100%', objectFit: 'contain', borderRadius: '12px', boxShadow: isCenter ? '0 10px 30px rgba(0,0,0,0.5)' : 'none' }} />
+                  <img src={getOptimizedImage(photo, 1200)} alt={`Gallery view ${index + 1}`} style={{ maxHeight: '100%', maxWidth: '100%', objectFit: 'contain', borderRadius: '12px', boxShadow: isCenter ? '0 10px 30px rgba(0,0,0,0.5)' : 'none' }} />
                 </div>
               );
             })}
@@ -1597,8 +1602,7 @@ const TravelMap = () => {
                       <div className="no-scrollbar" style={{ display: 'flex', gap: '10px', overflowX: 'auto', paddingBottom: '10px', marginTop: '5px' }}>
                         {formPhotos.map((photo, idx) => (
                           <div key={idx} style={{ position: 'relative', minWidth: '150px' }}>
-                            <img src={photo} alt={`Preview ${idx}`} style={{ width: '150px', height: '150px', objectFit: 'cover', borderRadius: '6px', border: '1px solid var(--border-light)' }} />
-                            <button
+                              img src={getOptimizedImage(photo, 300)} alt={`Preview ${idx}`} style={{ width: '150px', height: '150px', objectFit: 'cover', borderRadius: '6px', border: '1px solid var(--border-light)' }} />                            <button
                               type="button"
                               onClick={() => setFormPhotos(formPhotos.filter((_, i) => i !== idx))}
                               style={{ position: 'absolute', top: '5px', right: '5px', background: 'rgba(239, 68, 68, 0.9)', color: 'white', border: 'none', borderRadius: '4px', padding: '2px 6px', cursor: 'pointer', fontSize: '10px', fontWeight: 'bold' }}
