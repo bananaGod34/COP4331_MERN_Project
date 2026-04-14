@@ -363,6 +363,7 @@ const TravelMap = () => {
   const settingsRef = useRef<HTMLDivElement>(null);
   const settingsBtnRef = useRef<HTMLDivElement>(null);
   const ignoreNextMapClick = useRef(false);
+  const hideUiRef = useRef<HTMLDivElement>(null);
 
   const WORLD_OFFSETS = isMobileScreen ? [-360, 0, 360] : [-720, -360, 0, 360, 720];
 
@@ -502,13 +503,15 @@ const TravelMap = () => {
 
       if (isSettingsOpen && 
           settingsRef.current && !settingsRef.current.contains(target) &&
-          settingsBtnRef.current && !settingsBtnRef.current.contains(target)) {
+          settingsBtnRef.current && !settingsBtnRef.current.contains(target) &&
+          hideUiRef.current && !hideUiRef.current.contains(target)) {
         setIsSettingsOpen(false);
         if (isMap) ignoreNextMapClick.current = true;
       }
 
       if (isMobileMenuOpen && 
-          islandRef.current && !islandRef.current.contains(target)) {
+          islandRef.current && !islandRef.current.contains(target) &&
+          hideUiRef.current && !hideUiRef.current.contains(target)) {
         setIsMobileMenuOpen(false);
         if (isMap) ignoreNextMapClick.current = true;
       }
@@ -1158,9 +1161,17 @@ const TravelMap = () => {
             <button
               aria-label="Previous Photo"
               onClick={(e) => { e.stopPropagation(); if (gallery.currentIndex > 0) setGallery({ ...gallery, currentIndex: gallery.currentIndex - 1 }); }}
-              style={{ position: 'absolute', left: '20px', top: '50%', transform: 'translateY(-50%)', background: 'rgba(255,255,255,0.1)', border: 'none', color: 'white', fontSize: '40px', cursor: 'pointer', padding: '15px 25px', borderRadius: '12px', zIndex: 10001, visibility: gallery.currentIndex > 0 ? 'visible' : 'hidden' }}
+              className="gallery-nav-btn"
+              style={{ 
+                position: 'absolute', left: '20px', top: '50%', transform: 'translateY(-50%)', 
+                background: 'none', border: 'none', color: 'white', 
+                fontSize: '64px',
+                cursor: 'pointer', zIndex: 10001, 
+                visibility: gallery.currentIndex > 0 ? 'visible' : 'hidden',
+                padding: '10px'
+              }}
             >
-              <Icons.ChevronLeft />
+              <Icons.ChevronLeft width={64} height={64} />
             </button>
           )}
 
@@ -1192,10 +1203,23 @@ const TravelMap = () => {
           {gallery.photos.length > 1 && !isMobileScreen && (
             <button
               aria-label="Next Photo"
-              onClick={(e) => { e.stopPropagation(); if (gallery.currentIndex < gallery.photos.length - 1) setGallery({ ...gallery, currentIndex: gallery.currentIndex + 1 }); }}
-              style={{ position: 'absolute', right: '20px', top: '50%', transform: 'translateY(-50%)', background: 'rgba(255,255,255,0.1)', border: 'none', color: 'white', fontSize: '40px', cursor: 'pointer', padding: '15px 25px', borderRadius: '12px', zIndex: 10001, visibility: gallery.currentIndex < gallery.photos.length - 1 ? 'visible' : 'hidden' }}
+              onClick={(e) => { 
+                e.stopPropagation(); 
+                if (gallery.currentIndex < gallery.photos.length - 1) {
+                  setGallery({ ...gallery, currentIndex: gallery.currentIndex + 1 }); 
+                }
+              }}
+              className="gallery-nav-btn"
+              style={{ 
+                position: 'absolute', right: '20px', top: '50%', transform: 'translateY(-50%)', 
+                background: 'none', border: 'none', color: 'white', 
+                fontSize: '64px', 
+                cursor: 'pointer', zIndex: 10001, 
+                visibility: gallery.currentIndex < gallery.photos.length - 1 ? 'visible' : 'hidden',
+                padding: '10px' 
+              }}
             >
-              <Icons.ChevronRight />
+              <Icons.ChevronRight width={64} height={64} />
             </button>
           )}
 
@@ -1218,6 +1242,16 @@ const TravelMap = () => {
 
       {!uiHidden && (
         <>
+          <div
+            className={`fab-overlay ${(isMobileMenuOpen || isSettingsOpen) ? 'active' : ''}`}
+            onClick={() => {
+              if (isMobileScreen) {
+                setIsMobileMenuOpen(false);
+                setIsSettingsOpen(false);
+              }
+            }}
+          />
+
           {/* 1. THE DYNAMIC ISLAND (Trips) */}
           <div
             ref={islandRef}
@@ -1228,9 +1262,14 @@ const TravelMap = () => {
               boxShadow: isMobileMenuOpen ? '0 4px 20px rgba(0,0,0,0.15)' : `0 4px 15px ${getDisplayColor(activeTrip?.lineColor || '#3b82f6')}40`
             }}
           >
-            <div className="island-header" onClick={() => { setIsMobileMenuOpen(!isMobileMenuOpen); setIsSettingsOpen(false); }}>
+            <div className="island-header"
+              onClick={(e) => {
+                e.stopPropagation(); 
+                setIsMobileMenuOpen(!isMobileMenuOpen); 
+                setIsSettingsOpen(false); 
+              }}>
               <div style={{ width: '12px', height: '12px', borderRadius: '50%', backgroundColor: getDisplayColor(activeTrip?.lineColor || '#3b82f6'), marginRight: '8px', flexShrink: 0 }} />
-              <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', color: 'var(--text-main)', whiteSpace: 'nowrap', maxWidth: '120px' }}>
+              <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', color: 'var(--text-main)', whiteSpace: 'nowrap', maxWidth: '120px', lineHeight: '1.4', paddingBottom: '2px', display: 'inline-block' }}>
                 {activeTrip?.name || 'Your Trips'}
               </span>
               <span style={{ marginLeft: '6px', fontSize: '10px', color: 'var(--text-main)', transition: 'transform 0.3s, var(--theme-trans)', transform: isMobileMenuOpen ? 'rotate(180deg)' : 'rotate(0)' }}><Icons.ChevronDown /></span>
@@ -1311,7 +1350,11 @@ const TravelMap = () => {
             ref={settingsBtnRef}
             className="floating-circle-btn"
             style={{ color: 'var(--text-main)', top: '15px' }}
-            onClick={() => { setIsSettingsOpen(!isSettingsOpen); setIsMobileMenuOpen(false); }}
+            onClick={(e) => {
+              e.stopPropagation(); 
+              setIsSettingsOpen(!isSettingsOpen); 
+              setIsMobileMenuOpen(false); 
+            }}
           >
             <Icons.Settings />
           </div>
@@ -1335,6 +1378,7 @@ const TravelMap = () => {
 
           {/* HIDE UI BUTTON */}
           <div
+            ref={hideUiRef}
             className="floating-circle-btn"
             onClick={() => setUiHidden(true)}
             style={{ color: 'var(--text-main)', top: isSettingsOpen ? '190px' : '70px', fontSize: '16px' }} 
