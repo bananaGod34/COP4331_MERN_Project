@@ -186,7 +186,8 @@ const SortableTripCard = ({
       {/* ROW 1 */}
       <div style={{ display: 'flex', alignItems: 'center', width: '100%' }}>
         <div 
-          {...attributes} {...listeners} className="desktop-drag" 
+          {...attributes} {...listeners} className="desktop-drag"
+          aria-label="Drag to reorder"
           style={{ 
             padding: '10px', marginLeft: '-10px', marginRight: '5px',
             display: 'flex', alignItems: 'center', justifyContent: 'center', 
@@ -1206,7 +1207,7 @@ const TravelMap = () => {
 
             <div className="island-content">
               <div style={{ display: 'flex', alignItems: 'center', marginBottom: '10px', paddingLeft: '4px' }}>
-                <h3 style={{ margin: 0, fontSize: '12px', textTransform: 'uppercase', letterSpacing: '1px', color: 'var(--text-muted)' }}>Your Trips</h3>
+                <h2 style={{ margin: 0, fontSize: '12px', textTransform: 'uppercase', letterSpacing: '1px', color: 'var(--text-muted)' }}>Your Trips</h2>
               </div>
 
               {/* Trip List */}
