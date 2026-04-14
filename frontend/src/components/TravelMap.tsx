@@ -1920,12 +1920,11 @@ const TravelMap = () => {
                           {trip.id === activeTripId && (
                             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '15px', paddingTop: '10px', borderTop: '1px solid var(--border-light)' }}>
                               <div
-                                className="action-btn action-btn-edit"
-                                aria-label="Previous Stop"
+                                className="floating-circle-btn"
                                 onClick={(e) => { e.preventDefault(); e.stopPropagation(); if (trueIndex > 0) handleCardClick(trip.pins[trueIndex - 1]); }}
-                                style={{ color: 'var(--text-main)'}}
+                                style={{ color: 'var(--text-main)' }} 
                               >
-                                <span style={{ marginLeft: '6px', fontSize: '10px', color: 'var(--text-main)', transition: 'transform 0.3s, var(--theme-trans)', transform: isMobileMenuOpen ? 'rotate(180deg)' : 'rotate(0)' }}><Icons.ChevronLeft /></span>
+                                <Icons.ChevronLeft />
                               </div>
 
                               <div style={{ display: 'flex', gap: '5px' }}>
@@ -1934,12 +1933,11 @@ const TravelMap = () => {
                               </div>
 
                               <div
-                                className="action-btn action-btn-edit"
-                                aria-label="Next Stop"
+                                className="floating-circle-btn"
                                 onClick={(e) => { e.preventDefault(); e.stopPropagation(); if (trueIndex < trip.pins.length - 1) handleCardClick(trip.pins[trueIndex + 1]); }}
-                                style={{ color: 'var(--text-main)'}}
+                                style={{ color: 'var(--text-main)' }} 
                               >
-                                <span style={{ marginRight: '6px', fontSize: '10px', color: 'var(--text-main)', transition: 'transform 0.3s, var(--theme-trans)', transform: isMobileMenuOpen ? 'rotate(180deg)' : 'rotate(0)'   }}><Icons.ChevronRight /></span>
+                                <Icons.ChevronRight />
                               </div>
                               
                             </div>
