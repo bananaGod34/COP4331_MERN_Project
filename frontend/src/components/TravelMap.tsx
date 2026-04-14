@@ -1917,12 +1917,11 @@ const TravelMap = () => {
                           {trip.id === activeTripId && (
                             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '15px', paddingTop: '10px', borderTop: '1px solid var(--border-light)' }}>
                               <button
-                                className="action-btn"
                                 aria-label="Previous Stop"
                                 onClick={(e) => { e.preventDefault(); e.stopPropagation(); if (trueIndex > 0) handleCardClick(trip.pins[trueIndex - 1]); }}
                                 style={{ visibility: trueIndex > 0 ? 'visible' : 'hidden', background: 'none', border: 'none', cursor: 'pointer', fontSize: '16px', padding: '0 5px' }}
                               >
-                                <span style={{ color: 'var(--text-main)', transition: 'var(--theme-trans)' }}><Icons.ChevronLeft /></span>
+                                <span style={{ marginLeft: '6px', fontSize: '10px', color: 'var(--text-main)', transition: 'transform 0.3s, var(--theme-trans)', transform: isMobileMenuOpen ? 'rotate(180deg)' : 'rotate(0)' }}><Icons.ChevronLeft /></span>
                               </button>
 
                               <div style={{ display: 'flex', gap: '5px' }}>
@@ -1931,12 +1930,11 @@ const TravelMap = () => {
                               </div>
 
                               <button
-                                className="action-btn"
                                 aria-label="Next Stop"
                                 onClick={(e) => { e.preventDefault(); e.stopPropagation(); if (trueIndex < trip.pins.length - 1) handleCardClick(trip.pins[trueIndex + 1]); }}
                                 style={{ visibility: trueIndex < trip.pins.length - 1 ? 'visible' : 'hidden', background: 'none', border: 'none', cursor: 'pointer', fontSize: '16px', padding: '0 5px' }}
                               >
-                                <span style={{ color: 'var(--text-main)', transition: 'var(--theme-trans)' }}><Icons.ChevronRight /></span>
+                                <span style={{ marginRight: '6px', fontSize: '10px', color: 'var(--text-main)', transition: 'transform 0.3s, var(--theme-trans)', transform: isMobileMenuOpen ? 'rotate(180deg)' : 'rotate(0)'   }}><Icons.ChevronRight /></span>
                               </button>
                               
                             </div>
