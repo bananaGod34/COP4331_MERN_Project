@@ -315,15 +315,22 @@ body, div, span, p, h1, h2, h3, hr, button, input, textarea, a, label, img{
   background-color: var(--bg-sidebar);
 }
 
-.leaflet-container * {
-  transition: none !important;
+.leaflet-tile-pane {
+  transition: filter 0.4s ease-in-out !important;
+}
+
+.leaflet-fade-anim .leaflet-popup,
+.leaflet-zoom-anim .leaflet-zoom-animated,
+.leaflet-popup-content-wrapper,
+.leaflet-popup-tip {
+  transition: opacity 0.2s linear, filter 0.4s ease !important;
 }
 
 .leaflet-tile-pane,
 .leaflet-popup-content-wrapper,
 .leaflet-popup-content-wrapper *,
 .leaflet-popup-tip {
-  transition: filter 0.4s ease, var(--theme-trans) !important;
+  transition: opacity 0.2s linear, filter 0.4s ease, var(--theme-trans) !important;
 }
 
 .theme-toggle-track {
@@ -353,6 +360,20 @@ body, div, span, p, h1, h2, h3, hr, button, input, textarea, a, label, img{
 .dark-mode .theme-toggle-thumb {
   transform: translateX(16px);
 }
+
+.island-header,
+.desktop-toggle-btn,
+.settings-logout-btn,
+.mini-btn,
+.action-btn,
+.popup-nav-btn {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  line-height: 1 !important;
+}
+
+
 
 .desktop-drag {
   touch-action: none;
@@ -575,6 +596,20 @@ body, div, span, p, h1, h2, h3, hr, button, input, textarea, a, label, img{
   animation: fadeInTile 0.5s ease-out backwards;
 }
 
+.leaflet-control-attribution {
+  background: rgba(255, 255, 255, 0.8) !important;
+  color: #333 !important;
+  font-size: 11px !important;
+  padding: 0 5px !important;
+  border: none !important;
+  box-shadow: none !important;
+  pointer-events: auto !important;
+}
+.leaflet-control-attribution a {
+  color: #0078A8 !important;
+  text-decoration: none !important;
+}
+
 @keyframes cascadeFade {
   0% { opacity: 0; transform: translateY(15px) scale(0.98); }
   100% { opacity: 1; transform: translateY(0) scale(1); }
@@ -626,6 +661,21 @@ body, div, span, p, h1, h2, h3, hr, button, input, textarea, a, label, img{
   .desktop-toggle-btn { display: none !important; }
   .map-wrapper { width: 100vw; }
   .desktop-panel-header h3 { display: none; }
+
+  .leaflet-control-attribution {
+    position: fixed !important;
+    top: 15px !important;
+    right: 15px !important;
+    bottom: auto !important;
+    left: auto !important;
+    margin: 0 !important;
+    z-index: 10001 !important; 
+    background: rgba(255, 255, 255, 0.8) !important;
+    border-radius: 4px !important;
+  }
+  .leaflet-bottom.leaflet-left {
+    pointer-events: none !important;
+  }
   
   .sidebar {
     position: fixed; top: auto !important; bottom: 0; left: 0;

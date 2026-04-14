@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect, useLayoutEffect, useMemo } from 'react';
-import { MapContainer, TileLayer, Marker, Popup, Polyline, useMapEvents, ZoomControl, useMap, CircleMarker } from 'react-leaflet';
+import { MapContainer, TileLayer, Marker, Popup, Polyline, useMapEvents, ZoomControl, useMap, CircleMarker, AttributionControl } from 'react-leaflet';
 import { useNavigate } from 'react-router-dom';
 import 'leaflet/dist/leaflet.css';
 import './TravelMap.css';
@@ -79,23 +79,27 @@ const getOptimizedImage = (url: string, width: number) => {
 
 // Map click listener
 // Also prevents map clicks from firing when interacting with popups or dragging markers
-const MapClickHandler = ({ onMapClick, popupCount }: any) => {
-  useMapEvents({
-    popupopen: () => { 
-      popupCount.current += 1; 
-    },
+const MapClickHandler = ({ onMapClick, popupCount, ignoreNextMapClick }: any) => {
+  const map = useMapEvents({
+    popupopen: () => { popupCount.current += 1; },
     popupclose: () => { 
-      setTimeout(() => { 
-        popupCount.current = Math.max(0, popupCount.current - 1); 
-      }, 50); 
+      setTimeout(() => { popupCount.current = Math.max(0, popupCount.current - 1); }, 50); 
     },
-    click: (e) => { 
+    dragstart: () => { ignoreNextMapClick.current = false; },
+    
+    click: (e) => {
+      if (ignoreNextMapClick.current) {
+        ignoreNextMapClick.current = false;
+        return; 
+      }
+      
+      map.closePopup(); 
+
       if (popupCount.current === 0) onMapClick(e.latlng); 
     },
   });
   return null;
 };
-
 // Pan to target pin
 const MapCameraController = ({ target, isSidebarOpen }: any) => {
   const map = useMap();
@@ -121,16 +125,13 @@ const MapCameraController = ({ target, isSidebarOpen }: any) => {
   return null;
 }
 
-const MapBackgroundEvents = ({ selectedCardId, setSelectedCardId }: any) => {
-  const map = useMapEvents({
-    click: () => setSelectedCardId(null)
-  });
-
-  React.useEffect(() => {
-    if (selectedCardId === null) {
-      map.closePopup();
+const MapBackgroundEvents = ({ selectedCardId, setSelectedCardId, ignoreNextMapClick }: any) => {
+  useMapEvents({
+    click: () => {
+      if (ignoreNextMapClick.current) return;
+      setSelectedCardId(null);
     }
-  }, [selectedCardId, map]);
+  });
 
   return null;
 };
@@ -358,6 +359,10 @@ const TravelMap = () => {
   const sidebarRef = React.useRef<HTMLDivElement>(null);
   const swipeState = React.useRef({ startY: 0, lastY: 0, startHeight: 0, time: 0, velocity: 0, isDragging: false, hasDecided: false });
   const swipeTimeout = React.useRef<NodeJS.Timeout>();
+  const islandRef = useRef<HTMLDivElement>(null);
+  const settingsRef = useRef<HTMLDivElement>(null);
+  const settingsBtnRef = useRef<HTMLDivElement>(null);
+  const ignoreNextMapClick = useRef(false);
 
   const WORLD_OFFSETS = isMobileScreen ? [-360, 0, 360] : [-720, -360, 0, 360, 720];
 
@@ -488,6 +493,30 @@ const TravelMap = () => {
     const timer = setTimeout(() => setIsDndReady(true), 1500);
     return () => clearTimeout(timer);
   }, [activeTripId]);
+
+  // out click
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      const target = event.target as Node;
+      const isMap = (target as HTMLElement).closest('.leaflet-container');
+
+      if (isSettingsOpen && 
+          settingsRef.current && !settingsRef.current.contains(target) &&
+          settingsBtnRef.current && !settingsBtnRef.current.contains(target)) {
+        setIsSettingsOpen(false);
+        if (isMap) ignoreNextMapClick.current = true;
+      }
+
+      if (isMobileMenuOpen && 
+          islandRef.current && !islandRef.current.contains(target)) {
+        setIsMobileMenuOpen(false);
+        if (isMap) ignoreNextMapClick.current = true;
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [isSettingsOpen, isMobileMenuOpen]);
 
   // --- EFFECTS ---
   // toggle dark mode
@@ -652,11 +681,13 @@ const TravelMap = () => {
       targetPin = { ...existingPin, name: formName, blurb: formBlurb, photoUrls: formPhotos };
 
       updateActiveTripPins(tripPins.map(pin => 
-        pin.id === editingPinId ? { ...pin, name: formName, blurb: formBlurb, photoUrls: formPhotos } : pin
+        pin.id === editingPinId ? targetPin : pin
       ));
     } else if (draftPin) {
       const newPin = { id: Date.now(), name: formName, lat: draftPin.lat, lng: draftPin.lng, blurb: formBlurb, photoUrls: formPhotos };
       updateActiveTripPins([...tripPins, newPin]);
+      
+      targetPin = newPin; 
     }
     
     setDraftPin(null);
@@ -1187,14 +1218,9 @@ const TravelMap = () => {
 
       {!uiHidden && (
         <>
-          {/* THE FAB GLASS OVERLAY */}
-         <div
-            className={`fab-overlay ${isMobileMenuOpen || isSettingsOpen ? 'active' : ''}`}
-            onClick={() => { setIsMobileMenuOpen(false); setIsSettingsOpen(false); }}
-          />
-
           {/* 1. THE DYNAMIC ISLAND (Trips) */}
-          <div 
+          <div
+            ref={islandRef}
             className={`dynamic-island ${isMobileMenuOpen ? 'expanded' : 'pill'}`}
             style={{ 
               borderColor: isMobileMenuOpen ? 'var(--border-light)' : getDisplayColor(activeTrip?.lineColor || '#3b82f6'),
@@ -1282,6 +1308,7 @@ const TravelMap = () => {
 
           {/* SETTINGS GEAR */}
           <div
+            ref={settingsBtnRef}
             className="floating-circle-btn"
             style={{ color: 'var(--text-main)', top: '15px' }}
             onClick={() => { setIsSettingsOpen(!isSettingsOpen); setIsMobileMenuOpen(false); }}
@@ -1290,7 +1317,7 @@ const TravelMap = () => {
           </div>
 
           {/* SETTINGS DROPDOWN */}
-          <div className={`settings-dropdown ${isSettingsOpen ? 'active' : ''}`}>
+          <div ref={settingsRef} className={`settings-dropdown ${isSettingsOpen ? 'active' : ''}`}>
             <div onClick={() => setDarkMode(d => !d)} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '10px', borderRadius: '6px', cursor: 'pointer', gap: '15px' }}>
               <span style={{ fontSize: '14px', fontWeight: 'bold', display: 'flex', alignItems: 'center', color: 'var(--text-main)', gap: '8px', lineHeight: 1 }}>
                 {darkMode ? <Icons.Moon style={{ display: 'block' }} /> : <Icons.Sun style={{ display: 'block' }} />} Dark Mode
@@ -1771,16 +1798,20 @@ const TravelMap = () => {
         center={mapCenter as any}
         zoom={6}
         zoomControl={false}
+        attributionControl={false}
         doubleClickZoom={false}
+        closePopupOnClick={false}
         style={{ height: '100%', width: '100%' }}
       >
+        <AttributionControl position="bottomleft" />
+
         <TileLayer
           url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png"
         />
         
-        <MapClickHandler onMapClick={handleMapClick} popupCount={popupCount} />
+        <MapClickHandler onMapClick={handleMapClick} popupCount={popupCount} ignoreNextMapClick={ignoreNextMapClick} />
         <MapCameraController target={cameraTarget} isSidebarOpen={isSidebarOpen}/>
-        <MapBackgroundEvents selectedCardId={selectedCardId} setSelectedCardId={setSelectedCardId} />
+        <MapBackgroundEvents selectedCardId={selectedCardId} setSelectedCardId={setSelectedCardId} ignoreNextMapClick={ignoreNextMapClick} />
         
         {/* Polyline (triple rendered for dateline wrapping) */}
         {visibleTripsData.map(trip => {
@@ -1920,7 +1951,8 @@ const TravelMap = () => {
                           
                           {trip.id === activeTripId && (
                             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '15px', paddingTop: '10px', borderTop: '1px solid var(--border-light)' }}>
-                              <button 
+                              <button
+                                className="popup-nav-btn"
                                 aria-label="Previous Stop"
                                 onClick={(e) => { e.preventDefault(); e.stopPropagation(); if (trueIndex > 0) handleCardClick(trip.pins[trueIndex - 1]); }}
                                 style={{ visibility: trueIndex > 0 ? 'visible' : 'hidden', background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', fontSize: '16px', padding: '0 5px', transition: 'var(--theme-trans)' }}
@@ -1934,6 +1966,7 @@ const TravelMap = () => {
                               </div>
 
                               <button
+                                className="popup-nav-btn"
                                 aria-label="Next Stop"
                                 onClick={(e) => { e.preventDefault(); e.stopPropagation(); if (trueIndex < trip.pins.length - 1) handleCardClick(trip.pins[trueIndex + 1]); }}
                                 style={{ visibility: trueIndex < trip.pins.length - 1 ? 'visible' : 'hidden', background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', fontSize: '16px', padding: '0 5px', transition: 'var(--theme-trans)' }}
