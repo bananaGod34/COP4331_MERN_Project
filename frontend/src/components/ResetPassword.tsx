@@ -63,10 +63,10 @@ const ResetPassword = () => {
         <svg xmlns="http://www.w3.org/2000/svg" width="32" height="40" viewBox="-4 -2 36 46">
             <path d="M14 0 C6.27 0 0 6.27 0 14 C0 24.5 14 38 14 38 C14 38 28 24.5 28 14 C28 6.27 21.73 0 14 0 Z M 14 9 A 5 5 0 1 0 14 19 A 5 5 0 1 0 14 9 Z" fill="var(--accent-blue)" fillRule="evenodd" />
         </svg>
-        <h2 style={{ margin: 0, fontSize: '28px', letterSpacing: '-0.5px' }}>Landmark</h2>
+        <h2 style={{ margin: 0, fontSize: '28px', color: 'var(--text-main)', letterSpacing: '-0.5px' }}>Landmark</h2>
         </div>
 
-        <h3 style={{ margin: '0 0 8px 0', fontSize: '24px' }}>Create New Password</h3>
+        <h3 style={{ margin: '0 0 8px 0', fontSize: '24px', color: 'var(--text-main)' }}>Create New Password</h3>
         <p style={{ color: 'var(--text-muted)', marginBottom: '30px', fontSize: '15px' }}>
         Please enter your new password below.
         </p>

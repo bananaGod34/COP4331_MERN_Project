@@ -1286,7 +1286,7 @@ const TravelMap = () => {
           {/* SETTINGS DROPDOWN */}
           <div className={`settings-dropdown ${isSettingsOpen ? 'active' : ''}`}>
             <div onClick={() => setDarkMode(d => !d)} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '10px', borderRadius: '6px', cursor: 'pointer', gap: '15px' }}>
-              <span style={{ fontSize: '14px', fontWeight: 'bold', display: 'flex', alignItems: 'center', color: 'var(--text-main)',gap: '8px', lineHeight: 1 }}>
+              <span style={{ fontSize: '14px', fontWeight: 'bold', display: 'flex', alignItems: 'center', color: 'var(--text-main)', gap: '8px', lineHeight: 1 }}>
                 {darkMode ? <Icons.Moon style={{ display: 'block' }} /> : <Icons.Sun style={{ display: 'block' }} />} <span>Dark Mode</span>
               </span>
               

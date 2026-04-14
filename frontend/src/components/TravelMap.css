@@ -22,9 +22,16 @@ body, html {
 }
 
 /* Master Base Elements */
-body, div, span, p, h1, h2, h3, hr, button, input, textarea, a, label, img,
-svg, path, circle, line, polyline {
+body, div, span, p, h1, h2, h3, hr, button, input, textarea, a, label, img {
   transition: var(--theme-trans);
+}
+
+svg {
+  transform: translateZ(0); 
+}
+
+svg, svg * {
+  transition: fill 0.3s ease, stroke 0.3s ease, color 0.3s ease !important;
 }
 
 .no-scrollbar,
@@ -56,6 +63,7 @@ svg, path, circle, line, polyline {
 .leaflet-popup-content-wrapper::-webkit-scrollbar-thumb {
   background-color: var(--border-input); 
   border-radius: 10px;
+  transition: background-color 0.3s ease !important;
 }
 
 .no-scrollbar::-webkit-scrollbar-thumb:hover,
