@@ -43,7 +43,7 @@ const Signup = () => {
     setMessage('');
 
     if(loginPassword !== confirmPassword) {
-      return setMessage('Passwords do not match');
+      return setMessage('Passwords do not match.');
     }
 
     if (strengthScore < 3) {

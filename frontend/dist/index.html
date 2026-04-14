@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <style>
+      body, html {
+        margin: 0;
+        padding: 0;
+        background-color: #ffffff;
+      }
+      html.dark-mode, html.dark-mode body {
+        background-color: #1f2937; 
+      }
+    </style>
+
+    <script>
+      if (localStorage.getItem('travelmap_theme') === 'dark') {
+        document.documentElement.classList.add('dark-mode');
+      }
+    </script>
+
+    <meta charset="UTF-8" />
+    <meta name="description" content="Landmark is an interactive travel planner that lets you map your trips, save locations, and track your adventures around the world." />
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Landmark">
+
+    <link rel="preconnect" href="https://basemaps.cartocdn.com" crossorigin>
+
+    <link rel="preload" href="/fonts/plus-jakarta-sans-regular.woff2" as="font" type="font/woff2" crossorigin>
+
+    <link rel="icon" type="image/svg+xml" href="/pin.svg" />
+    <link rel="preload" as="image" href="/auth-bg.webp" type="image/webp" fetchpriority="high">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Landmark</title>
+    <script type="module" crossorigin src="/assets/index-qAyELKXU.js"></script>
+    <link rel="modulepreload" crossorigin href="/assets/TravelMap-BVB9ftEY.js">
+    <link rel="stylesheet" crossorigin href="/assets/TravelMap-Bb9P80Zb.css">
+    <link rel="stylesheet" crossorigin href="/assets/index-v96LvV77.css">
+  </head>
+  <body>
+    <div id="root"></div>
+  </body>
+</html>
