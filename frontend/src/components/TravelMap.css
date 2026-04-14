@@ -273,7 +273,8 @@ body, html {
 }
 
 body, .sidebar, .trip-card, .sheet-content, .auth-form-side, 
-.settings-dropdown, .form-input, .dynamic-island, .info-box, .trip-style-box {
+.settings-dropdown, .form-input, .dynamic-island, .info-box, .trip-style-box,
+h1, h2, h3, p, span, button, a, label {
   transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease, box-shadow 0.3s ease;
 }
 
