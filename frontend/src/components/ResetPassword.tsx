@@ -89,11 +89,17 @@ const ResetPassword = () => {
         Please enter your new password below.
         </p>
 
-        {message && (
-            <div style={{ background: isSuccess ? 'var(--info-bg)' : 'var(--accent-red-dim, #fee2e2)', color: isSuccess ? 'var(--info-text)' : '#dc2626', padding: '12px', borderRadius: '6px', marginBottom: '20px', fontSize: '14px', fontWeight: 'bold' }}>
+        <div style={{ 
+          maxHeight: message ? '40px' : '0', 
+          opacity: message ? 1 : 0, 
+          overflow: 'hidden',
+          marginBottom: message ? '15px' : '0',
+          transition: 'all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1)' 
+        }}>
+          <div style={{ color: isSuccess ? 'var(--accent-green)' : 'var(--accent-red)', fontSize: '14px', fontWeight: 'bold', display: 'flex', alignItems: 'center' }}>
             {message}
+          </div>
         </div>
-        )}
 
         {!isSuccess ? (
         <form onSubmit={doReset} style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
