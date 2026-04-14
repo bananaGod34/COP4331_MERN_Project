@@ -22,8 +22,12 @@ body, html {
 }
 
 /* Master Base Elements */
-body, div, span, p, h1, h2, h3, hr, button, input, textarea, a, label, img, svg {
+body, div, span, p, h1, h2, h3, hr, button, input, textarea, a, label, img{
   transition: var(--theme-trans);
+}
+
+svg, svg * {
+  transition: color 0.3s ease !important;
 }
 
 .no-scrollbar,
