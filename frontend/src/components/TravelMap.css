@@ -272,33 +272,37 @@ body, html {
   background-color: var(--bg-sidebar);
 }
 
-.theme-transitioning,
-.theme-transitioning div,
-.theme-transitioning span,
-.theme-transitioning p,
-.theme-transitioning h1, .theme-transitioning h2, .theme-transitioning h3,
-.theme-transitioning label, .theme-transitioning input, .theme-transitioning textarea, .theme-transitioning button,
-.theme-transitioning a, .theme-transitioning hr, .theme-transitioning img {
-  transition: background 0.3s ease, background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease, border-top-color 0.3s ease, box-shadow 0.3s ease, opacity 0.3s ease !important;
+html.app-loaded body,
+html.app-loaded div,
+html.app-loaded span,
+html.app-loaded p,
+html.app-loaded h1, 
+html.app-loaded h2, 
+html.app-loaded h3,
+html.app-loaded label, 
+html.app-loaded input, 
+html.app-loaded textarea, 
+html.app-loaded button,
+html.app-loaded a, 
+html.app-loaded hr, 
+html.app-loaded img,
+html.app-loaded svg,
+html.app-loaded path,
+html.app-loaded circle,
+html.app-loaded line,
+html.app-loaded polyline {
+  transition: background 0.35s ease, background-color 0.35s ease, color 0.35s ease, border-color 0.35s ease, border-top-color 0.35s ease, box-shadow 0.35s ease, fill 0.35s ease, stroke 0.35s ease !important;
 }
 
-.theme-transitioning svg,
-.theme-transitioning path,
-.theme-transitioning circle,
-.theme-transitioning line,
-.theme-transitioning polyline {
-  transition: fill 0.3s ease, stroke 0.3s ease, color 0.3s ease !important;
-}
-
-.theme-transitioning .leaflet-container * {
+html.app-loaded .leaflet-container * {
   transition: none !important;
 }
 
-.theme-transitioning .leaflet-tile-pane,
-.theme-transitioning .leaflet-popup-content-wrapper,
-.theme-transitioning .leaflet-popup-content-wrapper *,
-.theme-transitioning .leaflet-popup-tip {
-  transition: filter 0.3s ease, background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease, border-top-color 0.3s ease !important;
+html.app-loaded .leaflet-tile-pane,
+html.app-loaded .leaflet-popup-content-wrapper,
+html.app-loaded .leaflet-popup-content-wrapper *,
+html.app-loaded .leaflet-popup-tip {
+  transition: filter 0.4s ease, background-color 0.35s ease, color 0.35s ease, border-color 0.35s ease, border-top-color 0.35s ease !important;
 }
 
 .theme-toggle-track {

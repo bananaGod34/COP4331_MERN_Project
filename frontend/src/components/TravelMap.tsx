@@ -206,10 +206,10 @@ const SortableTripCard = ({
         )}
 
         <div style={{ flex: 1, minWidth: 0, cursor: 'pointer' }} onClick={() => handleCardClick(pin)}>
-          <h3 style={{ margin: '0 0 4px 0', fontSize: '15px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+          <h3 style={{ margin: '0 0 4px 0', fontSize: '15px', color: 'var(--text-main)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
             {index + 1}. {pin.name}
           </h3>
-          <p style={{ margin: 0, fontSize: '13px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+          <p style={{ margin: 0, fontSize: '13px', color: 'var(--text-muted)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
             {pin.blurb}
           </p>
         </div>
@@ -486,31 +486,25 @@ const TravelMap = () => {
   // --- EFFECTS ---
   // toggle dark mode
   useEffect(() => {
+    const timer = setTimeout(() => {
+      document.documentElement.classList.add('app-loaded');
+    }, 100);
+    return () => clearTimeout(timer);
+  }, []);
+  
+  useEffect(() => {
     if (isFirstRender.current) {
       isFirstRender.current = false;
       return;
     }
     
-    document.documentElement.classList.add('theme-transitioning');
-
-    window.requestAnimationFrame(() => {
-      window.requestAnimationFrame(() => {
-        document.documentElement.classList.toggle('dark-mode', darkMode);
-        
-        if (mapRef.current?.getContainer()) {
-          mapRef.current.getContainer().classList.toggle('dark-mode', darkMode);
-        }
-        
-        localStorage.setItem('travelmap_theme', darkMode ? 'dark' : 'light');
-
-        // 4. Cleanup
-        const timer = setTimeout(() => {
-          document.documentElement.classList.remove('theme-transitioning');
-        }, 350);
-
-        return () => clearTimeout(timer);
-      });
-    });
+    document.documentElement.classList.toggle('dark-mode', darkMode);
+    
+    if (mapRef.current?.getContainer()) {
+      mapRef.current.getContainer().classList.toggle('dark-mode', darkMode);
+    }
+    
+    localStorage.setItem('travelmap_theme', darkMode ? 'dark' : 'light');
   }, [darkMode]);
 
   // dark mode display helper
