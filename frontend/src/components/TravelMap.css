@@ -287,11 +287,16 @@ body, html {
 .theme-transitioning hr,
 .theme-transitioning img {
   transition: background 0.35s ease, background-color 0.35s ease, color 0.35s ease, border-color 0.35s ease, border-top-color 0.35s ease, box-shadow 0.35s ease, opacity 0.35s ease !important;
+  will-change: color, background-color; 
 }
 .theme-transitioning svg,
-.theme-transitioning path {
+.theme-transitioning path,
+.theme-transitioning circle,
+.theme-transitioning line,
+.theme-transitioning polyline,
+.theme-transitioning rect,
+.theme-transitioning ellipse {
   transition: color 0.35s ease, fill 0.35s ease, stroke 0.35s ease !important;
-  will-change: color, fill, stroke;
 }
 .theme-transitioning .leaflet-container * {
   transition: none !important;
@@ -299,18 +304,12 @@ body, html {
 .theme-transitioning .leaflet-popup-content-wrapper,
 .theme-transitioning .leaflet-popup-content-wrapper *,
 .theme-transitioning .leaflet-popup-tip {
-  transition: background-color 0.35s ease, color 0.35s ease, border-color 0.35s ease, border-top-color 0.35s ease !important;
+  transition: background-color 0.35s ease, color 0.35s ease, border-color 0.35s ease, border-top-color 0.35s ease, fill 0.35s ease !important;
 }
 .theme-transitioning .leaflet-tile-pane {
   transition: filter 0.45s ease-in-out !important;
   will-change: filter;
   transform: translateZ(0);
-}
-.theme-transitioning ::-webkit-scrollbar-thumb {
-  transition: background-color 0.35s ease !important;
-}
-.theme-transitioning {
-  transition: scrollbar-color 0.35s ease !important;
 }
 
 .theme-toggle-thumb {
