@@ -1328,8 +1328,7 @@ const TravelMap = () => {
               borderRadius: '8px 0 0 8px', 
               cursor: 'pointer', 
               zIndex: 1001, 
-              boxShadow: '-2px 2px 4px rgba(0,0,0,0.05)',
-              transition: 'transform 0.3s ease-in-out, background-color 0.3s ease-in-out, border-color 0.3s ease-in-out, color 0.3s ease-in-out'
+              boxShadow: '-2px 2px 4px rgba(0,0,0,0.05)'
             }}
           >
             {isSidebarOpen ? <Icons.ChevronRight /> : <Icons.ChevronLeft />}
