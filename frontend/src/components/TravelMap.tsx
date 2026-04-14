@@ -1602,7 +1602,7 @@ const TravelMap = () => {
                       <div className="no-scrollbar" style={{ display: 'flex', gap: '10px', overflowX: 'auto', paddingBottom: '10px', marginTop: '5px' }}>
                         {formPhotos.map((photo, idx) => (
                           <div key={idx} style={{ position: 'relative', minWidth: '150px' }}>
-                              img src={getOptimizedImage(photo, 300)} alt={`Preview ${idx}`} style={{ width: '150px', height: '150px', objectFit: 'cover', borderRadius: '6px', border: '1px solid var(--border-light)' }} />                            <button
+                              <img src={getOptimizedImage(photo, 300)} alt={`Preview ${idx}`} style={{ width: '150px', height: '150px', objectFit: 'cover', borderRadius: '6px', border: '1px solid var(--border-light)' }} />                            <button
                               type="button"
                               onClick={() => setFormPhotos(formPhotos.filter((_, i) => i !== idx))}
                               style={{ position: 'absolute', top: '5px', right: '5px', background: 'rgba(239, 68, 68, 0.9)', color: 'white', border: 'none', borderRadius: '4px', padding: '2px 6px', cursor: 'pointer', fontSize: '10px', fontWeight: 'bold' }}
