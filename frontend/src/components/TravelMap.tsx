@@ -113,7 +113,7 @@ const MapCameraController = ({ target, isSidebarOpen }: any) => {
       
       if (isMobile && isSidebarOpen) {
         const targetPoint = map.project([target.lat, target.lng], map.getZoom());
-        targetPoint.y += (window.innerHeight * 0.25);
+        targetPoint.y += (window.innerHeight * 0.1);
         const offsetLatLng = map.unproject(targetPoint, map.getZoom());
         map.panTo(offsetLatLng, { animate: true, duration: 0.4 });
       } else {
@@ -498,6 +498,8 @@ const TravelMap = () => {
   // out click
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
+      if (tripModal.isOpen || gallery.isOpen) return;
+
       const target = event.target as Node;
       const isMap = (target as HTMLElement).closest('.leaflet-container');
 
@@ -519,7 +521,7 @@ const TravelMap = () => {
 
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, [isSettingsOpen, isMobileMenuOpen]);
+  }, [isSettingsOpen, isMobileMenuOpen, tripModal.isOpen, gallery.isOpen]);
 
   // --- EFFECTS ---
   // toggle dark mode
@@ -1088,7 +1090,7 @@ const TravelMap = () => {
       {tripModal.isOpen && (
         <div style={{
           position: 'absolute', top: 0, left: 0, width: '100%', height: '100%',
-          backgroundColor: 'rgba(0,0,0,0.5)', zIndex: 9999,
+          backgroundColor: 'rgba(0,0,0,0.5)', zIndex: 10001,
           display: 'flex', justifyContent: 'center', alignItems: 'center'
         }}>
           <div style={{
