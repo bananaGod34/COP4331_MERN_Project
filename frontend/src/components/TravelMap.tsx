@@ -157,8 +157,8 @@ const SortableTripCard = ({
   const style = {
     transform: CSS.Translate.toString(transform ? { ...transform, x: 0 } : null),
     transition: transition 
-      ? `${transition}, background-color 0.3s ease-in-out, border-color 0.3s ease-in-out, box-shadow 0.3s ease-in-out` 
-      : 'background-color 0.3s ease-in-out, border-color 0.3s ease-in-out, box-shadow 0.3s ease-in-out',
+      ? `${transition}, var(--theme-trans)` 
+      : 'var(--theme-trans)',
     animation: (hasAnimated || isDragging) ? 'none' : `cascadeFade 0.4s cubic-bezier(0.2, 0.8, 0.2, 1) both`,
     animationDelay: `${index * 0.05}s`,
      

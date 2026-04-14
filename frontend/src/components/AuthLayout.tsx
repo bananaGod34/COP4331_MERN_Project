@@ -33,7 +33,7 @@ const AuthLayout = () => {
         <div 
           style={{ 
             height: height !== 'auto' ? `${height}px` : 'auto',
-            transition: 'height 0.4s cubic-bezier(0.2, 0.8, 0.2, 1)',
+            transition: 'height 0.4s cubic-bezier(0.2, 0.8, 0.2, 1), var(--theme-trans)',
             overflow: 'hidden' 
           }}
         >
