@@ -97,83 +97,67 @@ const ResetPassword = () => {
 
         {!isSuccess ? (
         <form onSubmit={doReset} style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
+            
+            {/* NEW PASSWORD + METER */}
             <div>
-            <label style={{ display: 'block', fontSize: '13px', fontWeight: 'bold', marginBottom: '6px', color: 'var(--text-main)' }}>New Password</label>
-            <div style={{ position: 'relative' }}>
-                <input 
-                autoFocus
-                className="form-input" 
-                type={showPassword ? "text" : "password"} 
-                placeholder="••••••••" required
-                value={newPassword} onChange={(e) => setNewPassword(e.target.value)} 
-                style={{ paddingRight: '40px' }}
-                />
-                <button 
-                type="button" onClick={() => setShowPassword(!showPassword)}
-                style={{ position: 'absolute', right: '10px', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', padding: '4px' }}
-                >
-                {showPassword ? <Icons.EyeOff /> : <Icons.Eye />}
-                </button>
+              <label style={{ display: 'block', fontSize: '13px', fontWeight: 'bold', marginBottom: '6px', color: 'var(--text-main)' }}>New Password</label>
+              <div style={{ position: 'relative' }}>
+                  <input 
+                  autoFocus
+                  className="form-input" 
+                  type={showPassword ? "text" : "password"} 
+                  placeholder="••••••••" required
+                  value={newPassword} onChange={(e) => setNewPassword(e.target.value)} 
+                  style={{ paddingRight: '40px' }}
+                  />
+                  <button 
+                  type="button" onClick={() => setShowPassword(!showPassword)}
+                  style={{ position: 'absolute', right: '10px', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', padding: '4px' }}
+                  >
+                  {showPassword ? <Icons.EyeOff /> : <Icons.Eye />}
+                  </button>
+              </div>
+              
+              {/* Visual Meter */}
+              <div style={{ 
+                maxHeight: newPassword.length > 0 ? '30px' : '0', 
+                marginTop: newPassword.length > 0 ? '8px' : '0',
+                opacity: newPassword.length > 0 ? 1 : 0,
+                overflow: 'hidden',
+                transition: 'all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1)' 
+              }}>
+                <div style={{ display: 'flex', gap: '4px', height: '4px' }}>
+                  {[1, 2, 3, 4].map(level => (
+                    <div 
+                      key={level} 
+                      style={{ 
+                        flex: 1, borderRadius: '2px', 
+                        background: strengthScore >= level ? strengthColors[strengthScore] : 'var(--border-input)',
+                        transition: 'background 0.3s ease'
+                      }} 
+                    />
+                  ))}
+                </div>
+                <div style={{ fontSize: '11px', color: strengthColors[strengthScore], marginTop: '4px', fontWeight: 'bold', textAlign: 'right' }}>
+                  {strengthLabels[strengthScore]}
+                </div>
+              </div>
             </div>
 
+            {/* CONFIRM PASSWORD */}
             <div>
-            <label style={{ display: 'block', fontSize: '13px', fontWeight: 'bold', marginBottom: '6px', color: 'var(--text-main)' }}>New Password</label>
-            <div style={{ position: 'relative' }}>
-                <input 
-                autoFocus
-                className="form-input" 
-                type={showPassword ? "text" : "password"} 
-                placeholder="••••••••" required
-                value={newPassword} onChange={(e) => setNewPassword(e.target.value)} 
-                style={{ paddingRight: '40px' }}
-                />
-                <button 
-                type="button" onClick={() => setShowPassword(!showPassword)}
-                style={{ position: 'absolute', right: '10px', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', padding: '4px' }}
-                >
-                {showPassword ? <Icons.EyeOff /> : <Icons.Eye />}
-                </button>
+              <label style={{ display: 'block', fontSize: '13px', fontWeight: 'bold', marginBottom: '6px', color: 'var(--text-main)' }}>Confirm Password</label>
+              <div style={{ position: 'relative' }}>
+                  <input 
+                  className="form-input" 
+                  type={showPassword ? "text" : "password"} 
+                  placeholder="••••••••" required
+                  value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} 
+                  />
+              </div>
             </div>
             
-            <div style={{ 
-              maxHeight: newPassword.length > 0 ? '30px' : '0', 
-              marginTop: newPassword.length > 0 ? '8px' : '0',
-              opacity: newPassword.length > 0 ? 1 : 0,
-              overflow: 'hidden',
-              transition: 'all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1)' 
-            }}>
-              <div style={{ display: 'flex', gap: '4px', height: '4px' }}>
-                {[1, 2, 3, 4].map(level => (
-                  <div 
-                    key={level} 
-                    style={{ 
-                      flex: 1, borderRadius: '2px', 
-                      background: strengthScore >= level ? strengthColors[strengthScore] : 'var(--border-input)',
-                      transition: 'background 0.3s ease'
-                    }} 
-                  />
-                ))}
-              </div>
-              <div style={{ fontSize: '11px', color: strengthColors[strengthScore], marginTop: '4px', fontWeight: 'bold', textAlign: 'right' }}>
-                {strengthLabels[strengthScore]}
-              </div>
-            </div>
-
-            </div>
-
-            </div>
-            <div>
-            <label style={{ display: 'block', fontSize: '13px', fontWeight: 'bold', marginBottom: '6px', color: 'var(--text-main)' }}>Confirm Password</label>
-            <div style={{ position: 'relative' }}>
-                <input 
-                className="form-input" 
-                type={showPassword ? "text" : "password"} 
-                placeholder="••••••••" required
-                value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} 
-                style={{ paddingRight: '40px' }}
-                />
-            </div>
-            </div>
+            {/* SUBMIT BUTTON */}
             <button 
             className="btn btn-blue" 
             type="submit" 
