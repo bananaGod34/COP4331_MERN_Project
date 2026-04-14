@@ -1918,7 +1918,7 @@ const TravelMap = () => {
                           {/*style={{ visibility: trueIndex < trip.pins.length - 1 ? 'visible' : 'hidden', background: 'none', border: 'none', cursor: 'pointer', fontSize: '16px', padding: '0 5px' }} */}
 
                           {trip.id === activeTripId && (
-                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '15px', paddingTop: '10px', borderTop: '1px solid var(--border-light)' }}>
+                            <div style={{ color: 'var(--text-main)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '15px', paddingTop: '10px', borderTop: '1px solid var(--border-light)' }}>
                               <div
                                 className="floating-circle-btn"
                                 onClick={(e) => { e.preventDefault(); e.stopPropagation(); if (trueIndex > 0) handleCardClick(trip.pins[trueIndex - 1]); }}
