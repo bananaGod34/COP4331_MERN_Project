@@ -1,6 +1,5 @@
-import React from 'react';
+import React, { Suspense, lazy } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import TravelMap from './components/TravelMap';
 import AuthLayout from './components/AuthLayout';
 import Login from './components/Login';
 import Signup from './components/Signup';
@@ -11,6 +10,7 @@ import ProtectedRoute from './ProtectedRoute';
 
 import './components/TravelMap.css';
 
+const TravelMap = lazy(() => import('./components/TravelMap'));
 
 function App() {
   return (
@@ -28,7 +28,9 @@ function App() {
           path="/map" 
           element={
             <ProtectedRoute>
-              <TravelMap />
+              <Suspense fallback={<div style={{ width: '100vw', height: '100vh', background: 'var(--bg-panel)' }} />}>
+                <TravelMap />
+              </Suspense>
             </ProtectedRoute>
           } 
         />

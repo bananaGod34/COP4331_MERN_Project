@@ -354,7 +354,7 @@ const TravelMap = () => {
   const swipeState = React.useRef({ startY: 0, lastY: 0, startHeight: 0, time: 0, velocity: 0, isDragging: false, hasDecided: false });
   const swipeTimeout = React.useRef<NodeJS.Timeout>();
 
-  const WORLD_OFFSETS = [-1080, -720, -360, 0, 360, 720, 1080];
+  const WORLD_OFFSETS = isMobileScreen ? [-360, 0, 360] : [-720, -360, 0, 360, 720];
 
   // Drag n Drop sensors
   const sensors = useSensors(
