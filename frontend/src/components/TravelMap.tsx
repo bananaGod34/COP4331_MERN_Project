@@ -502,7 +502,7 @@ const TravelMap = () => {
         }
         
         localStorage.setItem('travelmap_theme', darkMode ? 'dark' : 'light');
-        
+
         const timer = setTimeout(() => {
           document.documentElement.classList.remove('theme-transitioning');
         }, 500);
