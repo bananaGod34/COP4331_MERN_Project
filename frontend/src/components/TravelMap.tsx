@@ -1202,7 +1202,7 @@ const TravelMap = () => {
               <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', color: 'var(--text-main)', whiteSpace: 'nowrap', maxWidth: '120px' }}>
                 {activeTrip?.name || 'Your Trips'}
               </span>
-              <span style={{ marginLeft: '6px', fontSize: '10px', transition: 'transform 0.3s, var(--theme-trans)', transform: isMobileMenuOpen ? 'rotate(180deg)' : 'rotate(0)' }}><Icons.ChevronDown stroke="var(--text-main)" /></span>
+              <span style={{ marginLeft: '6px', fontSize: '10px', transition: 'transform 0.3s, var(--theme-trans)', transform: isMobileMenuOpen ? 'rotate(180deg)' : 'rotate(0)' }}><Icons.ChevronDown /></span>
             </div>
 
             <div className="island-content">
@@ -1922,7 +1922,7 @@ const TravelMap = () => {
                                 onClick={(e) => { e.preventDefault(); e.stopPropagation(); if (trueIndex > 0) handleCardClick(trip.pins[trueIndex - 1]); }}
                                 style={{ visibility: trueIndex > 0 ? 'visible' : 'hidden', background: 'none', border: 'none', color: 'var(--text-main)',cursor: 'pointer', fontSize: '16px', padding: '0 5px' }}
                               >
-                                <Icons.ChevronLeft stroke="var(--text-main)" />
+                                <Icons.ChevronLeft />
                               </button>
 
                               <div style={{ display: 'flex', gap: '5px' }}>
@@ -1935,7 +1935,7 @@ const TravelMap = () => {
                                 onClick={(e) => { e.preventDefault(); e.stopPropagation(); if (trueIndex < trip.pins.length - 1) handleCardClick(trip.pins[trueIndex + 1]); }}
                                 style={{ visibility: trueIndex < trip.pins.length - 1 ? 'visible' : 'hidden', background: 'none', border: 'none', color: 'var(--text-main)',cursor: 'pointer', fontSize: '16px', padding: '0 5px' }}
                               >
-                                <Icons.ChevronRight stroke="var(--text-main)" />
+                                <Icons.ChevronRight />
                               </button>
                               
                             </div>

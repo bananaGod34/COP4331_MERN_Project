@@ -22,7 +22,7 @@ body, html {
 }
 
 /* Master Base Elements */
-body, div, span, p, h1, h2, h3, hr, button, input, textarea, a, label, img {
+body, div, span, p, h1, h2, h3, hr, button, input, textarea, a, label, img, svg {
   transition: var(--theme-trans);
 }
 
