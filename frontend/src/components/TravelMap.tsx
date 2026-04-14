@@ -1907,53 +1907,35 @@ const TravelMap = () => {
                         minWidth={300}
                         maxWidth={500}
                       >
-                        <div style={{ color: 'var(--text-main)', minWidth: '150px' }}>
+                        <div style={{ minWidth: '150px' }}>
                           
                           {renderPhotoPreview(pin.photoUrls)}
 
                           <strong style={{ fontSize: '16px', color: 'var(--text-main)' }}>{pin.name}</strong> <br />
                           <p style={{ margin: '8px 0', fontSize: '14px', color: 'var(--text-main)' }}>{pin.blurb}</p>
                           
-                          {/* style={{ visibility: trueIndex > 0 ? 'visible' : 'hidden', background: 'none', border: 'none', cursor: 'pointer', fontSize: '16px', padding: '0 5px' }}*/}
-                          {/*style={{ visibility: trueIndex < trip.pins.length - 1 ? 'visible' : 'hidden', background: 'none', border: 'none', cursor: 'pointer', fontSize: '16px', padding: '0 5px' }} */}
-
                           {trip.id === activeTripId && (
-                            <div style={{ color: 'var(--text-main)',display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '15px', paddingTop: '10px', borderTop: '1px solid var(--border-light)' }}>
-                              <div
-                                className="floating-circle-btn"
-                                style={{ color: 'var(--text-main)', top: '15px' }}
-                                onClick={() => { setIsSettingsOpen(!isSettingsOpen); setIsMobileMenuOpen(false); }}
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '15px', paddingTop: '10px', borderTop: '1px solid var(--border-light)' }}>
+                              <button 
+                                aria-label="Previous Stop"
+                                onClick={(e) => { e.preventDefault(); e.stopPropagation(); if (trueIndex > 0) handleCardClick(trip.pins[trueIndex - 1]); }}
+                                style={{ visibility: trueIndex > 0 ? 'visible' : 'hidden', background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', fontSize: '16px', padding: '0 5px', transition: 'var(--theme-trans)' }}
                               >
-                                <Icons.Settings />
+                                <Icons.ChevronLeft />
+                              </button>
+
+                              <div style={{ display: 'flex', gap: '5px' }}>
+                                <button onClick={(e) => { e.preventDefault(); e.stopPropagation(); startEditing(pin); }} className="mini-btn mini-btn-default">Edit</button>
+                                <button onClick={(e) => {e.preventDefault(); e.stopPropagation(); deletePin(pin.id); }} className="mini-btn mini-btn-danger">Delete</button>
                               </div>
 
-                              <div style={{ overflow: 'hidden' }}>
-                                <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px', marginTop: '10px', paddingTop: '10px', borderTop: '1px solid var(--border-light)' }}>
-                                  <button
-                                    onClick={(e) => { e.stopPropagation(); startEditing(pin); }}
-                                    className="action-btn action-btn-edit"
-                                  >
-                                    <Icons.Edit style={{ display: 'block' }} /> Edit
-                                  </button>
-                                  <button
-                                    onClick={(e) => {
-                                      e.stopPropagation(); 
-                                      if (window.confirm(`Are you sure you want to delete ${pin.name}?`)) deletePin(pin.id);
-                                    }}
-                                    className="action-btn action-btn-delete"
-                                  >
-                                    <Icons.Trash style={{ display: 'block' }} /> Delete
-                                  </button>
-                                </div>
-                              </div>
-
-                              <div
-                                className="floating-circle-btn"
-                                style={{ color: 'var(--text-main)', top: '15px' }}
-                                onClick={() => { setIsSettingsOpen(!isSettingsOpen); setIsMobileMenuOpen(false); }}
+                              <button
+                                aria-label="Next Stop"
+                                onClick={(e) => { e.preventDefault(); e.stopPropagation(); if (trueIndex < trip.pins.length - 1) handleCardClick(trip.pins[trueIndex + 1]); }}
+                                style={{ visibility: trueIndex < trip.pins.length - 1 ? 'visible' : 'hidden', background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', fontSize: '16px', padding: '0 5px', transition: 'var(--theme-trans)' }}
                               >
-                                <Icons.Settings />
-                              </div>
+                                <Icons.ChevronRight />
+                              </button>
                               
                             </div>
                           )}
