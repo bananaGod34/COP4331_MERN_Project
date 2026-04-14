@@ -273,10 +273,21 @@ body, html {
 }
 
 .theme-transitioning,
-.theme-transitioning * {
-  transition-property: background, background-color, color, border-color, border-top-color, box-shadow, fill, stroke !important;
-  transition-duration: 0.3s !important;
-  transition-timing-function: ease-in-out !important;
+.theme-transitioning div,
+.theme-transitioning span,
+.theme-transitioning p,
+.theme-transitioning h1, .theme-transitioning h2, .theme-transitioning h3,
+.theme-transitioning label, .theme-transitioning input, .theme-transitioning textarea, .theme-transitioning button,
+.theme-transitioning a, .theme-transitioning hr, .theme-transitioning img {
+  transition: background 0.3s ease, background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease, border-top-color 0.3s ease, box-shadow 0.3s ease, opacity 0.3s ease !important;
+}
+
+.theme-transitioning svg,
+.theme-transitioning path,
+.theme-transitioning circle,
+.theme-transitioning line,
+.theme-transitioning polyline {
+  transition: fill 0.3s ease, stroke 0.3s ease, color 0.3s ease !important;
 }
 
 .theme-transitioning .leaflet-container * {
@@ -287,8 +298,21 @@ body, html {
 .theme-transitioning .leaflet-popup-content-wrapper,
 .theme-transitioning .leaflet-popup-content-wrapper *,
 .theme-transitioning .leaflet-popup-tip {
-  transition: filter 0.3s ease, background-color 0.25s ease, color 0.25s ease, border-color 0.25s ease !important;
-  will-change: filter;
+  transition: filter 0.3s ease, background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease, border-top-color 0.3s ease !important;
+}
+
+.theme-toggle-track {
+  width: 36px; height: 20px; border-radius: 10px; position: relative; flex-shrink: 0;
+  background-color: #cbd5e1;
+  transition: background-color 0.3s ease;
+}
+.dark-mode .theme-toggle-track {
+  background-color: var(--accent-blue);
+}
+
+.settings-logout-btn {
+  display: flex; align-items: center; gap: 8px; padding: 10px; border-radius: 6px; 
+  cursor: pointer; color: var(--accent-red); font-weight: bold; font-size: 14px; line-height: 1;
 }
 
 .theme-toggle-thumb {

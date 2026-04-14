@@ -206,10 +206,10 @@ const SortableTripCard = ({
         )}
 
         <div style={{ flex: 1, minWidth: 0, cursor: 'pointer' }} onClick={() => handleCardClick(pin)}>
-          <h3 style={{ margin: '0 0 4px 0', fontSize: '15px', color: 'var(--text-main)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+          <h3 style={{ margin: '0 0 4px 0', fontSize: '15px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
             {index + 1}. {pin.name}
           </h3>
-          <p style={{ margin: 0, fontSize: '13px', color: 'var(--text-muted)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+          <p style={{ margin: 0, fontSize: '13px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
             {pin.blurb}
           </p>
         </div>
@@ -503,9 +503,10 @@ const TravelMap = () => {
         
         localStorage.setItem('travelmap_theme', darkMode ? 'dark' : 'light');
 
+        // 4. Cleanup
         const timer = setTimeout(() => {
           document.documentElement.classList.remove('theme-transitioning');
-        }, 300);
+        }, 350);
 
         return () => clearTimeout(timer);
       });
@@ -1295,12 +1296,12 @@ const TravelMap = () => {
                 {darkMode ? <Icons.Moon style={{ display: 'block' }} /> : <Icons.Sun style={{ display: 'block' }} />} <span>Dark Mode</span>
               </span>
               
-              <div style={{ width: '36px', height: '20px', borderRadius: '10px', background: darkMode ? 'var(--accent-blue)' : '#cbd5e1', position: 'relative', transition: 'background 0.2s', flexShrink: 0 }}>
+              <div className="theme-toggle-track">
                 <div className="theme-toggle-thumb" />
               </div>
             </div>
             <hr style={{ border: 'none', borderTop: '1px solid var(--border-light)', margin: '4px 0' }} />
-            <div onClick={handleLogout} style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '10px', borderRadius: '6px', cursor: 'pointer', color: 'var(--accent-red)', fontWeight: 'bold', fontSize: '14px', lineHeight: 1 }}>
+            <div onClick={handleLogout} className="settings-logout-btn">
               <Icons.LogOut style={{ display: 'block' }} /> <span>Sign Out</span>
             </div>
           </div>
@@ -1925,7 +1926,7 @@ const TravelMap = () => {
                               <button 
                                 aria-label="Previous Stop"
                                 onClick={(e) => { e.preventDefault(); e.stopPropagation(); if (trueIndex > 0) handleCardClick(trip.pins[trueIndex - 1]); }}
-                                style={{ visibility: trueIndex > 0 ? 'visible' : 'hidden', background: 'none', border: 'none', color: 'var(--text-main)', cursor: 'pointer', fontSize: '16px', padding: '0 5px' }}
+                                style={{ visibility: trueIndex > 0 ? 'visible' : 'hidden', background: 'none', border: 'none', cursor: 'pointer', fontSize: '16px', padding: '0 5px' }}
                               >
                                 <Icons.ChevronLeft />
                               </button>
@@ -1938,7 +1939,7 @@ const TravelMap = () => {
                               <button
                                 aria-label="Next Stop"
                                 onClick={(e) => { e.preventDefault(); e.stopPropagation(); if (trueIndex < trip.pins.length - 1) handleCardClick(trip.pins[trueIndex + 1]); }}
-                                style={{ visibility: trueIndex < trip.pins.length - 1 ? 'visible' : 'hidden', background: 'none', border: 'none', color: 'var(--text-main)', cursor: 'pointer', fontSize: '16px', padding: '0 5px' }}
+                                style={{ visibility: trueIndex < trip.pins.length - 1 ? 'visible' : 'hidden', background: 'none', border: 'none', cursor: 'pointer', fontSize: '16px', padding: '0 5px' }}
                               >
                                 <Icons.ChevronRight />
                               </button>
