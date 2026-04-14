@@ -195,7 +195,7 @@ body, html {
   flex-direction: column; 
   gap: 15px;
 
-  transition: transform 0.3s ease-in-out, background-color 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+  transition: transform 0.3s ease-in-out, background-color 0.3s ease-in-out, box-shadow 0.3s ease-in-out, color 0.3s ease-in-out, border-color 0.3s ease-in-out;
   transform: translateX(0);
 
   display: flex; 
@@ -272,14 +272,9 @@ body, html {
   background-color: var(--bg-sidebar);
 }
 
-body, .sidebar, .trip-card, .sheet-content, .auth-form-side, 
-.settings-dropdown, .form-input, .dynamic-island, .info-box, .trip-style-box,
-h1, h2, h3, p, span, button, a, label {
-  transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease, box-shadow 0.3s ease;
-}
-
+body, div, span, p, h1, h2, h3, hr, button, input, textarea, a, label,
 svg, path, circle, line, polyline {
-  transition: fill 0.3s ease, stroke 0.3s ease, color 0.3s ease;
+  transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease, border-top-color 0.3s ease, box-shadow 0.3s ease, fill 0.3s ease, stroke 0.3s ease;
 }
 
 .leaflet-container * {
@@ -342,7 +337,7 @@ svg, path, circle, line, polyline {
   font-weight: bold;
   cursor: pointer;
   line-height: 1;
-  transition: all 0.2s ease;
+  transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
 }
 .action-btn-edit {
   background: transparent;
@@ -376,7 +371,7 @@ svg, path, circle, line, polyline {
   overflow: hidden;
   margin-top: 0;
   pointer-events: none;
-  transition: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+  transition: max-height 0.3s cubic-bezier(0.2, 0.8, 0.2, 1), opacity 0.3s ease, margin-top 0.3s ease;
 }
 
 .trip-actions-slider.open {
@@ -400,7 +395,7 @@ svg, path, circle, line, polyline {
   
   max-width: 90vw; 
   
-  transition: all 0.4s cubic-bezier(0.2, 0.8, 0.2, 1), background-color 0.3s ease-in-out, border-color 0.3s ease-in-out, color 0.3s ease-in-out;
+  transition: width 0.4s cubic-bezier(0.2, 0.8, 0.2, 1), max-height 0.4s cubic-bezier(0.2, 0.8, 0.2, 1), border-width 0.4s ease, background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease, box-shadow 0.3s ease;
 }
 
 .dynamic-island.pill { 
@@ -452,7 +447,7 @@ svg, path, circle, line, polyline {
   font-weight: bold;
   cursor: pointer;
   line-height: 1;
-  transition: all 0.2s ease;
+  transition: border-color 0.2s ease, color 0.2s ease, background-color 0.2s ease;
 }
 
 .create-trip-btn:hover {
@@ -463,7 +458,7 @@ svg, path, circle, line, polyline {
 
 .floating-save-wrapper {
   position: fixed; top: 70px; left: 50%; transform: translateX(-50%); z-index: 9997;
-  transition: all 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
+  transition: opacity 0.4s cubic-bezier(0.2, 0.8, 0.2, 1), transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
   opacity: 0; pointer-events: none; 
   transform: translate(-50%, -30px);
 }
@@ -492,13 +487,17 @@ svg, path, circle, line, polyline {
   background: var(--bg-panel); border-radius: 12px; padding: 8px; width: 180px;
   box-shadow: 0 4px 20px rgba(0,0,0,0.15); border: 1px solid var(--border-light);
   transform-origin: top left; 
-  transition: all 0.2s ease, background-color 0.3s ease-in-out, border-color 0.3s ease-in-out;
+  transition: opacity 0.2s ease, transform 0.2s ease, background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease;
   opacity: 0; transform: scale(0.9); pointer-events: none;
 }
 .settings-dropdown.active { opacity: 1; transform: scale(1); pointer-events: auto; }
 
 .sidebar.closed {
   transform: translateX(100%);
+}
+
+.desktop-toggle-btn {
+  transition: transform 0.3s ease-in-out, background-color 0.3s ease-in-out, border-color 0.3s ease-in-out, color 0.3s ease-in-out;
 }
 
 .color-ribbon::-webkit-scrollbar {
@@ -658,7 +657,7 @@ svg, path, circle, line, polyline {
     box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.15);
     z-index: 1000;
     box-sizing: border-box;
-    transition: max-height 0.3s cubic-bezier(0.4, 0, 0.2, 1), background-color 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+    transition: max-height 0.3s cubic-bezier(0.4, 0, 0.2, 1), background-color 0.3s ease-in-out, box-shadow 0.3s ease-in-out, color 0.3s ease-in-out, border-color 0.3s ease-in-out;
   }
 
   .sidebar.closed {
@@ -675,7 +674,7 @@ svg, path, circle, line, polyline {
   }
 
   .sheet-content {
-    transition: opacity 0.2s ease, background-color 0.3s ease-in-out;
+    transition: opacity 0.2s ease, background-color 0.3s ease-in-out, color 0.3s ease-in-out, border-color 0.3s ease-in-out;
     max-height: 1000px;
     opacity: 1;
     transform: translateZ(0);
