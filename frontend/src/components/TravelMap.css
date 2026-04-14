@@ -407,17 +407,18 @@ body, div, span, p, h1, h2, h3, hr, button, input, textarea, a, label, img{
 .island-header {
   height: 44px; display: flex; justify-content: center; align-items: center;
   font-weight: bold; font-size: 15px; cursor: pointer; padding: 0 15px;
+  color: var(--text-main);
   transition: var(--theme-trans);
 }
 .island-content {
-    opacity: 0; 
-    transition: opacity 0.2s ease, var(--theme-trans);
-    padding: 0 15px 15px 15px; 
-    pointer-events: none; 
-    width: 350px;
-    max-width: 90vw;
-    box-sizing: border-box;
-  }
+  opacity: 0; 
+  transition: opacity 0.2s ease, var(--theme-trans);
+  padding: 0 15px 15px 15px; 
+  pointer-events: none; 
+  width: 350px;
+  max-width: 90vw;
+  box-sizing: border-box;
+}
 .dynamic-island.expanded .island-content { 
   opacity: 1; 
   transition: opacity 0.3s ease 0.1s, var(--theme-trans);
@@ -533,6 +534,7 @@ body, div, span, p, h1, h2, h3, hr, button, input, textarea, a, label, img{
 }
 
 .dummy {
+  color: var(--text-main);
   transition: var(--theme-trans);
 }
 
