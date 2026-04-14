@@ -1,6 +1,7 @@
 import React, { useRef, useEffect, useState } from 'react';
 import { Outlet, useLocation } from 'react-router-dom';
 import ThemeToggle from './ThemeToggle';
+import './TravelMap.css';
 
 const AuthLayout = () => {
   const location = useLocation();
