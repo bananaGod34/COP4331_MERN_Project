@@ -333,6 +333,7 @@ body, div, span, p, h1, h2, h3, hr, button, input, textarea, a, label, img{
   font-weight: bold;
   cursor: pointer;
   line-height: 1;
+  color: var(--text-main);
   transition: var(--theme-trans);
 }
 .action-btn-edit {
