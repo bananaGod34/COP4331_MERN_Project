@@ -1281,7 +1281,7 @@ const TravelMap = () => {
             style={{ color: 'var(--text-main)', top: '15px' }}
             onClick={() => { setIsSettingsOpen(!isSettingsOpen); setIsMobileMenuOpen(false); }}
           >
-            <Icons.Settings />
+            <Icons.ChevronLeft />
           </div>
 
           {/* SETTINGS DROPDOWN */}
@@ -1307,7 +1307,7 @@ const TravelMap = () => {
             onClick={() => setUiHidden(true)}
             style={{ color: 'var(--text-main)', top: isSettingsOpen ? '190px' : '70px', fontSize: '16px' }} 
           >
-            <Icons.Eye />
+            <Icons.ChevronRight />
           </div>
           
           <button
