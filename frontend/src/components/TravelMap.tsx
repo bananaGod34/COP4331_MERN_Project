@@ -1202,7 +1202,7 @@ const TravelMap = () => {
               <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', color: 'var(--text-main)', whiteSpace: 'nowrap', maxWidth: '120px' }}>
                 {activeTrip?.name || 'Your Trips'}
               </span>
-              <span style={{ marginLeft: '6px', fontSize: '10px', transition: 'transform 0.3s, var(--theme-trans)', transform: isMobileMenuOpen ? 'rotate(180deg)' : 'rotate(0)' }}><Icons.ChevronDown /></span>
+              <span style={{ marginLeft: '6px', fontSize: '10px', color: 'var(--text-main)', transition: 'transform 0.3s, var(--theme-trans)', transform: isMobileMenuOpen ? 'rotate(180deg)' : 'rotate(0)' }}><Icons.ChevronDown /></span>
             </div>
 
             <div className="island-content">
