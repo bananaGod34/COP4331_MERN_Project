@@ -23,7 +23,7 @@ const AuthLayout = () => {
       <ThemeToggle />
       
       <div className="auth-bg-wrapper">
-        <img src={authBg} alt="Travel Background" />
+        <img src={authBg} alt="Travel Background" fetchPriority="high" />
         <div className="auth-bg-overlay" />
       </div>
       
