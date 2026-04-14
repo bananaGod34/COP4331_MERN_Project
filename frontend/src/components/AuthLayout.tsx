@@ -24,7 +24,7 @@ const AuthLayout = () => {
       
       <div className="auth-bg-wrapper">
         <img 
-          src="/auth-bg.avif"
+          src="/auth-bg.webp"
           alt="Travel Background" fetchPriority="high" />
         <div className="auth-bg-overlay" />
       </div>
