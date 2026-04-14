@@ -17,15 +17,8 @@ const ThemeToggle = () => {
       return;
     }
     
-    document.documentElement.classList.add('theme-transitioning');
     document.documentElement.classList.toggle('dark-mode', darkMode);
     localStorage.setItem('travelmap_theme', darkMode ? 'dark' : 'light');
-
-    const timer = setTimeout(() => {
-      document.documentElement.classList.remove('theme-transitioning');
-    }, 350);
-    
-    return () => clearTimeout(timer);
   }, [darkMode]);
 
   return (

@@ -491,7 +491,7 @@ const TravelMap = () => {
     }, 100);
     return () => clearTimeout(timer);
   }, []);
-  
+
   useEffect(() => {
     if (isFirstRender.current) {
       isFirstRender.current = false;
@@ -1198,7 +1198,7 @@ const TravelMap = () => {
           >
             <div className="island-header" onClick={() => { setIsMobileMenuOpen(!isMobileMenuOpen); setIsSettingsOpen(false); }}>
               <div style={{ width: '12px', height: '12px', borderRadius: '50%', backgroundColor: getDisplayColor(activeTrip?.lineColor || '#3b82f6'), marginRight: '8px', flexShrink: 0 }} />
-              <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '120px' }}>
+              <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', color: 'var(--text-main)', whiteSpace: 'nowrap', maxWidth: '120px' }}>
                 {activeTrip?.name || 'Your Trips'}
               </span>
               <span style={{ marginLeft: '6px', fontSize: '10px', transition: 'transform 0.3s', transform: isMobileMenuOpen ? 'rotate(180deg)' : 'rotate(0)' }}><Icons.ChevronDown /></span>
@@ -1277,7 +1277,7 @@ const TravelMap = () => {
           {/* SETTINGS GEAR */}
           <div
             className="floating-circle-btn"
-            style={{ top: '15px' }}
+            style={{ color: 'var(--text-main)', top: '15px' }}
             onClick={() => { setIsSettingsOpen(!isSettingsOpen); setIsMobileMenuOpen(false); }}
           >
             <Icons.Settings />
@@ -1286,7 +1286,7 @@ const TravelMap = () => {
           {/* SETTINGS DROPDOWN */}
           <div className={`settings-dropdown ${isSettingsOpen ? 'active' : ''}`}>
             <div onClick={() => setDarkMode(d => !d)} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '10px', borderRadius: '6px', cursor: 'pointer', gap: '15px' }}>
-              <span style={{ fontSize: '14px', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '8px', lineHeight: 1 }}>
+              <span style={{ fontSize: '14px', fontWeight: 'bold', display: 'flex', alignItems: 'center', color: 'var(--text-main)',gap: '8px', lineHeight: 1 }}>
                 {darkMode ? <Icons.Moon style={{ display: 'block' }} /> : <Icons.Sun style={{ display: 'block' }} />} <span>Dark Mode</span>
               </span>
               
@@ -1304,7 +1304,7 @@ const TravelMap = () => {
           <div
             className="floating-circle-btn"
             onClick={() => setUiHidden(true)}
-            style={{ top: isSettingsOpen ? '190px' : '70px', fontSize: '16px' }} 
+            style={{ color: 'var(--text-main)', top: isSettingsOpen ? '190px' : '70px', fontSize: '16px' }} 
           >
             <Icons.Eye />
           </div>
@@ -1520,7 +1520,7 @@ const TravelMap = () => {
                 <div style={{ width: '40px', height: '5px', backgroundColor: 'var(--border-input)', borderRadius: '3px' }} />
               </div>
 
-              <h2 style={{ margin: 0, fontSize: '20px', padding: '0 15px' }}>
+              <h2 style={{ margin: 0, fontSize: '20px', color: 'var(--text-main)',padding: '0 15px' }}>
                 {getSheetTitle()}
               </h2>
             </div>
@@ -1920,7 +1920,7 @@ const TravelMap = () => {
                               <button 
                                 aria-label="Previous Stop"
                                 onClick={(e) => { e.preventDefault(); e.stopPropagation(); if (trueIndex > 0) handleCardClick(trip.pins[trueIndex - 1]); }}
-                                style={{ visibility: trueIndex > 0 ? 'visible' : 'hidden', background: 'none', border: 'none', cursor: 'pointer', fontSize: '16px', padding: '0 5px' }}
+                                style={{ visibility: trueIndex > 0 ? 'visible' : 'hidden', background: 'none', border: 'none', color: 'var(--text-main)',cursor: 'pointer', fontSize: '16px', padding: '0 5px' }}
                               >
                                 <Icons.ChevronLeft />
                               </button>
@@ -1933,7 +1933,7 @@ const TravelMap = () => {
                               <button
                                 aria-label="Next Stop"
                                 onClick={(e) => { e.preventDefault(); e.stopPropagation(); if (trueIndex < trip.pins.length - 1) handleCardClick(trip.pins[trueIndex + 1]); }}
-                                style={{ visibility: trueIndex < trip.pins.length - 1 ? 'visible' : 'hidden', background: 'none', border: 'none', cursor: 'pointer', fontSize: '16px', padding: '0 5px' }}
+                                style={{ visibility: trueIndex < trip.pins.length - 1 ? 'visible' : 'hidden', background: 'none', border: 'none', color: 'var(--text-main)',cursor: 'pointer', fontSize: '16px', padding: '0 5px' }}
                               >
                                 <Icons.ChevronRight />
                               </button>

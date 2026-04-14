@@ -272,37 +272,24 @@ body, html {
   background-color: var(--bg-sidebar);
 }
 
-html.app-loaded body,
-html.app-loaded div,
-html.app-loaded span,
-html.app-loaded p,
-html.app-loaded h1, 
-html.app-loaded h2, 
-html.app-loaded h3,
-html.app-loaded label, 
-html.app-loaded input, 
-html.app-loaded textarea, 
-html.app-loaded button,
-html.app-loaded a, 
-html.app-loaded hr, 
-html.app-loaded img,
-html.app-loaded svg,
-html.app-loaded path,
-html.app-loaded circle,
-html.app-loaded line,
-html.app-loaded polyline {
-  transition: background 0.35s ease, background-color 0.35s ease, color 0.35s ease, border-color 0.35s ease, border-top-color 0.35s ease, box-shadow 0.35s ease, fill 0.35s ease, stroke 0.35s ease !important;
+body, .sidebar, .trip-card, .sheet-content, .auth-form-side, 
+.settings-dropdown, .form-input, .dynamic-island, .info-box, .trip-style-box {
+  transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease, box-shadow 0.3s ease;
 }
 
-html.app-loaded .leaflet-container * {
+svg, path, circle, line, polyline {
+  transition: fill 0.3s ease, stroke 0.3s ease, color 0.3s ease;
+}
+
+.leaflet-container * {
   transition: none !important;
 }
 
-html.app-loaded .leaflet-tile-pane,
-html.app-loaded .leaflet-popup-content-wrapper,
-html.app-loaded .leaflet-popup-content-wrapper *,
-html.app-loaded .leaflet-popup-tip {
-  transition: filter 0.4s ease, background-color 0.35s ease, color 0.35s ease, border-color 0.35s ease, border-top-color 0.35s ease !important;
+.leaflet-tile-pane,
+.leaflet-popup-content-wrapper,
+.leaflet-popup-content-wrapper *,
+.leaflet-popup-tip {
+  transition: filter 0.4s ease, background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease, border-top-color 0.3s ease !important;
 }
 
 .theme-toggle-track {
