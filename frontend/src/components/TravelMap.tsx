@@ -1580,7 +1580,7 @@ const TravelMap = () => {
                         onChange={(e) => setFormName(e.target.value)}/>
                     </div>
                     <div>
-                      <label style={{ fontSize: '14px', fontWeight: 'bold' }}>Travel Blurb</label>
+                      <label style={{ fontSize: '14px', fontWeight: 'bold', color: 'var(--text-main)' }}>Travel Blurb</label>
                       <textarea
                         className="form-input"
                         style={{ height: '100px', resize: 'none' }}
@@ -1593,7 +1593,7 @@ const TravelMap = () => {
 
                     {/* Multiple Photo Upload */}
                     <div>
-                      <label style={{ fontSize: '14px', fontWeight: 'bold' }}>Photos</label>
+                      <label style={{ fontSize: '14px', fontWeight: 'bold', color: 'var(--text-main)' }}>Photos</label>
                       <div className="no-scrollbar" style={{ display: 'flex', gap: '10px', overflowX: 'auto', paddingBottom: '10px', marginTop: '5px' }}>
                         {formPhotos.map((photo, idx) => (
                           <div key={idx} style={{ position: 'relative', minWidth: '150px' }}>
@@ -1670,7 +1670,7 @@ const TravelMap = () => {
                     <p style={{ margin: 0, fontSize: '13px', fontWeight: 'bold', color: 'var(--text-muted)' }}>TRIP STYLE</p>
 
                     <div>
-                      <label style={{ fontSize: '13px', fontWeight: 'bold', display: 'block', marginBottom: '8px' }}>Trip Color</label>
+                      <label style={{ fontSize: '13px', fontWeight: 'bold', color: 'var(--text-main)', display: 'block', marginBottom: '8px' }}>Trip Color</label>
                       <div className="color-ribbon">
                         <div className="custom-color-btn" style={{ position: 'relative', borderRadius: '50%', overflow: 'hidden', border: '2px solid var(--border-light)', flexShrink: 0 }}>
                           <input
@@ -1911,8 +1911,8 @@ const TravelMap = () => {
                           
                           {renderPhotoPreview(pin.photoUrls)}
 
-                          <strong style={{ fontSize: '16px' }}>{pin.name}</strong> <br />
-                          <p style={{ margin: '8px 0', fontSize: '14px' }}>{pin.blurb}</p>
+                          <strong style={{ fontSize: '16px', color: 'var(--text-main)' }}>{pin.name}</strong> <br />
+                          <p style={{ margin: '8px 0', fontSize: '14px', color: 'var(--text-main)' }}>{pin.blurb}</p>
                           
                           {trip.id === activeTripId && (
                             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '15px', paddingTop: '10px', borderTop: '1px solid var(--border-light)' }}>
