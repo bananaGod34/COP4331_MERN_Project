@@ -533,15 +533,6 @@ body, div, span, p, h1, h2, h3, hr, button, input, textarea, a, label, img{
   animation: fadeInTile 0.5s ease-out backwards;
 }
 
-.dummy-class {
-  background: 'none';
-  border: 'none';
-  cursor: 'pointer';
-  padding: '0 5px';
-  color: var(--text-main);
-  transition: var(--theme-trans);
-}
-
 @keyframes cascadeFade {
   0% { opacity: 0; transform: translateY(15px) scale(0.98); }
   100% { opacity: 1; transform: translateY(0) scale(1); }

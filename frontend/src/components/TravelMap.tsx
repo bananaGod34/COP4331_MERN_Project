@@ -1917,12 +1917,11 @@ const TravelMap = () => {
                           {trip.id === activeTripId && (
                             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '15px', paddingTop: '10px', borderTop: '1px solid var(--border-light)' }}>
                               <button 
-                                className="dummy"
                                 aria-label="Previous Stop"
                                 onClick={(e) => { e.preventDefault(); e.stopPropagation(); if (trueIndex > 0) handleCardClick(trip.pins[trueIndex - 1]); }}
-                                style={{ visibility: trueIndex > 0 ? 'visible' : 'hidden', background: 'none', border: 'none', color: 'var(--text-main)', cursor: 'pointer', fontSize: '16px', padding: '0 5px', transition: 'var(--theme-trans)' }}
+                                style={{ visibility: trueIndex > 0 ? 'visible' : 'hidden', background: 'none', border: 'none', cursor: 'pointer', fontSize: '16px', padding: '0 5px' }}
                               >
-                                <Icons.ChevronLeft />
+                                <span style={{ color: 'var(--text-main)', transition: 'var(--theme-trans)' }}><Icons.ChevronLeft /></span>
                               </button>
 
                               <div style={{ display: 'flex', gap: '5px' }}>
@@ -1931,12 +1930,11 @@ const TravelMap = () => {
                               </div>
 
                               <button
-                                className="dummy"
                                 aria-label="Next Stop"
                                 onClick={(e) => { e.preventDefault(); e.stopPropagation(); if (trueIndex < trip.pins.length - 1) handleCardClick(trip.pins[trueIndex + 1]); }}
-                                style={{ visibility: trueIndex < trip.pins.length - 1 ? 'visible' : 'hidden', background: 'none', border: 'none', color: 'var(--text-main)', cursor: 'pointer', fontSize: '16px', padding: '0 5px', transition: 'var(--theme-trans)' }}
+                                style={{ visibility: trueIndex < trip.pins.length - 1 ? 'visible' : 'hidden', background: 'none', border: 'none', cursor: 'pointer', fontSize: '16px', padding: '0 5px' }}
                               >
-                                <Icons.ChevronRight />
+                                <span style={{ color: 'var(--text-main)', transition: 'var(--theme-trans)' }}><Icons.ChevronRight /></span>
                               </button>
                               
                             </div>
