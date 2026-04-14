@@ -41,7 +41,7 @@ const ThemeToggle = () => {
         border: '1px solid var(--border-light)',
         color: 'var(--text-main)',
         boxShadow: 'var(--shadow-float)',
-        transition: 'all 0.3s ease'
+        transition: 'var(--theme-trans)'
       }}
     >
       {darkMode ? (

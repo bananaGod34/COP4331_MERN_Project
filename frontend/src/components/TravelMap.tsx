@@ -230,7 +230,7 @@ const SortableTripCard = ({
               onClick={(e) => { e.stopPropagation(); startEditing(pin); }}
               className="action-btn action-btn-edit"
             >
-              <Icons.Edit style={{ display: 'block' }} /> <span>Edit</span>
+              <Icons.Edit style={{ display: 'block', color: 'inherit' }} /> <span style={{ color: 'inherit' }}>Edit</span>
             </button>
             <button
               onClick={(e) => {
@@ -239,7 +239,7 @@ const SortableTripCard = ({
               }}
               className="action-btn action-btn-delete"
             >
-              <Icons.Trash style={{ display: 'block' }} /> <span>Delete</span>
+              <Icons.Trash style={{ display: 'block', color: 'inherit' }} /> <span style={{ color: 'inherit' }}>Delete</span>
             </button>
           </div>
         </div>
@@ -1202,7 +1202,7 @@ const TravelMap = () => {
               <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', color: 'var(--text-main)', whiteSpace: 'nowrap', maxWidth: '120px' }}>
                 {activeTrip?.name || 'Your Trips'}
               </span>
-              <span style={{ marginLeft: '6px', fontSize: '10px', transition: 'transform 0.3s', transform: isMobileMenuOpen ? 'rotate(180deg)' : 'rotate(0)' }}><Icons.ChevronDown /></span>
+              <span style={{ marginLeft: '6px', fontSize: '10px', transition: 'transform 0.3s, var(--theme-trans)', transform: isMobileMenuOpen ? 'rotate(180deg)' : 'rotate(0)' }}><Icons.ChevronDown /></span>
             </div>
 
             <div className="island-content">
@@ -1242,10 +1242,10 @@ const TravelMap = () => {
                       {/* ROW 2: The Action Buttons */}
                       <div className={`trip-actions-slider ${isActive ? 'open' : ''}`}>
                         <button onClick={(e) => { e.stopPropagation(); handleRenameTrip(); }} className="action-btn action-btn-edit" aria-label={`Edit ${trip.name}`}>
-                          <Icons.Edit style={{ display: 'block' }} /> <span>Edit</span>
+                          <Icons.Edit style={{ display: 'block', color: 'inherit' }} /> <span style={{ color: 'inherit' }}>Edit</span>
                         </button>
                         <button onClick={(e) => { e.stopPropagation(); handleDeleteTrip(); }} className="action-btn action-btn-delete" aria-label={`Delete ${trip.name}`}>
-                          <Icons.Trash style={{ display: 'block' }} /> <span>Delete</span>
+                          <Icons.Trash style={{ display: 'block', color: 'inherit' }} /> <span style={{ color: 'inherit' }}>Delete</span>
                         </button>
                       </div>
                     </div>
@@ -1288,7 +1288,8 @@ const TravelMap = () => {
           <div className={`settings-dropdown ${isSettingsOpen ? 'active' : ''}`}>
             <div onClick={() => setDarkMode(d => !d)} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '10px', borderRadius: '6px', cursor: 'pointer', gap: '15px' }}>
               <span style={{ fontSize: '14px', fontWeight: 'bold', display: 'flex', alignItems: 'center', color: 'var(--text-main)', gap: '8px', lineHeight: 1 }}>
-                {darkMode ? <Icons.Moon style={{ display: 'block' }} /> : <Icons.Sun style={{ display: 'block' }} />} <span>Dark Mode</span>
+                {darkMode ? <Icons.Moon style={{ display: 'block', color: 'inherit' }} /> : <Icons.Sun style={{ display: 'block', color: 'inherit' }} />} 
+                <span style={{ color: 'inherit' }}>Dark Mode</span>
               </span>
               
               <div className="theme-toggle-track">
@@ -1297,7 +1298,7 @@ const TravelMap = () => {
             </div>
             <hr style={{ border: 'none', borderTop: '1px solid var(--border-light)', margin: '4px 0' }} />
             <div onClick={handleLogout} className="settings-logout-btn">
-              <Icons.LogOut style={{ display: 'block' }} /> <span>Sign Out</span>
+              <Icons.LogOut style={{ display: 'block', color: 'inherit' }} /> <span style={{ color: 'inherit' }}>Sign Out</span>
             </div>
           </div>
 
@@ -1922,7 +1923,7 @@ const TravelMap = () => {
                                 onClick={(e) => { e.preventDefault(); e.stopPropagation(); if (trueIndex > 0) handleCardClick(trip.pins[trueIndex - 1]); }}
                                 style={{ visibility: trueIndex > 0 ? 'visible' : 'hidden', background: 'none', border: 'none', color: 'var(--text-main)',cursor: 'pointer', fontSize: '16px', padding: '0 5px' }}
                               >
-                                <Icons.ChevronLeft />
+                                <Icons.ChevronLeft style={{ color: 'inherit' }} />
                               </button>
 
                               <div style={{ display: 'flex', gap: '5px' }}>
@@ -1935,7 +1936,7 @@ const TravelMap = () => {
                                 onClick={(e) => { e.preventDefault(); e.stopPropagation(); if (trueIndex < trip.pins.length - 1) handleCardClick(trip.pins[trueIndex + 1]); }}
                                 style={{ visibility: trueIndex < trip.pins.length - 1 ? 'visible' : 'hidden', background: 'none', border: 'none', color: 'var(--text-main)',cursor: 'pointer', fontSize: '16px', padding: '0 5px' }}
                               >
-                                <Icons.ChevronRight />
+                                <Icons.ChevronRight style={{ color: 'inherit' }} />
                               </button>
                               
                             </div>
