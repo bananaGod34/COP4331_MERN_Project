@@ -505,7 +505,7 @@ const TravelMap = () => {
 
         const timer = setTimeout(() => {
           document.documentElement.classList.remove('theme-transitioning');
-        }, 500);
+        }, 300);
 
         return () => clearTimeout(timer);
       });
