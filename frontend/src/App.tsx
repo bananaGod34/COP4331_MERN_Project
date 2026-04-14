@@ -8,8 +8,6 @@ import ForgotPassword from './components/ForgotPassword';
 import ResetPassword from './components/ResetPassword';
 import ProtectedRoute from './ProtectedRoute';
 
-import './components/TravelMap.css';
-
 const TravelMap = lazy(() => import('./components/TravelMap'));
 
 function App() {
